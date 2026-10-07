@@ -47,7 +47,7 @@
       >
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column label="类型" width="110">
-          <template #default="{ row }">
+          <template #default="{ row }: { row: AppealItem }">
             {{ TYPE_TEXT[row.type] ?? row.type }}
           </template>
         </el-table-column>
@@ -62,7 +62,7 @@
           </template>
         </el-table-column>
         <el-table-column label="状态" width="100">
-          <template #default="{ row }">
+          <template #default="{ row }: { row: AppealItem }">
             <el-tag :type="STATUS_TAG[row.status]">{{ STATUS_TEXT[row.status] }}</el-tag>
           </template>
         </el-table-column>

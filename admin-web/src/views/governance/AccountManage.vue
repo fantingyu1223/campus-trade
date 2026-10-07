@@ -56,7 +56,7 @@
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="nickname" label="昵称" min-width="140" show-overflow-tooltip />
         <el-table-column label="身份类型" width="110">
-          <template #default="{ row }">
+          <template #default="{ row }: { row: AccountItem }">
             {{ ROLE_TEXT[row.identity_type] ?? row.identity_type }}
           </template>
         </el-table-column>

@@ -12,7 +12,7 @@
       <el-table v-loading="loading" :data="list" border empty-text="暂无预警">
         <el-table-column prop="user_masked" label="用户（脱敏）" min-width="140" />
         <el-table-column label="命中规则" width="160">
-          <template #default="{ row }">
+          <template #default="{ row }: { row: RiskWarningItem }">
             {{ RULE_TEXT[row.rule_type] ?? row.rule_type }}
           </template>
         </el-table-column>

@@ -43,7 +43,7 @@
         @row-click="goDetail"
       >
         <el-table-column label="对象类型" width="110">
-          <template #default="{ row }">
+          <template #default="{ row }: { row: ReportItem }">
             {{ TARGET_TYPE_TEXT[row.target_type] ?? row.target_type }}
           </template>
         </el-table-column>
@@ -60,7 +60,7 @@
           </template>
         </el-table-column>
         <el-table-column label="状态" width="100">
-          <template #default="{ row }">
+          <template #default="{ row }: { row: ReportItem }">
             <el-tag v-if="row.status" :type="STATUS_TAG[row.status]">
               {{ STATUS_TEXT[row.status] }}
             </el-tag>

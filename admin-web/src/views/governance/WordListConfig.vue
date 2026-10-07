@@ -36,12 +36,12 @@
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="word" label="词条" min-width="140" />
         <el-table-column label="类型" width="110">
-          <template #default="{ row }">
+          <template #default="{ row }: { row: WordItem }">
             {{ TYPE_TEXT[row.type] ?? row.type }}
           </template>
         </el-table-column>
         <el-table-column label="级别" width="120">
-          <template #default="{ row }">
+          <template #default="{ row }: { row: WordItem }">
             <el-tag :type="row.level === 'block' ? 'danger' : 'warning'">
               {{ LEVEL_TEXT[row.level] ?? row.level }}
             </el-tag>

@@ -27,7 +27,7 @@
           </template>
         </el-table-column>
         <el-table-column label="状态" width="100">
-          <template #default="{ row }">
+          <template #default="{ row }: { row: MerchantReviewItem }">
             <el-tag v-if="row.status" :type="STATUS_TAG[row.status]">
               {{ STATUS_TEXT[row.status] }}
             </el-tag>
