@@ -1,5 +1,7 @@
 <template>
-  <el-container class="app-shell">
+  <!-- 登录页裸布局（无侧边栏/顶栏） -->
+  <router-view v-if="isLoginPage" />
+  <el-container v-else class="app-shell">
     <el-aside width="220px" class="app-aside">
       <div class="app-title">校园二手平台 · 管理端</div>
       <el-menu :default-active="$route.path" router>
@@ -28,6 +30,10 @@
           <el-breadcrumb-item>{{ $route.meta.group ?? '平台配置' }}</el-breadcrumb-item>
           <el-breadcrumb-item>{{ $route.meta.title }}</el-breadcrumb-item>
         </el-breadcrumb>
+        <div class="header-right">
+          <span v-if="roleLabel()" class="role-tag">{{ roleLabel() }}</span>
+          <el-button link type="danger" @click="onLogout">退出登录</el-button>
+        </div>
       </el-header>
       <el-main>
         <router-view />
@@ -37,6 +43,33 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @module PIM-BC-05
+ * 登录页裸布局切换 + 顶部退出登录。
+ * 退出仅清本地 token（#52 refresh / #53 logout 后端未实现，见 api/auth.ts 偏差说明 2）。
+ */
+import { computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { ElMessageBox } from 'element-plus';
+import { ADMIN_TOKEN_KEY } from './api/auth';
+
+const route = useRoute();
+const router = useRouter();
+
+const isLoginPage = computed(() => route.path === '/login');
+// localStorage 非响应式，模板随路由切换重渲染时读取即可
+const roleLabel = () => localStorage.getItem('admin_role') ?? '';
+
+async function onLogout() {
+  try {
+    await ElMessageBox.confirm('确认退出登录？', '退出登录', { type: 'warning' });
+  } catch {
+    return; // 取消
+  }
+  localStorage.removeItem(ADMIN_TOKEN_KEY);
+  localStorage.removeItem('admin_role');
+  await router.replace('/login');
+}
 </script>
 
 <style scoped>
@@ -55,6 +88,16 @@
 .app-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   border-bottom: 1px solid var(--el-border-color);
+}
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.role-tag {
+  color: var(--el-text-color-secondary);
+  font-size: 13px;
 }
 </style>

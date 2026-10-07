@@ -9,6 +9,7 @@
  * 登录页落地后改为统一 auth store 注入。
  */
 import type { ApiResponse, PageQuery, PageResult } from '../types/contract';
+import { handleUnauthorized } from './auth';
 
 const BASE_URL = '/admin/v1';
 
@@ -73,7 +74,7 @@ export interface JoinRequestListQuery extends PageQuery {
 // ---------- 请求封装 ----------
 
 function authHeaders(): Record<string, string> {
-  // TODO(登录未就绪)：token 占位，后台登录页完成后改从 auth store 获取
+  // 登录页（/login）成功后写入 localStorage('admin_token')，见 api/auth.ts
   const token = localStorage.getItem('admin_token');
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
@@ -99,6 +100,8 @@ async function request<T>(
   const envelope = (await resp.json()) as ApiResponse<T>;
   // 业务判定以 code 为准（§5.1 通用约定）
   if (!resp.ok || envelope.code !== 0) {
+    // 401/1001 等鉴权失效：清 token 跳 /login（@api §5.3 #51）
+    handleUnauthorized(resp.status, envelope.code);
     throw new Error(envelope.message || `请求失败（code=${envelope.code}）`);
   }
   return envelope.data as T;

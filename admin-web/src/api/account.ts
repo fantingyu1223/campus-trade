@@ -15,6 +15,7 @@
  *  3. ban payload 中 source（封禁来源：人工/举报处置/申诉裁决）由前端透传展示，枚举待契约确认。
  */
 import type { ApiResponse, PageQuery, PageResult } from '../types/contract';
+import { handleUnauthorized } from './auth';
 
 const BASE_URL = '/admin/v1';
 
@@ -79,7 +80,7 @@ export interface AccountListQuery extends PageQuery {
 // ---------- 请求封装（与 governance.ts 同款） ----------
 
 function authHeaders(): Record<string, string> {
-  // TODO(登录未就绪)：token 占位，后台登录页完成后改从 auth store 获取
+  // 登录页（/login）成功后写入 localStorage('admin_token')，见 api/auth.ts
   const token = localStorage.getItem('admin_token');
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
@@ -105,6 +106,8 @@ async function request<T>(
   const envelope = (await resp.json()) as ApiResponse<T>;
   // 业务判定以 code 为准（§5.1 通用约定）
   if (!resp.ok || envelope.code !== 0) {
+    // 401/1001 等鉴权失效：清 token 跳 /login（@api §5.3 #51）
+    handleUnauthorized(resp.status, envelope.code);
     throw new Error(envelope.message || `请求失败（code=${envelope.code}）`);
   }
   return envelope.data as T;
