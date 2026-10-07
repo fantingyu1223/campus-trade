@@ -108,7 +108,7 @@ import {
   updateSchool,
   removeSchool,
 } from '../../api/school';
-import type { SchoolItem, SchoolListQuery, SchoolStatus } from '../../api/school';
+import type { SchoolCreatePayload, SchoolItem, SchoolListQuery, SchoolStatus } from '../../api/school';
 
 const query = reactive<SchoolListQuery>({ page: 1, pageSize: 20 });
 const list = ref<SchoolItem[]>([]);
@@ -199,7 +199,8 @@ async function submitForm() {
   if (!valid) return;
   saving.value = true;
   try {
-    const payload = { name: form.name, domain: form.domain, remark: form.remark };
+    const payload: SchoolCreatePayload = { name: form.name, email_suffix: form.domain };
+    if (form.remark.trim()) payload.remark = form.remark.trim();
     if (editingId.value === null) {
       await createSchool(payload); // #69
       ElMessage.success('新增成功，认证页学校列表将同步展示');

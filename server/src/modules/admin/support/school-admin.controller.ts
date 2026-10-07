@@ -56,7 +56,7 @@ export class SchoolAdminController {
       action: 'school.create',
       targetType: 'school',
       targetId: data.id,
-      reason: remark ?? `新增学校 ${data.name}`,
+      reason: remark?.trim() ? remark : `新增学校 ${data.name}`,
     });
     return { code: 0, message: 'ok', data };
   }
@@ -75,7 +75,7 @@ export class SchoolAdminController {
       action: 'school.update',
       targetType: 'school',
       targetId: id,
-      reason: remark ?? `修改学校 #${id}`,
+      reason: remark?.trim() ? remark : `修改学校 #${id}`,
     });
     return { code: 0, message: 'ok', data };
   }
@@ -94,7 +94,7 @@ export class SchoolAdminController {
       action: 'school.disable',
       targetType: 'school',
       targetId: id,
-      reason: remark ?? `停用学校 #${id}`,
+      reason: remark?.trim() ? remark : `停用学校 #${id}`,
     });
     return { code: 0, message: 'ok', data };
   }

@@ -17,7 +17,10 @@ INSERT INTO `category` VALUES (10,3,'宿舍用品','',1,'active','2026-10-06 22:
 INSERT INTO `category` VALUES (11,3,'洗护清洁','',2,'active','2026-10-06 22:34:05','2026-10-06 22:34:05');
 INSERT INTO `user` VALUES (1,'mock_seller_001',NULL,'张同学','','å¤§å››å­¦å§å‡ºé—²ç½®','student',1,'normal',NULL,NULL,'2026-10-06 15:00:28',NULL,NULL,NULL,NULL,NULL,NULL,'2026-10-06 22:34:05','2026-10-06 15:00:28');
 INSERT INTO `user` VALUES (2,'mock_buyer_001',NULL,'李同学','','å¤§äºŒå­¦å¼Ÿ','student',1,'normal',NULL,NULL,'2026-10-06 15:00:28',NULL,NULL,NULL,NULL,NULL,NULL,'2026-10-06 22:34:05','2026-10-06 15:00:28');
-INSERT INTO `admin_user` VALUES (1,'admin','$2b$10$K8VfHq5vF0nPqZ5xYvKzYuQGmNwR8sJ3pL6dE9tXwYcA1bN2mO4hS','admin','active',NULL,'2026-10-06 22:34:05','2026-10-06 22:34:05');
+-- 后台种子管理员：初始密码 Admin@2026（bcrypt 哈希，§5.3 #51 登录可用）；
+-- ON DUPLICATE KEY UPDATE 保证种子可重复执行（重跑会重置该账号密码/角色/状态）
+INSERT INTO `admin_user` VALUES (1,'admin','$2b$10$1K6ZOe3dfQwQwApl6Hpez.IdSyLtLakqR8dlo/TuszulkFFVH8xeG','admin','active',NULL,'2026-10-06 22:34:05','2026-10-06 22:34:05')
+ON DUPLICATE KEY UPDATE password_hash=VALUES(password_hash), role=VALUES(role), status=VALUES(status);
 
 INSERT INTO `product` (id,seller_id,school_id,category_id,title,description,condition_level,price,original_price,trade_mode,meet_location,status,is_urgent,view_count,favorite_count,published_at,created_at,updated_at) VALUES (1,1,1,5,'高等数学（下册）教材 九成新','同济第七版，无笔记划痕','like_new',15.00,45.00,'both','东区食堂门口','on_sale',0,0,0,NOW(6),NOW(6),NOW(6));
 INSERT INTO `product_image` (product_id,image_url,sort_order,created_at,updated_at) VALUES (1,'http://localhost:3000/static/placeholder.png',0,NOW(6),NOW(6));

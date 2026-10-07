@@ -30,11 +30,11 @@ export interface SchoolItem {
   remark?: string;
 }
 
-/** #69 新增学校请求 */
+/** #69 新增学校请求（字段对齐后端契约：email_suffix；remark 为空则不传，后端自动生成事由） */
 export interface SchoolCreatePayload {
   name: string;
   /** 邮箱后缀 */
-  domain: string;
+  email_suffix: string;
   remark?: string;
 }
 

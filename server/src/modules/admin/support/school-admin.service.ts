@@ -119,7 +119,7 @@ export class SchoolAdminService {
       action: 'school.create',
       target_type: 'school',
       target_id: created.id,
-      reason: dto.remark ?? `新增学校 ${dto.name}`,
+      reason: dto.remark?.trim() ? dto.remark : `新增学校 ${dto.name}`,
       detail: { name: dto.name, email_suffix: dto.email_suffix ?? null },
     });
 
@@ -170,7 +170,7 @@ export class SchoolAdminService {
       action: 'school.update',
       target_type: 'school',
       target_id: id,
-      reason: dto.remark ?? `修改学校 ${school.name}`,
+      reason: dto.remark?.trim() ? dto.remark : `修改学校 ${school.name}`,
       detail: data,
     });
 

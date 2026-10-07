@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 """签发本地开发用后台管理员 JWT（AdminJwtGuard 校验口径：HS256，payload 含 admin_id/role）。
 
-背景：后台登录接口（§5.3 #51 POST /admin/v1/auth/login）尚未实现，
-本地联调期间用本脚本签发 token，注入 admin-web localStorage('admin_token') 使用。
+背景：后台登录接口（§5.3 #51 POST /admin/v1/auth/login）已实现（种子账号 admin / Admin@2026）。
+本脚本保留为本地联调兜底（如绕过登录页直接签发指定 role 的 token），
+注入 admin-web localStorage('admin_token') 使用。
 
 用法：
     python scripts/sign-admin-token.py [admin_id] [role] [ttl_days]
