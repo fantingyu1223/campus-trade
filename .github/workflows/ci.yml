@@ -28,6 +28,10 @@ jobs:
       - name: Install dependencies (npm ci)
         run: npm ci
 
+      # Prisma Client 必须显式生成，否则自定义模型类型缺失导致 tsc 失败
+      - name: Prisma generate
+        run: npm run prisma:generate --workspace server
+
       - name: Server build
         run: npm run build:server
 
