@@ -1,0 +1,4 @@
+<view class="safety-banner" role="alert">
+  <text class="safety-banner__icon">🛡</text>
+  <text class="safety-banner__text">{{tip}}</text>
+</view>

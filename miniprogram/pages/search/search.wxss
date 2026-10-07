@@ -1,0 +1,131 @@
+.page {
+  padding: 20rpx;
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+.search-bar {
+  display: flex;
+  align-items: center;
+}
+.search-bar__input {
+  flex: 1;
+  background: #fff;
+  border-radius: 32rpx;
+  padding: 16rpx 28rpx;
+  font-size: 28rpx;
+}
+.search-bar__btn {
+  margin-left: 20rpx;
+  color: #07c160;
+  font-size: 30rpx;
+}
+.toolbar {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 12rpx;
+  margin-top: 20rpx;
+  padding: 20rpx;
+}
+.toolbar__filter {
+  font-size: 26rpx;
+  color: #333;
+  margin-right: 40rpx;
+}
+.toolbar__filter--active {
+  color: #07c160;
+}
+.toolbar__sort {
+  font-size: 26rpx;
+  color: #666;
+  margin-right: 32rpx;
+}
+.toolbar__sort--active {
+  color: #07c160;
+  font-weight: 600;
+}
+.filter-panel {
+  background: #fff;
+  border-radius: 12rpx;
+  margin-top: 16rpx;
+  padding: 24rpx;
+}
+.filter-panel__group {
+  margin-bottom: 24rpx;
+}
+.filter-panel__label {
+  font-size: 26rpx;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+.filter-panel__price {
+  display: flex;
+  align-items: center;
+}
+.filter-panel__price-input {
+  flex: 1;
+  background: #f5f5f5;
+  border-radius: 8rpx;
+  padding: 12rpx 20rpx;
+  font-size: 26rpx;
+}
+.filter-panel__price-sep {
+  margin: 0 16rpx;
+  color: #999;
+}
+.filter-panel__tags {
+  display: flex;
+  flex-wrap: wrap;
+}
+.filter-panel__tag {
+  background: #f5f5f5;
+  color: #666;
+  font-size: 24rpx;
+  padding: 10rpx 24rpx;
+  border-radius: 24rpx;
+  margin: 0 16rpx 16rpx 0;
+}
+.filter-panel__tag--active {
+  background: #e8f7ee;
+  color: #07c160;
+}
+.filter-panel__actions {
+  display: flex;
+}
+.filter-panel__btn {
+  flex: 1;
+  text-align: center;
+  padding: 18rpx 0;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+}
+.filter-panel__btn--reset {
+  background: #f5f5f5;
+  color: #666;
+  margin-right: 20rpx;
+}
+.filter-panel__btn--apply {
+  background: #07c160;
+  color: #fff;
+}
+.state {
+  text-align: center;
+  color: #999;
+  font-size: 26rpx;
+  padding: 120rpx 0;
+}
+.state--error {
+  color: #ff4d4f;
+}
+.state__retry {
+  color: #07c160;
+  margin-top: 20rpx;
+}
+.result-list {
+  margin-top: 20rpx;
+}
+.result-list__total {
+  color: #999;
+  font-size: 24rpx;
+  margin-bottom: 16rpx;
+}

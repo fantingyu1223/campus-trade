@@ -1,0 +1,4 @@
+<view
+  wx:if="{{label}}"
+  class="identity-badge {{isMerchant ? 'identity-badge--merchant' : 'identity-badge--person'}}"
+>{{label}}</view>

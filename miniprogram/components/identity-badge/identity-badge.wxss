@@ -1,0 +1,23 @@
+.identity-badge {
+  display: inline-block;
+  font-size: 20rpx;
+  line-height: 1;
+  padding: 6rpx 12rpx;
+  border-radius: 8rpx;
+  box-sizing: border-box;
+}
+
+/* 个人身份：学生/教职工 */
+.identity-badge--person {
+  color: #409eff;
+  background: #ecf5ff;
+  border: 1rpx solid #b3d8ff;
+}
+
+/* 认证商家：与个人闲置可区分（F33-AC1） */
+.identity-badge--merchant {
+  color: #b88230;
+  background: #faecd8;
+  border: 1rpx solid #e6a23c;
+  font-weight: 600;
+}

@@ -1,0 +1,16 @@
+{
+  "description": "校园二手平台小程序",
+  "appid": "touristappid",
+  "compileType": "miniprogram",
+  "libVersion": "latest",
+  "setting": {
+    "es6": true,
+    "enhance": true,
+    "minified": true,
+    "postcss": true,
+    "urlCheck": false,
+    "useCompilerPlugins": ["typescript"]
+  },
+  "projectname": "campus-secondhand-miniprogram",
+  "miniprogramRoot": "./"
+}

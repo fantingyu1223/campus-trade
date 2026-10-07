@@ -1,0 +1,53 @@
+.page {
+  min-height: 100vh;
+  padding: 120rpx 48rpx;
+  box-sizing: border-box;
+}
+
+.card {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 64rpx 40rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.card__icon {
+  font-size: 96rpx;
+  margin-bottom: 32rpx;
+}
+
+.card__title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.card__title--success {
+  color: #07c160;
+}
+
+.card__title--fail {
+  color: #f56c6c;
+}
+
+.card__desc {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.7;
+  text-align: center;
+  margin-bottom: 48rpx;
+}
+
+.card__btn {
+  width: 100%;
+  border-radius: 44rpx;
+  font-size: 30rpx;
+}
+
+.card__btn--plain {
+  background: #f7f7f7;
+  color: #333;
+}

@@ -1,0 +1,35 @@
+<view class="page">
+  <view wx:if="{{loading}}" class="state">加载中…</view>
+  <view wx:elif="{{error}}" class="state state--error">
+    <text>{{error}}</text>
+    <view class="state__retry" bindtap="onRetry">点击重试</view>
+  </view>
+
+  <scroll-view wx:else scroll-y class="list" enhanced>
+    <view wx:if="{{list.length === 0}}" class="state">还没有收藏商品，去逛逛吧</view>
+    <view
+      wx:for="{{list}}"
+      wx:key="product_id"
+      class="item"
+      data-id="{{item.product_id}}"
+      bindtap="onItemTap"
+      bindlongpress="onItemLongPress"
+    >
+      <image wx:if="{{item.cover}}" class="item__cover" src="{{item.cover}}" mode="aspectFill" />
+      <view wx:else class="item__cover item__cover--placeholder">图</view>
+      <view class="item__body">
+        <view class="item__title">{{item.title}}</view>
+        <view class="item__price-row">
+          <text class="item__price">¥{{item.price}}</text>
+          <text class="item__fav-price">收藏时 ¥{{item.fav_price}}</text>
+          <text wx:if="{{item.price_trend === 'down'}}" class="item__trend item__trend--down">已降价↓</text>
+          <text wx:elif="{{item.price_trend === 'up'}}" class="item__trend item__trend--up">已涨价↑</text>
+        </view>
+      </view>
+      <view wx:if="{{item.status === 'sold'}}" class="item__badge">已售出</view>
+      <view wx:elif="{{item.status === 'off_shelf'}}" class="item__badge">已下架</view>
+    </view>
+    <view wx:if="{{list.length > 0}}" class="list__tip">长按条目可取消收藏</view>
+    <view class="list__safe"></view>
+  </scroll-view>
+</view>

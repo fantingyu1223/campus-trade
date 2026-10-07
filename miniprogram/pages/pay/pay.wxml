@@ -1,0 +1,34 @@
+<view class="page">
+  <view wx:if="{{loading}}" class="state">加载中…</view>
+  <view wx:elif="{{error}}" class="state state--error">
+    <text>{{error}}</text>
+    <view class="state__retry" bindtap="onRetry">点击重试</view>
+  </view>
+
+  <block wx:elif="{{summary}}">
+    <!-- 订单摘要卡 -->
+    <view class="summary-card">
+      <image wx:if="{{summary.product.cover}}" src="{{summary.product.cover}}" class="summary-card__cover" mode="aspectFill" />
+      <view wx:else class="summary-card__cover summary-card__cover--placeholder">暂无图</view>
+      <view class="summary-card__info">
+        <view class="summary-card__title">{{summary.product.title}}</view>
+        <view class="summary-card__seller">卖家：{{summary.seller.nickname}}</view>
+        <view class="summary-card__amount">¥{{summary.amount}}</view>
+      </view>
+    </view>
+
+    <view class="pay-tip">请当面验货后再确认收货，平台不托管资金。</view>
+
+    <view class="pay-btn {{paying ? 'pay-btn--disabled' : ''}}" bindtap="onGoPay">
+      {{paying ? '支付中…' : '去支付'}}
+    </view>
+  </block>
+
+  <!-- 付款强制风险确认弹层（F13-AC2，不可点遮罩关闭） -->
+  <pay-confirm-modal
+    visible="{{payVisible}}"
+    amount="{{summary.amount || 0}}"
+    bind:confirm="onPayConfirm"
+    bind:cancel="onPayCancel"
+  />
+</view>

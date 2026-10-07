@@ -1,0 +1,48 @@
+<view class="page">
+  <!-- 状态 Tab -->
+  <view class="tabs">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="value"
+      class="tabs__item {{activeTab === item.value ? 'tabs__item--active' : ''}}"
+      data-value="{{item.value}}"
+      bindtap="onTabTap"
+    >{{item.label}}</view>
+  </view>
+
+  <!-- 列表三态 -->
+  <view wx:if="{{loading}}" class="state">加载中…</view>
+  <view wx:elif="{{error}}" class="state state--error">
+    <text>{{error}}</text>
+    <view class="state__retry" bindtap="onRetry">点击重试</view>
+  </view>
+  <view wx:elif="{{list.length === 0}}" class="state">
+    <text>暂无{{activeTab === 'on_sale' ? '在售' : activeTab === 'sold' ? '已售' : '下架'}}商品</text>
+    <view wx:if="{{activeTab === 'on_sale'}}" class="state__publish" bindtap="onGoPublish">去发布一件闲置</view>
+  </view>
+
+  <!-- 商品列表 -->
+  <view wx:else class="list">
+    <view wx:for="{{list}}" wx:key="id" class="item">
+      <product-card product="{{item}}" show-sold bindcardtap="onCardTap" />
+      <!-- 操作按钮（按 Tab 状态区分） -->
+      <view class="item__actions" wx:if="{{activeTab !== 'sold'}}">
+        <block wx:if="{{activeTab === 'on_sale'}}">
+          <view class="item__btn" data-id="{{item.id}}" catchtap="onOffline">下架</view>
+          <view class="item__btn item__btn--primary" data-id="{{item.id}}" catchtap="onMarkSold">标记已售</view>
+        </block>
+        <block wx:elif="{{activeTab === 'off_sale'}}">
+          <view class="item__btn item__btn--primary" data-id="{{item.id}}" catchtap="onRelist">重新上架</view>
+        </block>
+      </view>
+    </view>
+  </view>
+
+  <!-- 标记已售弹窗（U13：未选买家时弹窗内拦截「必须指定买家」） -->
+  <mark-sold-modal
+    visible="{{markSoldVisible}}"
+    buyers="{{buyers}}"
+    bindselect="onMarkSoldSelect"
+    bindcancel="onMarkSoldCancel"
+  />
+</view>

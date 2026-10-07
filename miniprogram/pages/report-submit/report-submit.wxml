@@ -1,0 +1,32 @@
+<view class="page">
+  <!-- 提交成功回执页 -->
+  <view wx:if="{{submitted}}" class="result">
+    <view class="result__icon">✅</view>
+    <view class="result__title">举报已受理</view>
+    <view class="result__row">
+      <text class="result__label">回执编号</text>
+      <text class="result__value">R{{reportId}}</text>
+    </view>
+    <view class="result__row">
+      <text class="result__label">处理状态</text>
+      <text class="result__value result__value--status">已受理</text>
+    </view>
+    <view class="result__desc">你的举报身份对被举报方不可见，处理结果将通过站内通知告知</view>
+    <button class="result__btn" bindtap="onBack">返回</button>
+  </view>
+
+  <block wx:else>
+    <!-- 匿名保护提示卡（F18-AC2） -->
+    <view class="anon-notice">
+      🛡️ 你的举报身份对被举报方不可见，请放心如实反馈
+    </view>
+
+    <!-- 举报复合表单（含举报对象信息条） -->
+    <report-form
+      target-type-label="{{targetTypeLabel}}"
+      target-title="{{targetTitle}}"
+      submitting="{{submitting}}"
+      bind:submit="onFormSubmit"
+    />
+  </block>
+</view>

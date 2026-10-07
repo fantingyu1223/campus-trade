@@ -1,0 +1,67 @@
+<view class="page">
+  <!-- 常驻安全提示条（F13-AC1 接收侧可见） -->
+  <view class="safety-bar">安全提示：平台不托管资金，请勿脱离平台私下转账，当面验货后再确认收货。</view>
+
+  <view wx:if="{{loading}}" class="state">加载中…</view>
+  <view wx:elif="{{error}}" class="state state--error">
+    <text>{{error}}</text>
+    <view class="state__retry" bindtap="onRetry">点击重试</view>
+  </view>
+
+  <scroll-view wx:else scroll-y class="msg-scroll">
+    <!-- 游标分页：加载更早 -->
+    <view
+      wx:if="{{hasMore}}"
+      class="load-earlier {{loadingMore ? 'load-earlier--loading' : ''}}"
+      bindtap="onLoadEarlier"
+    >{{loadingMore ? '加载中…' : '加载更早'}}</view>
+
+    <view
+      wx:for="{{messages}}"
+      wx:key="msg_id"
+      class="msg-row {{item.sender_id === myId ? 'msg-row--self' : ''}}"
+    >
+      <!-- 文本消息 -->
+      <block wx:if="{{item.type === 'text'}}">
+        <view class="msg-bubble {{item.sender_id === myId ? 'msg-bubble--self' : ''}}">
+          <text>{{item.content}}</text>
+        </view>
+        <view wx:if="{{item.sender_id === myId}}" class="msg-read {{item.is_read ? 'msg-read--read' : ''}}">
+          {{item.is_read ? '已读' : '未读'}}
+        </view>
+      </block>
+
+      <!-- 意向卡片消息（F14） -->
+      <view wx:elif="{{item.type === 'intent_card'}}" class="msg-intent">
+        <intent-card payload="{{item.intent_payload}}" is-self="{{item.sender_id === myId}}" bind:respond="onIntentRespond" />
+      </view>
+
+      <!-- 图片消息占位 -->
+      <image wx:elif="{{item.type === 'image'}}" src="{{item.content}}" mode="widthFix" class="msg-image" />
+    </view>
+  </scroll-view>
+
+  <!-- 底部输入区 -->
+  <view class="input-bar">
+    <input
+      class="input-bar__input"
+      value="{{input}}"
+      placeholder="友善沟通，谨防诈骗"
+      confirm-type="send"
+      bindinput="onInput"
+      bindconfirm="onSend"
+    />
+    <view class="input-bar__send {{input.trim() && !sending ? '' : 'input-bar__send--disabled'}}" bindtap="onSend">
+      {{sending ? '…' : '发送'}}
+    </view>
+  </view>
+  <view class="input-bar__placeholder"></view>
+
+  <!-- 风险词警示弹层（F13-AC1） -->
+  <risk-warning-modal
+    visible="{{riskVisible}}"
+    words="{{riskWords}}"
+    bind:continue="onRiskContinue"
+    bind:edit="onRiskEdit"
+  />
+</view>

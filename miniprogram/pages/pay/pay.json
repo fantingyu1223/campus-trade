@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "付款",
+  "usingComponents": {
+    "pay-confirm-modal": "/components/pay-confirm-modal/pay-confirm-modal"
+  }
+}

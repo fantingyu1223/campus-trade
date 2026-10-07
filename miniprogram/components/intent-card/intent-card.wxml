@@ -1,0 +1,22 @@
+<view class="intent-card">
+  <view class="intent-card__header">
+    <text class="intent-card__title">交易意向</text>
+    <text class="intent-card__status intent-card__status--{{payload.status}}">{{statusLabel}}</text>
+  </view>
+  <view class="intent-card__row">
+    <text class="intent-card__label">意向价格</text>
+    <text class="intent-card__price">¥{{payload.price}}</text>
+  </view>
+  <view class="intent-card__row">
+    <text class="intent-card__label">交货地点</text>
+    <text class="intent-card__value">{{payload.trade_point}}</text>
+  </view>
+  <view class="intent-card__row">
+    <text class="intent-card__label">交货时间</text>
+    <text class="intent-card__value">{{payload.trade_time}}</text>
+  </view>
+  <view wx:if="{{payload.status === 'pending' && !isSelf}}" class="intent-card__actions">
+    <view class="intent-card__btn intent-card__btn--reject" bindtap="onReject">拒绝</view>
+    <view class="intent-card__btn intent-card__btn--accept" bindtap="onAccept">接受</view>
+  </view>
+</view>

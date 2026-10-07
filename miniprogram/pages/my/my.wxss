@@ -1,0 +1,112 @@
+.page {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding-bottom: 32rpx;
+}
+
+/* 用户信息卡 */
+.user-card {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  padding: 32rpx 24rpx;
+  margin-bottom: 16rpx;
+}
+.user-card__avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.user-card__avatar-img {
+  width: 120rpx;
+  height: 120rpx;
+}
+.user-card__avatar-placeholder {
+  font-size: 56rpx;
+  color: #ccc;
+}
+.user-card__info {
+  margin-left: 24rpx;
+  flex: 1;
+}
+.user-card__name-row {
+  display: flex;
+  align-items: center;
+}
+.user-card__nickname {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #333;
+  margin-right: 16rpx;
+}
+.user-card__merchant {
+  margin-top: 12rpx;
+}
+
+/* 分组与功能项 */
+.group {
+  background: #fff;
+  margin-bottom: 16rpx;
+}
+.group__title {
+  font-size: 24rpx;
+  color: #999;
+  padding: 20rpx 24rpx 0;
+}
+.cell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28rpx 24rpx;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+.cell:last-child {
+  border-bottom: none;
+}
+.cell__label {
+  font-size: 28rpx;
+  color: #333;
+}
+.cell__label--danger {
+  color: #ff4d4f;
+}
+.cell__arrow {
+  color: #ccc;
+  font-size: 32rpx;
+}
+
+/* 已注销终态 */
+.cancelled {
+  background: #fff;
+  margin: 32rpx 24rpx;
+  border-radius: 16rpx;
+  padding: 64rpx 32rpx;
+  text-align: center;
+}
+.cancelled__icon {
+  font-size: 72rpx;
+}
+.cancelled__title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #333;
+  margin-top: 16rpx;
+}
+.cancelled__desc {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 16rpx;
+}
+.cancelled__btn {
+  background: #07c160;
+  color: #fff;
+  font-size: 30rpx;
+  border-radius: 44rpx;
+  margin-top: 40rpx;
+}

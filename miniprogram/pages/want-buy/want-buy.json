@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "求购",
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "want-buy-card": "/components/want-buy-card/want-buy-card"
+  }
+}

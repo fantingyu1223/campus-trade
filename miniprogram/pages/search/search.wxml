@@ -1,0 +1,92 @@
+<view class="page">
+  <!-- 搜索框 -->
+  <view class="search-bar">
+    <input
+      class="search-bar__input"
+      placeholder="搜索校内闲置好物"
+      value="{{keyword}}"
+      confirm-type="search"
+      bindinput="onKeywordInput"
+      bindconfirm="onSearchConfirm"
+    />
+    <view class="search-bar__btn" bindtap="onSearchConfirm">搜索</view>
+  </view>
+
+  <!-- 工具条：筛选入口 + 排序 -->
+  <view class="toolbar">
+    <view class="toolbar__filter {{panelVisible ? 'toolbar__filter--active' : ''}}" bindtap="onTogglePanel">
+      筛选{{panelVisible ? ' ▲' : ' ▼'}}
+    </view>
+    <view
+      wx:for="{{sortOptions}}"
+      wx:key="value"
+      class="toolbar__sort {{sort === item.value ? 'toolbar__sort--active' : ''}}"
+      data-value="{{item.value}}"
+      bindtap="onSortTap"
+    >{{item.label}}</view>
+  </view>
+
+  <!-- 筛选面板 -->
+  <view wx:if="{{panelVisible}}" class="filter-panel">
+    <view class="filter-panel__group">
+      <view class="filter-panel__label">价格区间（元）</view>
+      <view class="filter-panel__price">
+        <input class="filter-panel__price-input" type="digit" placeholder="最低价" value="{{minPrice}}" bindinput="onMinPriceInput" />
+        <text class="filter-panel__price-sep">—</text>
+        <input class="filter-panel__price-input" type="digit" placeholder="最高价" value="{{maxPrice}}" bindinput="onMaxPriceInput" />
+      </view>
+    </view>
+
+    <view class="filter-panel__group">
+      <view class="filter-panel__label">成色</view>
+      <view class="filter-panel__tags">
+        <view
+          wx:for="{{conditionOptions}}"
+          wx:key="value"
+          class="filter-panel__tag {{condition === item.value ? 'filter-panel__tag--active' : ''}}"
+          data-value="{{item.value}}"
+          bindtap="onConditionTap"
+        >{{item.label}}</view>
+      </view>
+    </view>
+
+    <view class="filter-panel__group">
+      <view class="filter-panel__label">卖家身份</view>
+      <view class="filter-panel__tags">
+        <view
+          wx:for="{{roleOptions}}"
+          wx:key="value"
+          class="filter-panel__tag {{roleFilter === item.value ? 'filter-panel__tag--active' : ''}}"
+          data-value="{{item.value}}"
+          bindtap="onRoleTap"
+        >{{item.label}}</view>
+      </view>
+    </view>
+
+    <view class="filter-panel__actions">
+      <view class="filter-panel__btn filter-panel__btn--reset" bindtap="onResetFilter">重置</view>
+      <view class="filter-panel__btn filter-panel__btn--apply" bindtap="onApplyFilter">确定</view>
+    </view>
+  </view>
+
+  <!-- 结果列表 -->
+  <view wx:if="{{loading}}" class="state">搜索中…</view>
+  <view wx:elif="{{error}}" class="state state--error">
+    <text>{{error}}</text>
+    <view class="state__retry" bindtap="onRetry">点击重试</view>
+  </view>
+  <view wx:elif="{{searched && list.length === 0}}" class="state">
+    没有找到相关商品，换个关键词或调整筛选试试
+  </view>
+  <view wx:elif="{{!searched}}" class="state">输入关键词开始搜索</view>
+
+  <view wx:else class="result-list">
+    <view class="result-list__total">共 {{total}} 件相关商品</view>
+    <product-card
+      wx:for="{{list}}"
+      wx:key="id"
+      product="{{item}}"
+      bindcardtap="onCardTap"
+    />
+  </view>
+</view>

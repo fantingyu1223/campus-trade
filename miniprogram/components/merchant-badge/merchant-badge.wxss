@@ -1,0 +1,33 @@
+/* 认证商家强化标识：金色边框 + 渐变底，比 identity-badge 商家态更醒目（F33-AC1） */
+.merchant-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6rpx 16rpx;
+  border-radius: 24rpx;
+  border: 2rpx solid #d4a017;
+  background: linear-gradient(90deg, #fff7e0, #ffe9b3);
+  box-sizing: border-box;
+  line-height: 1;
+}
+.merchant-badge__icon {
+  font-size: 24rpx;
+  margin-right: 8rpx;
+}
+.merchant-badge__text {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #8a5a00;
+  letter-spacing: 2rpx;
+}
+
+/* 大号：强展示位（商品详情/店铺位） */
+.merchant-badge--large {
+  padding: 10rpx 24rpx;
+  border-width: 3rpx;
+}
+.merchant-badge--large .merchant-badge__icon {
+  font-size: 32rpx;
+}
+.merchant-badge--large .merchant-badge__text {
+  font-size: 28rpx;
+}

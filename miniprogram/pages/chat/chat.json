@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "会话",
+  "usingComponents": {
+    "intent-card": "/components/intent-card/intent-card",
+    "risk-warning-modal": "/components/risk-warning-modal/risk-warning-modal"
+  }
+}

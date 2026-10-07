@@ -1,0 +1,37 @@
+<view class="page">
+  <view wx:if="{{loading}}" class="state">加载中…</view>
+  <view wx:elif="{{error}}" class="state state--error">
+    <text>{{error}}</text>
+    <view class="state__retry" bindtap="onRetry">点击重试</view>
+  </view>
+  <view wx:elif="{{list.length === 0}}" class="state">
+    <view class="state__empty-icon">💬</view>
+    <view>暂无会话</view>
+    <view class="state__empty-sub">去商品详情页「联系卖家」发起沟通吧</view>
+  </view>
+
+  <block wx:else>
+    <view
+      wx:for="{{list}}"
+      wx:key="conv_id"
+      class="conv-item"
+      data-conv-id="{{item.conv_id}}"
+      data-nickname="{{item.peer.nickname}}"
+      data-identity-type="{{item.peer.identity_type}}"
+      bindtap="onTapConversation"
+    >
+      <view class="conv-item__avatar">{{item.peer.nickname[0] || '友'}}</view>
+      <view class="conv-item__main">
+        <view class="conv-item__top">
+          <text class="conv-item__nickname">{{item.peer.nickname}}</text>
+          <identity-badge identity-type="{{item.peer.identity_type || 'guest'}}" />
+          <text class="conv-item__time">{{item.timeLabel}}</text>
+        </view>
+        <view class="conv-item__bottom">
+          <text class="conv-item__last {{item.unread > 0 ? 'conv-item__last--unread' : ''}}">{{item.last_msg}}</text>
+          <view wx:if="{{item.unread > 0}}" class="conv-item__badge">{{item.unread > 99 ? '99+' : item.unread}}</view>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>

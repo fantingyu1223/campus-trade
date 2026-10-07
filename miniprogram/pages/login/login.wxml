@@ -1,0 +1,31 @@
+<view class="page">
+  <view class="brand">
+    <view class="brand__logo">校</view>
+    <view class="brand__name">校园二手平台</view>
+    <view class="brand__slogan">校内闲置 · 当面交易 · 安全放心</view>
+  </view>
+
+  <view class="login-area">
+    <button
+      class="login-btn"
+      type="primary"
+      loading="{{loading}}"
+      disabled="{{loading}}"
+      bindtap="onLogin"
+    >微信授权登录</button>
+
+    <checkbox-group bindchange="onAgreeChange" class="agreement">
+      <label class="agreement__label">
+        <checkbox value="agree" checked="{{agreed}}" class="agreement__checkbox" />
+        <text class="agreement__text">
+          我已阅读并同意
+          <text class="agreement__link" catchtap="onViewAgreement" data-type="agreement">《用户协议》</text>
+          与
+          <text class="agreement__link" catchtap="onViewAgreement" data-type="privacy">《隐私政策》</text>
+        </text>
+      </label>
+    </checkbox-group>
+
+    <view class="guest-entry" bindtap="onBrowseAsGuest">暂不登录，先逛逛</view>
+  </view>
+</view>

@@ -1,0 +1,27 @@
+<view class="wb-card {{item.status !== 'active' ? 'wb-card--done' : ''}}">
+  <view class="wb-card__head">
+    <text class="wb-card__category">{{item.category_name || '其他'}}</text>
+    <!-- 生效中：到期倒计时（≤3 天红色「即将到期」）；终态：状态标识 -->
+    <text wx:if="{{item.status === 'active' && daysLeft > 0}}" class="wb-card__countdown {{expiring ? 'wb-card__countdown--urgent' : ''}}">
+      {{expiring ? '即将到期 · ' : ''}}剩 {{daysLeft}} 天
+    </text>
+    <text wx:elif="{{item.status === 'active'}}" class="wb-card__countdown wb-card__countdown--urgent">已到期</text>
+    <text wx:elif="{{item.status === 'bought'}}" class="wb-card__status">已买到</text>
+    <text wx:elif="{{item.status === 'closed'}}" class="wb-card__status">已关闭</text>
+    <text wx:else class="wb-card__status">已到期</text>
+  </view>
+
+  <view class="wb-card__title">{{item.title}}</view>
+
+  <view class="wb-card__meta">
+    <text class="wb-card__price">¥{{item.min_price}} ~ ¥{{item.max_price}}</text>
+    <text wx:if="{{item.condition}}" class="wb-card__condition">{{item.condition}}</text>
+  </view>
+
+  <!-- 我的条目操作区：仅生效中展示（终态置灰且无操作） -->
+  <view wx:if="{{isMine && item.status === 'active' && daysLeft > 0}}" class="wb-card__ops">
+    <view class="wb-card__op" catchtap="onRenew">续期</view>
+    <view class="wb-card__op" catchtap="onClose">关闭</view>
+    <view class="wb-card__op wb-card__op--primary" catchtap="onBought">已买到</view>
+  </view>
+</view>

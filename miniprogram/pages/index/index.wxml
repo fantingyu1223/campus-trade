@@ -1,0 +1,68 @@
+<view class="page">
+  <!-- 常驻安全提示条（F13-AC3） -->
+  <safety-banner class="page__banner" />
+
+  <!-- 搜索框 -->
+  <view class="search-bar">
+    <input
+      class="search-bar__input"
+      placeholder="搜索校内闲置好物"
+      value="{{searchKeyword}}"
+      confirm-type="search"
+      bindinput="onSearchInput"
+      bindconfirm="onSearch"
+    />
+    <view class="search-bar__btn" bindtap="onSearch">搜索</view>
+  </view>
+
+  <!-- 分类入口 -->
+  <view class="category-grid">
+    <view
+      wx:for="{{categories}}"
+      wx:key="id"
+      class="category-item"
+      data-name="{{item.name}}"
+      bindtap="onCategoryTap"
+    >
+      <view class="category-item__icon">{{item.icon}}</view>
+      <view class="category-item__name">{{item.name}}</view>
+    </view>
+  </view>
+
+  <!-- 商品流 -->
+  <view class="section-title">推荐闲置</view>
+
+  <view wx:if="{{productsLoading}}" class="state">商品加载中…</view>
+  <view wx:elif="{{productsError}}" class="state state--error">
+    <text>{{productsError}}</text>
+    <view class="state__retry" bindtap="onRetryProducts">点击重试</view>
+  </view>
+  <view wx:elif="{{products.length === 0}}" class="state">暂无商品，去发布第一件闲置吧</view>
+
+  <view wx:else class="product-flow">
+    <view
+      wx:for="{{products}}"
+      wx:key="id"
+      class="product-card"
+      data-id="{{item.id}}"
+      bindtap="onProductTap"
+    >
+      <view class="product-card__cover">
+        <image wx:if="{{item.cover}}" src="{{item.cover}}" mode="aspectFill" class="product-card__img" />
+        <view wx:else class="product-card__img product-card__img--placeholder">实拍图</view>
+        <view wx:if="{{item.is_urgent}}" class="product-card__urgent">急出</view>
+      </view>
+      <view class="product-card__body">
+        <view class="product-card__title">{{item.title}}</view>
+        <view class="product-card__meta">
+          <text class="product-card__price">¥{{item.price}}</text>
+          <text class="product-card__condition">{{item.condition}}</text>
+        </view>
+        <view class="product-card__seller">
+          <text class="product-card__nickname">{{item.seller.nickname}}</text>
+          <identity-badge identity-type="{{item.seller.identity_type}}" />
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,25 @@
+<view wx:if="{{visible}}" class="pay-modal">
+  <view class="pay-modal__mask" catchtap="noop"></view>
+  <view class="pay-modal__panel" catchtap="noop">
+    <view class="pay-modal__title">付款前必读</view>
+    <view class="pay-modal__warning">平台不托管资金，务必当面验货后再确认收货</view>
+
+    <view class="pay-modal__rules">
+      <view class="pay-modal__rule">· 取消订单须对方确认，或 24 小时未响应默认同意，原路退款；</view>
+      <view class="pay-modal__rule">· 约定交货时间后 48 小时未确认收货且未异议，系统将自动确认收货；</view>
+      <view class="pay-modal__rule">· 现场验货不满意可拒收，须留存时间与说明（拒收留痕）；</view>
+      <view class="pay-modal__rule">· 平台可协调纠纷，但无法强制退款。</view>
+    </view>
+
+    <view class="pay-modal__agree" bindtap="onToggleAgree">
+      <view class="pay-modal__checkbox {{agreed ? 'pay-modal__checkbox--on' : ''}}">{{agreed ? '✓' : ''}}</view>
+      <text class="pay-modal__agree-text">我已阅读并理解</text>
+    </view>
+
+    <view
+      class="pay-modal__btn pay-modal__btn--confirm {{agreed ? '' : 'pay-modal__btn--disabled'}}"
+      bindtap="onConfirm"
+    >确认并支付 ¥{{amount}}</view>
+    <view class="pay-modal__btn pay-modal__btn--cancel" bindtap="onCancel">再想想</view>
+  </view>
+</view>

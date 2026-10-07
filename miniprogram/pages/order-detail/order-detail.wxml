@@ -1,0 +1,57 @@
+<view class="page">
+  <view wx:if="{{loading}}" class="state">加载中…</view>
+  <view wx:elif="{{error}}" class="state state--error">
+    <text>{{error}}</text>
+    <view class="state__retry" bindtap="onRetry">点击重试</view>
+  </view>
+
+  <block wx:elif="{{order}}">
+    <!-- 五态步骤条（F34-AC3，当前态高亮加粗变色） -->
+    <view class="steps">
+      <view
+        wx:for="{{steps}}"
+        wx:key="key"
+        class="step {{order.status === item.key ? 'step--active' : ''}}"
+      >{{item.label}}</view>
+    </view>
+
+    <!-- 48h 确认收货倒计时（F35-AC1，仅待确认态展示） -->
+    <view wx:if="{{order.status === 'pending_confirm' && countdownText}}" class="countdown {{countdownExpired ? 'countdown--expired' : ''}}">
+      {{countdownExpired ? '确认收货已超时' : `确认收货倒计时 ${countdownText}`}}
+    </view>
+
+    <!-- 订单信息卡 -->
+    <view class="info-card">
+      <view class="info-card__row"><text class="info-card__label">订单号</text>{{order.order_no}}</view>
+      <view class="info-card__row"><text class="info-card__label">商品</text>{{order.product.title}}</view>
+      <view class="info-card__row"><text class="info-card__label">金额</text><text class="info-card__amount">¥{{order.amount}}</text></view>
+      <view class="info-card__row"><text class="info-card__label">卖家</text>{{order.seller.nickname}}</view>
+      <view class="info-card__row" wx:if="{{order.trade_point}}"><text class="info-card__label">交货地点</text>{{order.trade_point}}</view>
+      <view class="info-card__row" wx:if="{{order.trade_time}}"><text class="info-card__label">交货时间</text>{{order.trade_time}}</view>
+    </view>
+
+    <!-- 状态化操作按钮（F35-AC3） -->
+    <view class="actions">
+      <block wx:if="{{order.status === 'pending_confirm'}}">
+        <view class="btn btn--primary" bindtap="onConfirmReceive">确认收货</view>
+        <view class="btn" bindtap="onRejectOnsite">现场拒收</view>
+        <view class="btn btn--danger" bindtap="onCancelOrder">取消订单</view>
+      </block>
+      <view wx:elif="{{order.status === 'pending_delivery'}}" class="btn btn--danger" bindtap="onCancelOrder">取消订单</view>
+      <view wx:elif="{{order.status === 'completed'}}" class="btn btn--primary" bindtap="onGoReview">去评价</view>
+      <view wx:if="{{order.status !== 'appealing' && order.status !== 'cancelled'}}" class="btn btn--plain" bindtap="onAppeal">申诉</view>
+    </view>
+
+    <!-- 订单事件 timeline（全程留痕） -->
+    <view class="timeline">
+      <view class="timeline__title">订单记录</view>
+      <view wx:for="{{order.timeline}}" wx:key="time" class="timeline__item">
+        <view class="timeline__dot"></view>
+        <view class="timeline__content">
+          <view class="timeline__time">{{item.time}}</view>
+          <view class="timeline__event">{{item.event}}</view>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>

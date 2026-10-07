@@ -1,0 +1,57 @@
+<view class="page">
+  <!-- 提交成功结果页：已提交，待公开 -->
+  <view wx:if="{{submitted}}" class="result">
+    <view class="result__icon">✅</view>
+    <view class="result__title">已提交，待公开</view>
+    <view class="result__desc">评价将在{{publishedAt}}统一公开</view>
+    <button class="result__btn" bindtap="onBack">返回</button>
+  </view>
+
+  <block wx:else>
+    <!-- 订单摘要条 -->
+    <view class="summary">
+      <view class="summary__product">商品：{{orderSummary.product_title}}</view>
+      <view class="summary__peer">对方：{{orderSummary.peer_nickname}}</view>
+    </view>
+
+    <!-- 星级点选 -->
+    <view class="card">
+      <view class="card__label">总体评分 <text class="card__required">*</text></view>
+      <view class="stars">
+        <text
+          wx:for="{{stars}}"
+          wx:key="*this"
+          class="stars__item {{score >= item ? 'stars__item--active' : ''}}"
+          data-score="{{item}}"
+          bindtap="onStarTap"
+        >★</text>
+        <text class="stars__text">{{score}} 分</text>
+      </view>
+    </view>
+
+    <!-- 文字评价 -->
+    <view class="card">
+      <view class="card__label">文字评价</view>
+      <textarea
+        class="card__textarea"
+        placeholder="说说这次交易的体验吧（选填）"
+        maxlength="{{500}}"
+        value="{{content}}"
+        bindinput="onContentInput"
+      />
+      <view class="card__counter">{{contentLen}}/500</view>
+    </view>
+
+    <!-- 延迟公开提示卡 -->
+    <view class="delay-notice">
+      ⏳ 评价将在双方均提交或 7 天评价期结束后统一公开，公开前对方无法看到你的评价内容
+    </view>
+
+    <view class="footer">
+      <button
+        class="footer__submit {{(!score || submitting) ? 'footer__submit--disabled' : ''}}"
+        bindtap="onSubmit"
+      >{{submitting ? '提交中…' : '提交评价'}}</button>
+    </view>
+  </block>
+</view>

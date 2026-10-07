@@ -1,0 +1,24 @@
+<view wx:if="{{visible}}" class="cancel-modal">
+  <view class="cancel-modal__mask" catchtap="onCancel"></view>
+  <view class="cancel-modal__panel" catchtap="noop">
+    <view class="cancel-modal__icon">⛔</view>
+    <view class="cancel-modal__title">注销账号</view>
+    <view class="cancel-modal__warning">
+      注销后不可恢复，存在在途交易将被拦截。名下商品将自动下架，账号数据将被清除。
+    </view>
+    <view class="cancel-modal__tip">请输入「{{keyword}}」二字以确认注销</view>
+    <input
+      class="cancel-modal__input"
+      placeholder="请输入「注销」"
+      value="{{inputValue}}"
+      bindinput="onInput"
+    />
+    <view class="cancel-modal__actions">
+      <view class="cancel-modal__btn cancel-modal__btn--cancel" bindtap="onCancel">取消</view>
+      <view
+        class="cancel-modal__btn cancel-modal__btn--confirm {{(inputValue !== keyword || confirming) ? 'cancel-modal__btn--disabled' : ''}}"
+        bindtap="onConfirm"
+      >{{confirming ? '提交中…' : '确认注销'}}</view>
+    </view>
+  </view>
+</view>

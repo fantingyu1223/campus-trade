@@ -1,0 +1,125 @@
+<view class="page">
+  <!-- 步骤条 -->
+  <view class="steps">
+    <view class="steps__item {{step >= 1 ? 'steps__item--active' : ''}}">
+      <view class="steps__dot">1</view>
+      <text class="steps__label">实拍图</text>
+    </view>
+    <view class="steps__line {{step >= 2 ? 'steps__line--active' : ''}}"></view>
+    <view class="steps__item {{step >= 2 ? 'steps__item--active' : ''}}">
+      <view class="steps__dot">2</view>
+      <text class="steps__label">商品信息</text>
+    </view>
+    <view class="steps__line {{step >= 3 ? 'steps__line--active' : ''}}"></view>
+    <view class="steps__item {{step >= 3 ? 'steps__item--active' : ''}}">
+      <view class="steps__dot">3</view>
+      <text class="steps__label">确认发布</text>
+    </view>
+  </view>
+
+  <!-- step 1：实拍图上传 -->
+  <view wx:if="{{step === 1}}" class="card">
+    <view class="card__title">上传实拍图（最多 9 张）</view>
+    <view class="card__tip">请上传商品真实照片，首图将作为封面展示</view>
+    <view class="img-grid">
+      <view wx:for="{{images}}" wx:key="index" class="img-grid__item">
+        <image src="{{item}}" mode="aspectFill" class="img-grid__img" />
+        <view class="img-grid__delete" data-index="{{index}}" catchtap="onDeleteImage">×</view>
+      </view>
+      <view wx:if="{{images.length < 9}}" class="img-grid__add" bindtap="onChooseImage">
+        <view class="img-grid__add-icon">+</view>
+        <view class="img-grid__add-text">拍照/选图</view>
+      </view>
+    </view>
+    <view wx:if="{{errors.images}}" class="field-error">{{errors.images}}</view>
+    <view class="btn btn--primary" bindtap="onNextStep">下一步</view>
+  </view>
+
+  <!-- step 2：商品信息表单 -->
+  <view wx:if="{{step === 2}}" class="card">
+    <view class="form-item">
+      <view class="form-item__label">商品标题 <text class="form-item__required">*</text></view>
+      <input class="form-item__input" placeholder="如：高等数学（下）教材" value="{{title}}" bindinput="onTitleInput" />
+      <view wx:if="{{errors.title}}" class="field-error">{{errors.title}}</view>
+    </view>
+
+    <view class="form-item">
+      <view class="form-item__label">商品分类 <text class="form-item__required">*</text></view>
+      <picker range="{{categoryOptions}}" range-key="name" value="{{categoryIndex}}" bindchange="onCategoryChange">
+        <view class="form-item__picker {{categoryIndex < 0 ? 'form-item__picker--placeholder' : ''}}">
+          {{categoryIndex >= 0 ? categoryOptions[categoryIndex].name : '请选择分类'}}
+        </view>
+      </picker>
+      <view wx:if="{{errors.category}}" class="field-error">{{errors.category}}</view>
+    </view>
+
+    <view class="form-item">
+      <view class="form-item__label">成色 <text class="form-item__required">*</text></view>
+      <picker range="{{conditionOptions}}" range-key="label" value="{{conditionIndex}}" bindchange="onConditionChange">
+        <view class="form-item__picker {{conditionIndex < 0 ? 'form-item__picker--placeholder' : ''}}">
+          {{conditionIndex >= 0 ? conditionOptions[conditionIndex].label : '请选择成色'}}
+        </view>
+      </picker>
+      <view wx:if="{{errors.condition}}" class="field-error">{{errors.condition}}</view>
+    </view>
+
+    <view class="form-item">
+      <view class="form-item__label">价格（元） <text class="form-item__required">*</text></view>
+      <input class="form-item__input" type="digit" placeholder="请输入价格" value="{{price}}" bindinput="onPriceInput" />
+      <view wx:if="{{errors.price}}" class="field-error">{{errors.price}}</view>
+    </view>
+
+    <view class="form-item">
+      <view class="form-item__label">自提地点 <text class="form-item__required">*</text></view>
+      <input class="form-item__input" placeholder="如：学校南门快递柜旁" value="{{meetLocation}}" bindinput="onMeetLocationInput" />
+      <view wx:if="{{errors.meetLocation}}" class="field-error">{{errors.meetLocation}}</view>
+    </view>
+
+    <view class="form-item">
+      <view class="form-item__label">商品描述 <text class="form-item__required">*</text></view>
+      <textarea class="form-item__textarea" placeholder="描述商品成色、使用情况、出手原因等" value="{{desc}}" bindinput="onDescInput" />
+      <view wx:if="{{errors.desc}}" class="field-error">{{errors.desc}}</view>
+    </view>
+
+    <view class="form-item">
+      <view class="form-item__label">交易方式</view>
+      <picker range="{{tradeModeOptions}}" range-key="label" value="{{tradeModeIndex}}" bindchange="onTradeModeChange">
+        <view class="form-item__picker">{{tradeModeOptions[tradeModeIndex].label}}</view>
+      </picker>
+    </view>
+
+    <view class="form-item form-item--switch">
+      <view class="form-item__label">急出</view>
+      <switch checked="{{isUrgent}}" color="#07c160" bindchange="onUrgentChange" />
+    </view>
+    <view wx:if="{{isUrgent}}" class="form-item__hint">急出商品将优先展示，同一账号同时最多 3 件急出商品</view>
+
+    <view class="btn-row">
+      <view class="btn btn--ghost" bindtap="onPrevStep">上一步</view>
+      <view class="btn btn--primary" bindtap="onNextStep">下一步</view>
+    </view>
+  </view>
+
+  <!-- step 3：信息汇总确认 -->
+  <view wx:if="{{step === 3}}" class="card">
+    <view class="card__title">确认商品信息</view>
+    <view class="summary__images">
+      <image wx:for="{{images}}" wx:key="index" src="{{item}}" mode="aspectFill" class="summary__img" />
+    </view>
+    <view class="summary__row"><text class="summary__label">标题</text><text class="summary__value">{{title}}</text></view>
+    <view class="summary__row"><text class="summary__label">分类</text><text class="summary__value">{{categoryOptions[categoryIndex].name}}</text></view>
+    <view class="summary__row"><text class="summary__label">成色</text><text class="summary__value">{{conditionOptions[conditionIndex].label}}</text></view>
+    <view class="summary__row"><text class="summary__label">价格</text><text class="summary__value summary__value--price">¥{{price}}</text></view>
+    <view class="summary__row"><text class="summary__label">自提地点</text><text class="summary__value">{{meetLocation}}</text></view>
+    <view class="summary__row"><text class="summary__label">交易方式</text><text class="summary__value">{{tradeModeOptions[tradeModeIndex].label}}</text></view>
+    <view class="summary__row"><text class="summary__label">急出</text><text class="summary__value">{{isUrgent ? '是' : '否'}}</text></view>
+    <view class="summary__row"><text class="summary__label">描述</text><text class="summary__value">{{desc}}</text></view>
+
+    <view class="btn-row">
+      <view class="btn btn--ghost" bindtap="onPrevStep">上一步</view>
+      <view class="btn btn--primary {{submitting ? 'btn--disabled' : ''}}" bindtap="onSubmit">
+        {{submitting ? '提交中…' : '确认发布'}}
+      </view>
+    </view>
+  </view>
+</view>

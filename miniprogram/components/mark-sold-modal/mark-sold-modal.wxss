@@ -1,0 +1,93 @@
+.mark-sold-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+}
+.mark-sold-modal__mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+.mark-sold-modal__panel {
+  position: absolute;
+  left: 60rpx;
+  right: 60rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 32rpx;
+}
+.mark-sold-modal__title {
+  font-size: 32rpx;
+  font-weight: 600;
+  text-align: center;
+}
+.mark-sold-modal__tip {
+  font-size: 24rpx;
+  color: #999;
+  text-align: center;
+  margin-top: 12rpx;
+}
+.mark-sold-modal__list {
+  max-height: 480rpx;
+  margin-top: 24rpx;
+}
+.mark-sold-modal__empty {
+  color: #999;
+  font-size: 26rpx;
+  text-align: center;
+  padding: 48rpx 0;
+}
+.buyer-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 16rpx;
+  border-radius: 12rpx;
+}
+.buyer-item--active {
+  background: #e8f7ee;
+}
+.buyer-item__avatar {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: #07c160;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26rpx;
+}
+.buyer-item__nickname {
+  flex: 1;
+  margin-left: 20rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+.buyer-item__check {
+  color: #07c160;
+  font-size: 32rpx;
+  width: 40rpx;
+  text-align: center;
+}
+.mark-sold-modal__actions {
+  display: flex;
+  margin-top: 32rpx;
+}
+.mark-sold-modal__btn {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx 0;
+  border-radius: 12rpx;
+  font-size: 30rpx;
+}
+.mark-sold-modal__btn--cancel {
+  background: #f5f5f5;
+  color: #666;
+  margin-right: 20rpx;
+}
+.mark-sold-modal__btn--confirm {
+  background: #07c160;
+  color: #fff;
+}

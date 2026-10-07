@@ -1,0 +1,75 @@
+<view class="page">
+  <view wx:if="{{loading}}" class="state">加载中…</view>
+  <view wx:elif="{{error}}" class="state state--error">
+    <text>{{error}}</text>
+    <view class="state__retry" bindtap="onRetry">点击重试</view>
+  </view>
+
+  <block wx:elif="{{detail}}">
+    <!-- 图集 -->
+    <swiper wx:if="{{detail.product.images.length > 0}}" class="gallery" indicator-dots circular>
+      <swiper-item wx:for="{{detail.product.images}}" wx:key="*this">
+        <image src="{{item}}" mode="aspectFill" class="gallery__img" />
+      </swiper-item>
+    </swiper>
+    <view wx:else class="gallery gallery--placeholder">实拍图</view>
+
+    <!-- 商品信息 -->
+    <view class="info">
+      <view class="info__price-row">
+        <text class="info__price">¥{{detail.product.price}}</text>
+        <text wx:if="{{detail.product.original_price}}" class="info__original">¥{{detail.product.original_price}}</text>
+        <view wx:if="{{detail.product.is_urgent}}" class="info__urgent">急出</view>
+      </view>
+      <view class="info__title">{{detail.product.title}}</view>
+      <view class="info__meta">
+        <text class="info__tag">{{conditionLabel}}</text>
+        <text class="info__tag">{{tradeModeLabel}}</text>
+      </view>
+      <view class="info__row">
+        <text class="info__label">自提地点</text>
+        <text class="info__value">{{detail.product.meet_location}}</text>
+      </view>
+      <view class="info__row" wx:if="{{detail.product.published_at}}">
+        <text class="info__label">发布时间</text>
+        <text class="info__value">{{detail.product.published_at}}</text>
+      </view>
+    </view>
+
+    <!-- 商品描述 -->
+    <view class="section">
+      <view class="section__title">商品描述</view>
+      <view class="section__body">{{detail.product.description}}</view>
+    </view>
+
+    <!-- 卖家信息条 -->
+    <view class="seller">
+      <view class="seller__avatar">{{detail.seller.nickname[0] || '卖'}}</view>
+      <view class="seller__info">
+        <view class="seller__nickname">{{detail.seller.nickname}}</view>
+        <identity-badge identity-type="{{detail.seller.identity_type}}" />
+      </view>
+      <view class="seller__credit">信用 {{detail.seller.credit_score}}</view>
+    </view>
+
+    <!-- 内嵌安全提示（F13-AC3） -->
+    <view class="safety-tip">
+      安全提示：平台不托管资金，请当面验货后再付款；勿脱离平台私下转账，谨防诈骗。
+    </view>
+
+    <!-- 举报入口（占位） -->
+    <view class="report" bindtap="onReport">举报该商品</view>
+
+    <!-- 底部操作条 -->
+    <view class="footer">
+      <view class="footer__btn footer__btn--primary" bindtap="onContactSeller">联系卖家</view>
+    </view>
+    <view class="footer__placeholder"></view>
+  </block>
+
+  <!-- 已售出全屏遮罩（F7-AC2） -->
+  <view wx:if="{{isSold}}" class="sold-mask">
+    <view class="sold-mask__text">已售出</view>
+    <view class="sold-mask__sub">该商品已完成交易，去看看其他好物吧</view>
+  </view>
+</view>

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "提交举报",
+  "usingComponents": {
+    "report-form": "/components/report-form/report-form"
+  }
+}

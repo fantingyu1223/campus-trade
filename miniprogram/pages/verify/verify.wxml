@@ -1,0 +1,87 @@
+<view class="page">
+  <!-- 身份选择 Tab -->
+  <view class="tabs">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="key"
+      class="tabs__item {{identityTab === item.key ? 'tabs__item--active' : ''}}"
+      data-key="{{item.key}}"
+      bindtap="onTabChange"
+    >{{item.label}}</view>
+  </view>
+
+  <!-- 学校选择（学生/教职工） -->
+  <block wx:if="{{identityTab !== 'merchant'}}">
+    <view class="section">
+      <view class="section__title">选择学校</view>
+      <input
+        class="input"
+        placeholder="搜索学校名称"
+        value="{{schoolKeyword}}"
+        bindinput="onSchoolKeywordInput"
+      />
+      <view wx:if="{{schoolsLoading}}" class="state state--loading">学校列表加载中…</view>
+      <view wx:elif="{{schoolsError}}" class="state state--error">
+        <text>{{schoolsError}}</text>
+        <view class="state__retry" bindtap="onRetrySchools">点击重试</view>
+      </view>
+      <scroll-view wx:else scroll-y class="school-list">
+        <view
+          wx:for="{{schools}}"
+          wx:key="id"
+          class="school-item {{selectedSchoolId === item.id ? 'school-item--active' : ''}}"
+          data-id="{{item.id}}"
+          bindtap="onSelectSchool"
+        >
+          <text class="school-item__name">{{item.name}}</text>
+          <text class="school-item__city">{{item.city}}</text>
+        </view>
+        <view wx:if="{{schools.length === 0 && !showJoinForm}}" class="state">暂无可选学校</view>
+      </scroll-view>
+    </view>
+
+    <!-- 名单外：申请加入入口（F36-AC1） -->
+    <view wx:if="{{showJoinForm}}" class="join-card">
+      <view class="join-card__title">该校暂不支持</view>
+      <view class="join-card__desc">你搜索的学校暂未开通，可提交加入申请，开通后将通知你。</view>
+      <input class="input" placeholder="学校名称" value="{{joinSchoolName}}" data-field="joinSchoolName" bindinput="onJoinInput" />
+      <input class="input" placeholder="补充说明（选填，如校园邮箱后缀）" value="{{joinReason}}" data-field="joinReason" bindinput="onJoinInput" />
+      <button class="join-card__btn" size="mini" loading="{{joinSubmitting}}" bindtap="onSubmitJoin">申请加入</button>
+    </view>
+
+    <!-- 学生表单 -->
+    <view wx:if="{{identityTab === 'student'}}" class="section">
+      <view class="section__title">学生认证</view>
+      <view class="radio-row">
+        <view class="radio {{verifyType === 'student_no' ? 'radio--active' : ''}}" data-type="student_no" bindtap="onVerifyTypeChange">学号认证</view>
+        <view class="radio {{verifyType === 'campus_email' ? 'radio--active' : ''}}" data-type="campus_email" bindtap="onVerifyTypeChange">校园邮箱认证</view>
+      </view>
+      <input class="input" placeholder="真实姓名" value="{{realName}}" data-field="realName" bindinput="onInput" />
+      <input wx:if="{{verifyType === 'student_no'}}" class="input" placeholder="学号" value="{{studentNo}}" data-field="studentNo" bindinput="onInput" />
+      <input wx:else class="input" placeholder="校园邮箱（如 xxx@stu.xxx.edu.cn）" value="{{campusEmail}}" data-field="campusEmail" bindinput="onInput" />
+    </view>
+
+    <!-- 教职工表单 -->
+    <view wx:if="{{identityTab === 'staff'}}" class="section">
+      <view class="section__title">教职工认证</view>
+      <input class="input" placeholder="真实姓名" value="{{realName}}" data-field="realName" bindinput="onInput" />
+      <input class="input" placeholder="工号" value="{{staffNo}}" data-field="staffNo" bindinput="onInput" />
+      <input class="input" placeholder="校园邮箱" value="{{staffEmail}}" data-field="staffEmail" bindinput="onInput" />
+    </view>
+  </block>
+
+  <!-- 商家：材料上传占位 + 引导入驻申请 -->
+  <view wx:if="{{identityTab === 'merchant'}}" class="section">
+    <view class="section__title">商家认证</view>
+    <view class="merchant-tip">商家需提交营业执照 / 校园门店证明，审核通过后获得「认证商家」标识（约 2 个工作日）。</view>
+    <view class="evidence-list">
+      <image wx:for="{{merchantEvidence}}" wx:key="*this" class="evidence-list__img" src="{{item}}" mode="aspectFill" />
+      <view wx:if="{{merchantEvidence.length < 3}}" class="evidence-add" bindtap="onChooseEvidence">＋ 上传材料</view>
+    </view>
+    <view class="merchant-tip merchant-tip--sub">材料上传为占位功能，正式提交通道见商家入驻申请页（U5）。</view>
+  </view>
+
+  <button class="submit-btn" type="primary" loading="{{submitting}}" disabled="{{submitting}}" bindtap="onSubmit">
+    {{identityTab === 'merchant' ? '去填写入驻申请' : '提交认证'}}
+  </button>
+</view>

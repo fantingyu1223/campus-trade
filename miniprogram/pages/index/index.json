@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "校园二手平台",
+  "usingComponents": {
+    "safety-banner": "/components/safety-banner/safety-banner",
+    "identity-badge": "/components/identity-badge/identity-badge"
+  }
+}

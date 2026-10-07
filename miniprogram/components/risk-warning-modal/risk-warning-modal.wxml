@@ -1,0 +1,17 @@
+<view wx:if="{{visible}}" class="risk-modal">
+  <view class="risk-modal__mask" catchtap="noop"></view>
+  <view class="risk-modal__panel" catchtap="noop">
+    <view class="risk-modal__icon">⚠</view>
+    <view class="risk-modal__title">风险提示</view>
+    <view class="risk-modal__body">
+      你发送的内容命中平台风险词
+      <text wx:if="{{words.length > 0}}" class="risk-modal__words">「{{words.join('」「')}}」</text>
+      ，该内容可能涉及诈骗或违规交易。平台不托管资金，请勿脱离平台私下转账。
+    </view>
+    <view class="risk-modal__tip">继续发送将被留痕，仅供运营依授权流程调阅。</view>
+    <view class="risk-modal__actions">
+      <view class="risk-modal__btn risk-modal__btn--edit" bindtap="onEdit">修改</view>
+      <view class="risk-modal__btn risk-modal__btn--continue" bindtap="onContinue">继续发送</view>
+    </view>
+  </view>
+</view>

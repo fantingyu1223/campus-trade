@@ -1,0 +1,194 @@
+.page {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding-bottom: 32rpx;
+}
+
+/* 处罚记录引用条 */
+.punish-bar {
+  background: #fff7f0;
+  border: 1rpx solid #ffd591;
+  border-radius: 12rpx;
+  padding: 20rpx 24rpx;
+  margin: 16rpx;
+}
+.punish-bar__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.punish-bar__type {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #d46b08;
+}
+.punish-bar__time {
+  font-size: 22rpx;
+  color: #999;
+}
+.punish-bar__reason {
+  font-size: 24rpx;
+  color: #666;
+  margin-top: 12rpx;
+  line-height: 1.6;
+}
+
+.card {
+  background: #fff;
+  padding: 24rpx;
+  margin: 16rpx;
+  border-radius: 12rpx;
+}
+.card__label {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+.card__required {
+  color: #ff4d4f;
+}
+.card__hint {
+  font-size: 24rpx;
+  color: #999;
+}
+.card__picker {
+  font-size: 28rpx;
+  color: #333;
+  background: #f7f7f7;
+  border-radius: 12rpx;
+  padding: 18rpx 20rpx;
+}
+.card__picker--placeholder {
+  color: #999;
+}
+.card__textarea {
+  width: 100%;
+  height: 220rpx;
+  font-size: 28rpx;
+  background: #f7f7f7;
+  border-radius: 12rpx;
+  padding: 18rpx 20rpx;
+  box-sizing: border-box;
+}
+.card__counter {
+  text-align: right;
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 8rpx;
+}
+
+.images {
+  display: flex;
+  flex-wrap: wrap;
+}
+.images__wrap {
+  position: relative;
+  width: 160rpx;
+  height: 160rpx;
+  margin: 0 16rpx 16rpx 0;
+}
+.images__item {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 12rpx;
+}
+.images__del {
+  position: absolute;
+  top: -12rpx;
+  right: -12rpx;
+  width: 36rpx;
+  height: 36rpx;
+  line-height: 36rpx;
+  text-align: center;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 26rpx;
+}
+.images__add {
+  width: 160rpx;
+  height: 160rpx;
+  border: 2rpx dashed #ddd;
+  border-radius: 12rpx;
+  color: #ccc;
+  font-size: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16rpx;
+}
+
+/* 48h 时限提示条（F30-AC1） */
+.sla-notice {
+  background: #e8f4ff;
+  color: #1a6fb5;
+  font-size: 24rpx;
+  line-height: 1.6;
+  padding: 20rpx 24rpx;
+  margin: 16rpx;
+  border-radius: 12rpx;
+  border: 1rpx solid #b3d8ff;
+}
+
+.footer {
+  padding: 8rpx 24rpx;
+}
+.footer__submit {
+  background: #07c160;
+  color: #fff;
+  font-size: 30rpx;
+  border-radius: 44rpx;
+}
+.footer__submit--disabled {
+  opacity: 0.6;
+}
+
+/* 回执页 */
+.result {
+  background: #fff;
+  margin: 32rpx 24rpx;
+  border-radius: 16rpx;
+  padding: 48rpx 32rpx;
+}
+.result__icon {
+  text-align: center;
+  font-size: 72rpx;
+}
+.result__title {
+  text-align: center;
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #333;
+  margin-top: 16rpx;
+}
+.result__row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 28rpx;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+  margin-top: 24rpx;
+}
+.result__label {
+  color: #999;
+}
+.result__value {
+  color: #333;
+}
+.result__value--status {
+  color: #07c160;
+  font-weight: 600;
+}
+.result__desc {
+  font-size: 24rpx;
+  color: #999;
+  line-height: 1.6;
+  margin-top: 24rpx;
+}
+.result__btn {
+  background: #07c160;
+  color: #fff;
+  font-size: 30rpx;
+  border-radius: 44rpx;
+  margin-top: 32rpx;
+}

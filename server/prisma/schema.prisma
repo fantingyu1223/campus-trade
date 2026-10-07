@@ -1,0 +1,1284 @@
+// ============================================================================
+// 校园二手交易平台 —— 数据库单一事实源
+// 规格来源：docs/design/2026-02-06-技术选型与总体方案.md §4.1-§4.28（28 表）
+// 聚合对照：Modeling/psm/平台映射模型.md §2（PSM-02-x）
+//
+// 已定决策（禁止偏离）：
+// 1. 单物理库 + 每模型 @schema 注释标注逻辑归属（auth/product/trade/chat），
+//    不使用 Prisma multiSchema；跨 schema 直查由模块纪律禁止（§3.1）。
+// 2. 不设物理外键，FK 关系以字段注释「FK→」标注，一致性由应用层事务保证。
+// 3. 枚举用 Prisma enum（英文值 + 中文注释），DDL 落为 MySQL ENUM 类型；
+//    与 §4 的 VARCHAR(32) 口径差异为已定实现决策，值集合与文档一致。
+// 4. 模型名 PascalCase + @@map 映射原表名；字段名保持 snake_case 与列同名。
+// 5. 时间一律 DATETIME(0)（@db.DateTime(0)）；金额 DECIMAL(10,2)；
+//    BIGINT 一律 BigInt @db.UnsignedBigInt。
+// 6. product 表 FULLTEXT 索引（title, description, ngram parser）Prisma 不支持
+//    声明式表达，在 migration.sql 末尾手工追加（见 prisma/migrations/0001_init）。
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// 枚举定义（值集合与 §4 各表注释完全一致；英文值 + 中文注释）
+// ============================================================================
+
+/// 用户身份：guest 游客 / student 学生 / staff 教职工 / merchant 商家
+enum IdentityType {
+  guest    /// 游客（未认证，可浏览）
+  student  /// 学生（已通过校园认证）
+  staff    /// 教职工（MVP 沿用学生规则，裁决 10）
+  merchant /// 商家（入驻审核通过）
+}
+
+/// 用户状态：normal 正常 / banned 封禁 / readonly 只读 / clearance 毕业清仓 / cancelled 已注销
+enum UserStatus {
+  normal     /// 正常
+  banned     /// 封禁（后台处置）
+  readonly   /// 只读（拉黑关联/限制场景）
+  clearance  /// 毕业清仓流程中（F26）
+  cancelled  /// 已注销（F27）
+}
+
+/// 认证方式：student_no 学号 / campus_email 校园邮箱
+enum VerifyType {
+  student_no   /// 学号认证
+  campus_email /// 校园邮箱认证
+}
+
+/// 通用审核状态（认证/加入申请共用）：pending 待审核 / approved 通过 / rejected 驳回
+enum VerificationStatus {
+  pending  /// 待审核
+  approved /// 已通过
+  rejected /// 已驳回
+}
+
+/// 通用启停状态（学校/品类/词库/管理员共用）：active 生效 / disabled 停用
+enum EnableStatus {
+  active   /// 生效
+  disabled /// 停用（不删除以便追溯）
+}
+
+/// 商家入驻申请状态：pending 待审 / approved 通过 / rejected 驳回 / cancelled 用户撤回
+enum MerchantApplicationStatus {
+  pending   /// 待审核
+  approved  /// 已通过
+  rejected  /// 已驳回
+  cancelled /// 用户撤回
+}
+
+/// 商家入驻驳回理由码（8 枚举，F32）
+enum RejectReasonCode {
+  license_invalid     /// 营业执照无效/过期
+  license_unclear     /// 营业执照模糊
+  info_mismatch       /// 信息不符
+  shop_proof_missing  /// 门店证明缺失
+  duplicate_shop      /// 重复店铺
+  blacklisted         /// 在禁入驻名单
+  scope_not_allowed   /// 经营范围不允许
+  other               /// 其他（须填 detail）
+}
+
+/// 禁入驻名单状态：active 生效 / lifted 已解除
+enum BanListStatus {
+  active /// 生效中
+  lifted /// 已解除
+}
+
+/// 成色枚举：new 全新 / like_new 几乎全新 / good 良好 / fair 一般 / poor 较差
+enum ConditionLevel {
+  new      /// 全新
+  like_new /// 几乎全新
+  good     /// 良好
+  fair     /// 一般
+  poor     /// 较差
+}
+
+/// 商品交易方式：meet 当面 / online 线上 / both 均可
+enum ProductTradeMode {
+  meet   /// 当面交易
+  online /// 线上交易
+  both   /// 均可
+}
+
+/// 商品状态：on_sale 在售 / off_sale 下架 / trading 交易中 / sold 已售
+enum ProductStatus {
+  on_sale  /// 在售
+  off_sale /// 已下架
+  trading  /// 交易中（锁定）
+  sold     /// 已售
+}
+
+/// 求购状态：active 进行中 / closed 主动关闭 / bought 已买到 / expired 到期
+enum WantBuyStatus {
+  active  /// 进行中
+  closed  /// 主动关闭
+  bought  /// 已买到
+  expired /// 到期（30 天）
+}
+
+/// 消息类型：text 文本 / image 图片 / intent_card 意向卡片
+enum MessageType {
+  text        /// 文本
+  image       /// 图片
+  intent_card /// 意向卡片（报价/约见面）
+}
+
+/// 风险等级：high 拦截 / mid 留痕或打码 / low 仅提示
+enum RiskLevel {
+  high /// 高（拦截）
+  mid  /// 中（放行留痕/打码）
+  low  /// 低（仅提示）
+}
+
+/// 聊天风控处置：logged 仅留痕 / blocked 拦截 / warned 提示后放行
+enum RiskAction {
+  logged  /// 仅留痕
+  blocked /// 拦截（消息未送达）
+  warned  /// 提示后放行
+}
+
+/// 交易意向/订单交易方式：offline_meet 线下自提 / online_pay 线上支付留证
+enum TradeIntentMode {
+  offline_meet /// 线下自提（当面交易）
+  online_pay   /// 线上支付留证（通道可插拔）
+}
+
+/// 交易意向状态：pending 待确认 / confirmed 双方已确认 / cancelled 已取消
+enum TradeIntentStatus {
+  pending   /// 待确认
+  confirmed /// 双方已确认
+  cancelled /// 已取消
+}
+
+/// 订单五态：pending_delivery 待交付 / pending_confirm 待确认收货 / completed 已完成 / cancelled 已取消 / appealing 申诉中
+enum OrderStatus {
+  pending_delivery /// 待交付
+  pending_confirm  /// 待确认收货
+  completed        /// 已完成（终态）
+  cancelled        /// 已取消（终态）
+  appealing        /// 申诉中（冻结流转）
+}
+
+/// 订单事件操作方：buyer 买方 / seller 卖方 / system 系统超时任务 / admin 平台介入
+enum OrderEventActor {
+  buyer  /// 买方
+  seller /// 卖方
+  system /// 系统（超时任务）
+  admin  /// 平台介入
+}
+
+/// 支付通道（可插拔）：offline_scan 线下扫码 / cash 现金 / wechat_pay 微信支付（预留未启用）
+enum PaymentChannel {
+  offline_scan /// 线下扫码（平台不经手资金，§6.1 对策 B）
+  cash         /// 现金
+  wechat_pay   /// 微信支付（预留，未启用）
+}
+
+/// 支付状态：pending 待支付 / paid 已支付 / refunded 已退款 / refund_failed 退款失败
+enum PaymentStatus {
+  pending       /// 待支付
+  paid          /// 已支付
+  refunded      /// 已退款
+  refund_failed /// 退款失败（触发运营告警人工处理）
+}
+
+/// 退款状态：none 无 / processing 处理中 / success 成功 / failed 失败
+enum RefundStatus {
+  none       /// 无退款
+  processing /// 退款处理中
+  success    /// 退款成功
+  failed     /// 退款失败
+}
+
+/// 举报对象类型：product 商品 / user 用户 / merchant 商家 / chat 聊天
+enum ReportTargetType {
+  product  /// 商品
+  user     /// 用户
+  merchant /// 商家
+  chat     /// 聊天
+}
+
+/// 举报分类：fraud 诈骗 / prohibited 违禁品 / false_desc 描述不实 / other 其他
+enum ReportCategory {
+  fraud      /// 诈骗
+  prohibited /// 违禁品
+  false_desc /// 描述不实
+  other      /// 其他
+}
+
+/// 举报处理状态：pending 待处理 / processing 处理中 / resolved 已办结
+enum ReportStatus {
+  pending    /// 待处理
+  processing /// 处理中
+  resolved   /// 已办结
+}
+
+/// 举报处理结果：off_shelf 下架 / warning 警告 / ban 封禁 / rejected 驳回
+enum ReportResult {
+  off_shelf /// 下架
+  warning   /// 警告
+  ban       /// 封禁
+  rejected  /// 驳回
+}
+
+/// 举报 SLA 分级：urgent 4h（涉诈骗/违禁）/ high 24h / normal 48h
+enum SlaLevel {
+  urgent /// 紧急（4h）
+  high   /// 高（24h）
+  normal /// 普通（48h）
+}
+
+/// 申诉类型：dispute 交易纠纷 / punishment 处罚申诉
+enum AppealType {
+  dispute    /// 交易纠纷（关联订单）
+  punishment /// 处罚申诉（关联处罚记录）
+}
+
+/// 申诉状态：pending 待介入 / processing 介入中 / resolved 已裁决 / expired 超有效期
+enum AppealStatus {
+  pending    /// 待介入
+  processing /// 平台介入中
+  resolved   /// 已裁决
+  expired    /// 超有效期（仅可查看）
+}
+
+/// 申诉裁决结果：support 支持申诉方 / reject 驳回 / partial 部分支持
+enum AppealResult {
+  support /// 支持申诉方
+  reject  /// 驳回
+  partial /// 部分支持
+}
+
+/// 违规拦截场景：product_publish 商品发布 / product_edit 商品编辑 / chat 聊天 / want_buy 求购 / review 评价
+enum ViolationScene {
+  product_publish /// 商品发布
+  product_edit    /// 商品编辑
+  chat            /// 聊天
+  want_buy        /// 求购
+  review          /// 评价
+}
+
+/// 违规拦截动作：blocked 硬拦截 / masked 打码放行 / warned 提示后提交
+enum ViolationAction {
+  blocked /// 硬拦截
+  masked  /// 打码放行
+  warned  /// 提示后提交
+}
+
+/// 词库类型：risk 风险词（聊天留痕 F13）/ violation 违规词（拦截 F22）/ prohibited 违禁品词（发布硬拦截）
+enum WordListType {
+  risk       /// 风险词（聊天命中留痕，不拦截）
+  violation  /// 违规词（拦截用）
+  prohibited /// 违禁品词（商品发布硬拦截）
+}
+
+/// 黄牛风控规则：daily_ge5 日发同品≥5件 / cross_ge3_cat 跨≥3类目发布 / suspected_merchant 疑似商家综合判定
+enum RiskWarningRule {
+  daily_ge5          /// 日发同品≥5件
+  cross_ge3_cat      /// 跨≥3类目发布
+  suspected_merchant /// 疑似商家综合判定
+}
+
+/// 风险预警复核状态：pending 待复核 / confirmed 确认风险 / false_alarm 误报
+enum RiskWarningStatus {
+  pending     /// 待复核
+  confirmed   /// 确认风险（转商家核查/处罚）
+  false_alarm /// 误报
+}
+
+/// 后台角色：auditor 审核员 / admin 超管
+enum AdminRole {
+  auditor /// 审核员（仅审核/举报处理）
+  admin   /// 超管（含词库/账号管理/数据调阅）
+}
+
+/// 站内通知类型（F15）
+enum NotificationType {
+  new_message     /// 新留言
+  price_change    /// 收藏商品价格变动
+  want_buy_match  /// 求购匹配
+  order_status    /// 订单状态变更
+  report_result   /// 举报结果
+  appeal_result   /// 申诉结果
+  review_remind   /// 评价提醒
+  want_buy_expire /// 求购到期
+}
+
+// ============================================================================
+// schema: auth —— 认证/用户/学校/商家入驻（7 表）
+// ============================================================================
+
+/// @table user → PIM-AG-01 账号与认证（兼 AG-02 公开档案字段组，按字段组切分读写责任）
+/// @schema auth
+model User {
+  /// 用户ID
+  id                   BigInt       @id @default(autoincrement()) @db.UnsignedBigInt
+  /// 微信 openid（F1 微信登录）
+  openid               String       @db.VarChar(64)
+  /// 微信 unionid，跨应用识别
+  unionid              String?      @db.VarChar(64)
+  /// 昵称
+  nickname             String       @default("") @db.VarChar(64)
+  /// 头像 URL
+  avatar_url           String       @default("") @db.VarChar(512)
+  /// 个人简介
+  bio                  String       @default("") @db.VarChar(500)
+  /// 身份：升级路径 guest→student/staff→merchant，由认证/商家审核流程回写
+  identity_type        IdentityType @default(guest)
+  /// 所属学校，FK→school.id（不设物理外键）
+  school_id            BigInt?      @db.UnsignedBigInt
+  /// 状态（封禁/注销中间件每请求校验）
+  status               UserStatus   @default(normal)
+  /// 封禁原因（后台填写）
+  banned_reason        String?      @db.VarChar(255)
+  /// 封禁时间
+  banned_at            DateTime?    @db.DateTime(0)
+  /// 最近登录时间
+  last_login_at        DateTime?    @db.DateTime(0)
+  /// 预计毕业/离校时间，毕业处置触发依据（F26）
+  graduation_at        DateTime?    @db.DateTime(0)
+  /// 进入毕业清仓流程时间（F26）
+  clearance_started_at DateTime?    @db.DateTime(0)
+  /// 注销申请时间（F27）
+  logout_requested_at  DateTime?    @db.DateTime(0)
+  /// 注销延后截止（存在未完成交易/售后时延后，F27）
+  postpone_until       DateTime?    @db.DateTime(0)
+  /// 实际注销完成时间
+  cancelled_at         DateTime?    @db.DateTime(0)
+  /// 脱敏姓名（认证回写，仅展示用，实名信息不出站 N6）
+  real_name_masked     String?      @db.VarChar(64)
+  created_at           DateTime     @default(now()) @db.DateTime(0)
+  updated_at           DateTime     @updatedAt @db.DateTime(0)
+
+  @@unique([openid], map: "uk_openid")
+  @@index([unionid], map: "idx_unionid")
+  /// 按学校+状态筛选
+  @@index([school_id, status], map: "idx_school_status")
+  /// 毕业处置定时任务扫描
+  @@index([status, graduation_at], map: "idx_status_graduation")
+  @@map("user")
+}
+
+/// @table identity_verification → PIM-AG-01 账号与认证
+/// @schema auth
+model IdentityVerification {
+  /// 记录ID
+  id              BigInt             @id @default(autoincrement()) @db.UnsignedBigInt
+  /// FK→user.id（不设物理外键）
+  user_id         BigInt             @db.UnsignedBigInt
+  /// 认证所属学校，FK→school.id
+  school_id       BigInt             @db.UnsignedBigInt
+  /// 认证方式：student_no 学号 / campus_email 校园邮箱
+  verify_type     VerifyType
+  /// 学号（verify_type=student_no 时必填）
+  student_no      String?            @db.VarChar(64)
+  /// 校园邮箱（verify_type=campus_email 时必填）
+  campus_email    String?            @db.VarChar(128)
+  /// 姓名（与学号匹配校验用）
+  real_name       String?            @db.VarChar(64)
+  /// 是否教职工身份（认证为 staff）
+  staff_flag      Boolean            @default(false)
+  /// 状态：pending/approved/rejected
+  status          VerificationStatus @default(pending)
+  /// 驳回原因
+  reject_reason   String?            @db.VarChar(255)
+  /// 提交时间（审核 SLA 起算）
+  submitted_at    DateTime           @db.DateTime(0)
+  /// 审核完成时间
+  reviewed_at     DateTime?          @db.DateTime(0)
+  /// 审核人，FK→admin_user.id
+  reviewer_id     BigInt?            @db.UnsignedBigInt
+  /// 有效期，按学制到期（到期后降级为 guest，F27）
+  valid_until     DateTime?          @db.DateTime(0)
+  /// 专业/院系（可选，用于资料展示）
+  major           String?            @db.VarChar(128)
+  /// 入学年份
+  enrollment_year Int?               @db.UnsignedSmallInt
+  created_at      DateTime           @default(now()) @db.DateTime(0)
+  updated_at      DateTime           @updatedAt @db.DateTime(0)
+
+  /// 一个用户在一所学校仅一条有效认证
+  @@unique([user_id, school_id], map: "uk_user_school")
+  /// 待审核队列按提交时间排序
+  @@index([status, submitted_at], map: "idx_status_submitted")
+  /// 学制到期扫描任务
+  @@index([status, valid_until], map: "idx_valid_until")
+  @@map("identity_verification")
+}
+
+/// @table block → PIM-AG-02 用户档案（拉黑单向边）
+/// @schema auth
+model Block {
+  /// 记录ID
+  id         BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  /// 拉黑方用户ID，FK→user.id（CHECK blocker_id != blocked_id 由应用层保证）
+  blocker_id BigInt   @db.UnsignedBigInt
+  /// 被拉黑用户ID，FK→user.id
+  blocked_id BigInt   @db.UnsignedBigInt
+  created_at DateTime @default(now()) @db.DateTime(0)
+  updated_at DateTime @updatedAt @db.DateTime(0)
+
+  /// 防重复拉黑
+  @@unique([blocker_id, blocked_id], map: "uk_blocker_blocked")
+  /// 反查"谁拉黑了我"（内部判定用，不对用户暴露）
+  @@index([blocked_id], map: "idx_blocked")
+  @@map("block")
+}
+
+/// @table merchant_application → PIM-AG-10 商家入驻申请
+/// @schema auth
+model MerchantApplication {
+  /// 申请ID
+  id                   BigInt                    @id @default(autoincrement()) @db.UnsignedBigInt
+  /// FK→user.id（不设物理外键）
+  user_id              BigInt                    @db.UnsignedBigInt
+  /// 店铺名
+  shop_name            String                    @db.VarChar(128)
+  /// 营业执照图
+  license_image_url    String                    @db.VarChar(512)
+  /// 门店证明图
+  shop_proof_image_url String?                   @db.VarChar(512)
+  /// 联系电话
+  contact_phone        String                    @db.VarChar(32)
+  /// 门店地址
+  shop_address         String?                   @db.VarChar(255)
+  /// 四态：pending/approved/rejected/cancelled（用户撤回）
+  status               MerchantApplicationStatus @default(pending)
+  /// 驳回理由码（8 枚举）
+  reject_reason_code   RejectReasonCode?
+  /// 驳回补充说明
+  reject_reason_detail String?                   @db.VarChar(500)
+  /// 提交时间，SLA 与冷却起算点
+  submitted_at         DateTime                  @db.DateTime(0)
+  /// 审核 SLA 截止 = submitted_at + 2 个工作日
+  sla_deadline         DateTime                  @db.DateTime(0)
+  /// 审核完成时间
+  reviewed_at          DateTime?                 @db.DateTime(0)
+  /// 审核人，FK→admin_user.id
+  reviewer_id          BigInt?                   @db.UnsignedBigInt
+  /// 驳回后再次提交冷却截止 = reviewed_at + 7 天
+  cooldown_until       DateTime?                 @db.DateTime(0)
+  created_at           DateTime                  @default(now()) @db.DateTime(0)
+  updated_at           DateTime                  @updatedAt @db.DateTime(0)
+
+  /// 查本人最新申请
+  @@index([user_id, status], map: "idx_user_status")
+  /// SLA 超时预警扫描
+  @@index([status, sla_deadline], map: "idx_status_sla")
+  /// 冷却校验
+  @@index([user_id, cooldown_until], map: "idx_user_cooldown")
+  @@map("merchant_application")
+}
+
+/// @table merchant_ban_list → PIM-AG-10 商家入驻申请（禁入驻名单随聚合归入 auth）
+/// @schema auth
+model MerchantBanList {
+  /// 记录ID
+  id         BigInt        @id @default(autoincrement()) @db.UnsignedBigInt
+  /// 关联用户，FK→user.id（可空，名单可先于注册存在）
+  user_id    BigInt?       @db.UnsignedBigInt
+  /// 营业执照号
+  license_no String?       @db.VarChar(128)
+  /// 联系电话
+  phone      String?       @db.VarChar(32)
+  /// 禁入原因
+  reason     String        @db.VarChar(500)
+  /// 操作管理员，FK→admin_user.id
+  banned_by  BigInt        @db.UnsignedBigInt
+  /// 状态：active 生效 / lifted 已解除
+  status     BanListStatus @default(active)
+  /// 解除时间
+  lifted_at  DateTime?     @db.DateTime(0)
+  /// 解除操作人，FK→admin_user.id
+  lifted_by  BigInt?       @db.UnsignedBigInt
+  created_at DateTime      @default(now()) @db.DateTime(0)
+  updated_at DateTime      @updatedAt @db.DateTime(0)
+
+  /// 入驻校验按 user_id/license_no/phone 三路命中
+  @@index([user_id], map: "idx_user")
+  @@index([license_no], map: "idx_license")
+  @@index([phone], map: "idx_phone")
+  @@map("merchant_ban_list")
+}
+
+/// @table school → 无聚合 BC-06（运营支撑；名单读侧经 config-snapshot）
+/// @schema auth
+model School {
+  /// 学校ID
+  id                     BigInt       @id @default(autoincrement()) @db.UnsignedBigInt
+  /// 学校全称
+  name                   String       @db.VarChar(128)
+  /// 简称
+  short_name             String       @default("") @db.VarChar(64)
+  /// 校园邮箱后缀（如 @xxx.edu.cn），认证校验用
+  email_suffix           String?      @db.VarChar(128)
+  /// 城市
+  city                   String?      @db.VarChar(64)
+  /// 状态：active/disabled；首期仅本校 active
+  status                 EnableStatus @default(active)
+  /// 是否开放名单外加入申请（F36）
+  allow_join_application Boolean      @default(false)
+  created_at             DateTime     @default(now()) @db.DateTime(0)
+  updated_at             DateTime     @updatedAt @db.DateTime(0)
+
+  @@unique([name], map: "uk_name")
+  @@index([status], map: "idx_status")
+  @@map("school")
+}
+
+/// @table school_join_application → 无聚合 BC-06（运营支撑）
+/// @schema auth
+model SchoolJoinApplication {
+  /// 申请ID
+  id              BigInt             @id @default(autoincrement()) @db.UnsignedBigInt
+  /// FK→user.id（不设物理外键）
+  user_id         BigInt             @db.UnsignedBigInt
+  /// FK→school.id
+  school_id       BigInt             @db.UnsignedBigInt
+  /// 学号（可填）
+  student_no      String?            @db.VarChar(64)
+  /// 证明材料图（学生证/校园卡）
+  proof_image_url String?            @db.VarChar(512)
+  /// 申请说明
+  reason          String?            @db.VarChar(500)
+  /// 状态：pending/approved/rejected
+  status          VerificationStatus @default(pending)
+  /// 驳回原因
+  reject_reason   String?            @db.VarChar(255)
+  /// 提交时间
+  submitted_at    DateTime           @db.DateTime(0)
+  /// 审核时间
+  reviewed_at     DateTime?          @db.DateTime(0)
+  /// 审核人，FK→admin_user.id
+  reviewer_id     BigInt?            @db.UnsignedBigInt
+  created_at      DateTime           @default(now()) @db.DateTime(0)
+  updated_at      DateTime           @updatedAt @db.DateTime(0)
+
+  /// 查用户申请进度
+  @@index([user_id, status], map: "idx_user_status")
+  /// 后台按学校待审队列
+  @@index([school_id, status, submitted_at], map: "idx_school_status")
+  @@map("school_join_application")
+}
+
+// ============================================================================
+// schema: product —— 商品/求购/品类/词库/黄牛风控（7 表）
+// ============================================================================
+
+/// @table category → 无聚合 BC-06（运营支撑；品类正面清单 §8.4）
+/// @schema product
+model Category {
+  /// 品类ID
+  id         BigInt       @id @default(autoincrement()) @db.UnsignedBigInt
+  /// 父品类ID，0=顶级；仅父子两级（应用层校验 parent 的 parent_id 必须为 0，发布只挂叶子）
+  parent_id  BigInt       @default(0) @db.UnsignedBigInt
+  /// 品类名
+  name       String       @db.VarChar(64)
+  /// 图标
+  icon_url   String?      @db.VarChar(512)
+  /// 同级排序
+  sort_order Int          @default(0)
+  /// 状态：active/disabled
+  status     EnableStatus @default(active)
+  created_at DateTime     @default(now()) @db.DateTime(0)
+  updated_at DateTime     @updatedAt @db.DateTime(0)
+
+  @@unique([parent_id, name], map: "uk_parent_name")
+  /// 前台两级树查询
+  @@index([parent_id, status, sort_order], map: "idx_parent_status")
+  @@map("category")
+}
+
+/// @table product → PIM-AG-03 商品
+/// @schema product
+/// 说明：FULLTEXT 索引 idx_ft_title_desc (title, description) WITH PARSER ngram
+/// 无法在 Prisma schema 声明，由 prisma/migrations/0001_init/migration.sql 末尾手工追加（§4.8）。
+model Product {
+  /// 商品ID
+  id             BigInt          @id @default(autoincrement()) @db.UnsignedBigInt
+  /// 卖家，FK→user.id（不设物理外键）
+  seller_id      BigInt          @db.UnsignedBigInt
+  /// 所属学校（数据隔离边界），FK→school.id
+  school_id      BigInt          @db.UnsignedBigInt
+  /// 叶子品类，FK→category.id
+  category_id    BigInt          @db.UnsignedBigInt
+  /// 标题
+  title          String          @db.VarChar(128)
+  /// 描述（F5 图文）
+  description    String          @db.Text
+  /// 成色枚举：new/like_new/good/fair/poor
+  condition_level ConditionLevel
+  /// 售价
+  price          Decimal         @db.Decimal(10, 2)
+  /// 原价（展示用）
+  original_price Decimal?        @db.Decimal(10, 2)
+  /// 交易方式：meet 当面 / online 线上 / both
+  trade_mode     ProductTradeMode @default(both)
+  /// 当面交易约定地点（F10a）
+  meet_location  String?         @db.VarChar(255)
+  /// 可交易时间段说明（F10a）
+  available_time String?         @db.VarChar(255)
+  /// 状态：on_sale/off_sale/trading/sold
+  status         ProductStatus   @default(on_sale)
+  /// 是否急出标记（同用户在架急出 ≤3 件，应用层控制）
+  is_urgent      Boolean         @default(false)
+  /// 浏览数
+  view_count     Int             @default(0) @db.UnsignedInt
+  /// 收藏数（冗余计数，收藏/取消在事务内同步维护）
+  favorite_count Int             @default(0) @db.UnsignedInt
+  /// 成交买家，FK→user.id（F7 标记已售时记录）
+  sold_buyer_id  BigInt?         @db.UnsignedBigInt
+  /// 售出时间
+  sold_at        DateTime?       @db.DateTime(0)
+  /// 最近下架时间（F6）
+  off_sale_at    DateTime?       @db.DateTime(0)
+  /// 发布时间（首次上架时间，列表排序用）
+  published_at   DateTime?       @db.DateTime(0)
+  created_at     DateTime        @default(now()) @db.DateTime(0)
+  updated_at     DateTime        @updatedAt @db.DateTime(0)
+
+  /// 列表核心查询
+  @@index([school_id, category_id, status, published_at], map: "idx_school_category_status")
+  /// 我的商品
+  @@index([seller_id, status], map: "idx_seller_status")
+  /// 全站/搜索默认排序
+  @@index([status, published_at], map: "idx_status_published")
+  /// 我买到的
+  @@index([sold_buyer_id], map: "idx_sold_buyer")
+  @@map("product")
+}
+
+/// @table product_image → PIM-AG-03 商品（聚合内弱实体）
+/// @schema product
+model ProductImage {
+  /// 图片ID
+  id         BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  /// FK→product.id（不设物理外键；每商品最多 9 张，应用层控制）
+  product_id BigInt   @db.UnsignedBigInt
+  /// 图片 URL（对象存储）
+  image_url  String   @db.VarChar(512)
+  /// 排序，0=首图
+  sort_order Int      @default(0)
+  created_at DateTime @default(now()) @db.DateTime(0)
+  updated_at DateTime @updatedAt @db.DateTime(0)
+
+  @@index([product_id, sort_order], map: "idx_product")
+  @@map("product_image")
+}
+
+/// @table favorite → PIM-AG-03 商品（聚合内弱实体，收藏计数冗余于 product.favorite_count）
+/// @schema product
+model Favorite {
+  /// 记录ID
+  id         BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  /// FK→user.id（不设物理外键）
+  user_id    BigInt   @db.UnsignedBigInt
+  /// FK→product.id
+  product_id BigInt   @db.UnsignedBigInt
+  created_at DateTime @default(now()) @db.DateTime(0)
+  updated_at DateTime @updatedAt @db.DateTime(0)
+
+  /// 防重复收藏
+  @@unique([user_id, product_id], map: "uk_user_product")
+  /// 反查/计数
+  @@index([product_id], map: "idx_product")
+  @@map("favorite")
+}
+
+/// @table want_buy → PIM-AG-04 求购（撮合匹配为读模型投影，不落表）
+/// @schema product
+model WantBuy {
+  /// 求购ID
+  id             BigInt         @id @default(autoincrement()) @db.UnsignedBigInt
+  /// 发布人，FK→user.id（不设物理外键）
+  user_id        BigInt         @db.UnsignedBigInt
+  /// 所属学校，FK→school.id
+  school_id      BigInt         @db.UnsignedBigInt
+  /// 期望品类（可为非叶子），FK→category.id
+  category_id    BigInt         @db.UnsignedBigInt
+  /// 求购标题
+  title          String         @db.VarChar(128)
+  /// 补充说明
+  description    String?        @db.VarChar(1000)
+  /// 预期价位下限
+  price_min      Decimal?       @db.Decimal(10, 2)
+  /// 预期价位上限
+  price_max      Decimal?       @db.Decimal(10, 2)
+  /// 成色要求，枚举同 product.condition_level，NULL=不限
+  condition_level ConditionLevel?
+  /// 状态：active/closed（主动关闭）/bought（已买到）/expired（到期）
+  status         WantBuyStatus  @default(active)
+  /// 到期时间 = 发布时间 + 30 天
+  expire_at      DateTime       @db.DateTime(0)
+  /// 已续期次数
+  renewed_count  Int            @default(0) @db.UnsignedInt
+  /// 最近续期时间（续期时 expire_at 顺延 30 天）
+  renewed_at     DateTime?      @db.DateTime(0)
+  /// 关闭/买到时间
+  closed_at      DateTime?      @db.DateTime(0)
+  created_at     DateTime       @default(now()) @db.DateTime(0)
+  updated_at     DateTime       @updatedAt @db.DateTime(0)
+
+  /// 求购大厅列表
+  @@index([school_id, category_id, status, expire_at], map: "idx_school_category_status")
+  /// 我的求购
+  @@index([user_id, status], map: "idx_user_status")
+  /// 到期置 expired 定时任务
+  @@index([status, expire_at], map: "idx_status_expire")
+  @@map("want_buy")
+}
+
+/// @table word_list → 无聚合 BC-06（运营支撑；变更留痕三要素 changed_by/change_note/updated_at）
+/// @schema product
+model WordList {
+  /// 词ID
+  id          BigInt       @id @default(autoincrement()) @db.UnsignedBigInt
+  /// 词条
+  word        String       @db.VarChar(128)
+  /// 词库类型：risk 风险词 / violation 违规词 / prohibited 违禁品词
+  type        WordListType
+  /// 等级：high 拦截 / mid 留痕或打码 / low 仅提示
+  level       RiskLevel    @default(mid)
+  /// 状态：active 生效 / disabled 停用（不删除以便追溯）
+  status      EnableStatus @default(active)
+  /// 本次变更事由（变更留痕）
+  change_note String?      @db.VarChar(255)
+  /// 最近变更人，FK→admin_user.id
+  changed_by  BigInt?      @db.UnsignedBigInt
+  created_at  DateTime     @default(now()) @db.DateTime(0)
+  updated_at  DateTime     @updatedAt @db.DateTime(0)
+
+  /// 同词库内词条唯一
+  @@unique([word, type], map: "uk_word_type")
+  /// 词库加载（应用启动缓存+变更失效）
+  @@index([type, status], map: "idx_type_status")
+  @@map("word_list")
+}
+
+/// @table risk_warning → 无聚合 BC-06（运营支撑；规则由定时任务每小时扫描触发）
+/// @schema product
+model RiskWarning {
+  /// 预警ID
+  id            BigInt           @id @default(autoincrement()) @db.UnsignedBigInt
+  /// 触发用户ID，FK→user.id（不设物理外键）
+  user_id       BigInt           @db.UnsignedBigInt
+  /// 规则：daily_ge5 / cross_ge3_cat / suspected_merchant
+  rule_code     RiskWarningRule
+  /// 触发时的统计数据快照（发布数、类目数等）
+  rule_snapshot Json?
+  /// 复核结论：pending/confirmed/false_alarm
+  status        RiskWarningStatus @default(pending)
+  /// 复核人，FK→admin_user.id
+  handled_by    BigInt?          @db.UnsignedBigInt
+  /// 复核时间
+  handled_at    DateTime?        @db.DateTime(0)
+  /// 复核说明
+  handle_note   String?          @db.VarChar(500)
+  created_at    DateTime         @default(now()) @db.DateTime(0)
+  updated_at    DateTime         @updatedAt @db.DateTime(0)
+
+  /// 待复核队列
+  @@index([status, created_at], map: "idx_status_created")
+  /// 同用户同规则去重（24h 内不重复预警）
+  @@index([user_id, rule_code, created_at], map: "idx_user_rule")
+  @@map("risk_warning")
+}
+
+// ============================================================================
+// schema: chat —— 会话/消息/风控留痕/交易意向/违规拦截（5 表）
+// ============================================================================
+
+/// @table conversation → PIM-AG-05 会话与消息
+/// @schema chat
+model Conversation {
+  /// 会话ID
+  id                    BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  /// 买方，FK→user.id（不设物理外键）
+  buyer_id              BigInt    @db.UnsignedBigInt
+  /// 卖方，FK→user.id
+  seller_id             BigInt    @db.UnsignedBigInt
+  /// 关联商品，FK→product.id
+  product_id            BigInt    @db.UnsignedBigInt
+  /// 买方未读数（冗余计数，事务内维护）
+  buyer_unread_count    Int       @default(0) @db.UnsignedInt
+  /// 卖方未读数（冗余计数，事务内维护）
+  seller_unread_count   Int       @default(0) @db.UnsignedInt
+  /// 最后一条消息摘要（会话列表展示）
+  last_message_content  String?   @db.VarChar(255)
+  /// 最后一条消息类型
+  last_message_type     MessageType?
+  /// 最后一条消息发送者，FK→user.id
+  last_message_sender_id BigInt?  @db.UnsignedBigInt
+  /// 最后一条消息时间（会话列表排序）
+  last_message_at       DateTime? @db.DateTime(0)
+  /// 买方侧删除（软删，双方均删后由清理任务物理删除）
+  buyer_deleted         Boolean   @default(false)
+  /// 卖方侧删除（软删）
+  seller_deleted        Boolean   @default(false)
+  created_at            DateTime  @default(now()) @db.DateTime(0)
+  updated_at            DateTime  @updatedAt @db.DateTime(0)
+
+  /// 同一买卖方+商品仅一个会话
+  @@unique([buyer_id, seller_id, product_id], map: "uk_pair_product")
+  /// 买方会话列表
+  @@index([buyer_id, buyer_deleted, last_message_at], map: "idx_buyer")
+  /// 卖方会话列表
+  @@index([seller_id, seller_deleted, last_message_at], map: "idx_seller")
+  @@map("conversation")
+}
+
+/// @table message → PIM-AG-05 会话与消息（聚合内弱实体）
+/// @schema chat
+model Message {
+  /// 消息ID
+  id              BigInt      @id @default(autoincrement()) @db.UnsignedBigInt
+  /// 所属会话，FK→conversation.id（不设物理外键）
+  conversation_id BigInt      @db.UnsignedBigInt
+  /// 发送者，FK→user.id
+  sender_id       BigInt      @db.UnsignedBigInt
+  /// 接收者，FK→user.id
+  receiver_id     BigInt      @db.UnsignedBigInt
+  /// 消息类型：text 文本 / image 图片 / intent_card 意向卡片
+  type            MessageType @default(text)
+  /// 文本内容（type=text 时必填）
+  content         String?     @db.Text
+  /// 图片 URL（type=image 时必填）
+  image_url       String?     @db.VarChar(512)
+  /// 意向卡片载荷（type=intent_card 时必填，关联 trade_intent）
+  intent_payload  Json?
+  /// 是否已读
+  is_read         Boolean     @default(false)
+  /// 已读时间
+  read_at         DateTime?   @db.DateTime(0)
+  created_at      DateTime    @default(now()) @db.DateTime(0)
+  updated_at      DateTime    @updatedAt @db.DateTime(0)
+
+  /// 会话内消息分页拉取
+  @@index([conversation_id, created_at], map: "idx_conversation")
+  /// 未读消息拉取
+  @@index([receiver_id, is_read], map: "idx_receiver_read")
+  @@map("message")
+}
+
+/// @table message_risk_log → PIM-AG-05 会话与消息（F13 聊天风控留痕五字段，不可变日志）
+/// @schema chat
+model MessageRiskLog {
+  /// 留痕ID
+  id               BigInt     @id @default(autoincrement()) @db.UnsignedBigInt
+  /// 所属会话，FK→conversation.id（不设物理外键）
+  conversation_id  BigInt     @db.UnsignedBigInt
+  /// 关联消息，FK→message.id
+  message_id       BigInt     @db.UnsignedBigInt
+  /// 发送者，FK→user.id
+  sender_id        BigInt     @db.UnsignedBigInt
+  /// 接收者，FK→user.id
+  receiver_id      BigInt     @db.UnsignedBigInt
+  /// 命中风险词
+  hit_word         String     @db.VarChar(128)
+  /// 消息内容快照（留痕五字段之一，事后可追溯）
+  content_snapshot String     @db.Text
+  /// 风险等级：high/mid/low
+  level            RiskLevel
+  /// 处置：logged 仅留痕 / blocked 拦截 / warned 提示后放行
+  action           RiskAction @default(logged)
+  /// 留痕时间（不可变日志，无 updated_at）
+  created_at       DateTime   @default(now()) @db.DateTime(0)
+
+  /// 后台按等级/时间检索
+  @@index([level, created_at], map: "idx_level_created")
+  /// 按发送者追溯
+  @@index([sender_id, created_at], map: "idx_sender")
+  @@map("message_risk_log")
+}
+
+/// @table trade_intent → PIM-AG-05 会话与消息（F10 交易意向，双方确认后生成订单）
+/// @schema chat
+model TradeIntent {
+  /// 意向ID
+  id                 BigInt            @id @default(autoincrement()) @db.UnsignedBigInt
+  /// 所属会话，FK→conversation.id（不设物理外键）
+  conversation_id    BigInt            @db.UnsignedBigInt
+  /// 标的商品，FK→product.id
+  product_id         BigInt            @db.UnsignedBigInt
+  /// 发起人，FK→user.id
+  initiator_id       BigInt            @db.UnsignedBigInt
+  /// 交易方式：offline_meet 线下自提 / online_pay 线上支付留证
+  trade_mode         TradeIntentMode
+  /// 约定见面时间（offline_meet 时必填）
+  meet_time          DateTime?         @db.DateTime(0)
+  /// 约定见面地点（offline_meet 时必填）
+  meet_location      String?           @db.VarChar(255)
+  /// 意向成交金额
+  amount             Decimal           @db.Decimal(10, 2)
+  /// 买方确认时间
+  buyer_confirmed_at DateTime?         @db.DateTime(0)
+  /// 卖方确认时间
+  seller_confirmed_at DateTime?        @db.DateTime(0)
+  /// 状态：pending 待确认 / confirmed 双方已确认 / cancelled 已取消
+  status             TradeIntentStatus @default(pending)
+  created_at         DateTime          @default(now()) @db.DateTime(0)
+  updated_at         DateTime          @updatedAt @db.DateTime(0)
+
+  /// 会话内意向卡片查询
+  @@index([conversation_id, created_at], map: "idx_conversation")
+  /// 商品意向状态查询（防重复下单）
+  @@index([product_id, status], map: "idx_product_status")
+  @@map("trade_intent")
+}
+
+/// @table violation_intercept_log → 无聚合 BC-06（运营支撑；F22 全场景违规拦截留痕，不可变日志）
+/// @schema chat
+model ViolationInterceptLog {
+  /// 留痕ID
+  id               BigInt          @id @default(autoincrement()) @db.UnsignedBigInt
+  /// 场景：product_publish 发布 / product_edit 编辑 / chat 聊天 / want_buy 求购 / review 评价
+  scene            ViolationScene
+  /// 触发用户，FK→user.id（不设物理外键）
+  user_id          BigInt          @db.UnsignedBigInt
+  /// 关联目标ID（商品/求购/评价等，按 scene 解释）
+  target_id        BigInt?         @db.UnsignedBigInt
+  /// 命中词
+  hit_word         String          @db.VarChar(128)
+  /// 内容快照（事后可追溯）
+  content_snapshot String          @db.Text
+  /// 动作：blocked 硬拦截 / masked 打码放行 / warned 提示后提交
+  action           ViolationAction
+  /// 留痕时间（不可变日志，无 updated_at）
+  created_at       DateTime        @default(now()) @db.DateTime(0)
+
+  /// 后台按场景/时间检索
+  @@index([scene, created_at], map: "idx_scene_created")
+  /// 按用户追溯
+  @@index([user_id, created_at], map: "idx_user")
+  @@map("violation_intercept_log")
+}
+
+// ============================================================================
+// schema: trade —— 订单/支付/评价/举报/申诉/后台/通知（9 表）
+// ============================================================================
+
+/// @table trade_order → PIM-AG-06 交易订单（五态机：pending_delivery→pending_confirm→completed；cancelled/appealing）
+/// @schema trade
+model TradeOrder {
+  /// 订单ID
+  id                 BigInt           @id @default(autoincrement()) @db.UnsignedBigInt
+  /// 订单号（对外展示/对账用，生成规则应用层保证唯一）
+  order_no           String           @db.VarChar(32)
+  /// 来源交易意向，FK→trade_intent.id（不设物理外键）
+  trade_intent_id    BigInt?          @db.UnsignedBigInt
+  /// 标的商品，FK→product.id
+  product_id         BigInt           @db.UnsignedBigInt
+  /// 商品标题快照（下单时冗余，商品后续编辑不影响订单）
+  product_title      String           @db.VarChar(128)
+  /// 买方，FK→user.id
+  buyer_id           BigInt           @db.UnsignedBigInt
+  /// 卖方，FK→user.id
+  seller_id          BigInt           @db.UnsignedBigInt
+  /// 交易方式：offline_meet 线下自提 / online_pay 线上支付留证
+  trade_mode         TradeIntentMode
+  /// 成交金额
+  amount             Decimal          @db.Decimal(10, 2)
+  /// 状态：pending_delivery/pending_confirm/completed/cancelled/appealing
+  status             OrderStatus      @default(pending_delivery)
+  /// 约定见面时间（offline_meet）
+  meet_time          DateTime?        @db.DateTime(0)
+  /// 交付超时截止（超时自动取消，定时任务扫描）
+  timeout_deadline   DateTime?        @db.DateTime(0)
+  /// 取消发起方，FK→user.id（取消请求需对方确认）
+  cancel_initiator_id BigInt?         @db.UnsignedBigInt
+  /// 取消请求时间
+  cancel_requested_at DateTime?       @db.DateTime(0)
+  /// 取消请求响应截止（超时视为同意）
+  cancel_deadline    DateTime?        @db.DateTime(0)
+  /// 取消理由
+  cancel_reason      String?          @db.VarChar(255)
+  /// 取消拒绝说明（对方拒绝取消时填写）
+  cancel_reject_note String?          @db.VarChar(255)
+  /// 交付确认时间（进入 pending_confirm）
+  confirmed_at       DateTime?        @db.DateTime(0)
+  /// 完成时间（终态）
+  completed_at       DateTime?        @db.DateTime(0)
+  /// 取消时间（终态）
+  cancelled_at       DateTime?        @db.DateTime(0)
+  created_at         DateTime         @default(now()) @db.DateTime(0)
+  updated_at         DateTime         @updatedAt @db.DateTime(0)
+
+  @@unique([order_no], map: "uk_order_no")
+  /// 我买到的订单列表
+  @@index([buyer_id, status, created_at], map: "idx_buyer")
+  /// 我卖出的订单列表
+  @@index([seller_id, status, created_at], map: "idx_seller")
+  /// 交付超时自动取消扫描
+  @@index([status, timeout_deadline], map: "idx_status_deadline")
+  /// 取消请求超时扫描
+  @@index([status, cancel_deadline], map: "idx_cancel_deadline")
+  @@map("trade_order")
+}
+
+/// @table order_event → PIM-AG-06 交易订单（状态流转审计日志，不可变）
+/// @schema trade
+model OrderEvent {
+  /// 事件ID
+  id          BigInt          @id @default(autoincrement()) @db.UnsignedBigInt
+  /// 所属订单，FK→trade_order.id（不设物理外键）
+  order_id    BigInt          @db.UnsignedBigInt
+  /// 变更前状态（NULL=订单创建事件）
+  from_status OrderStatus?
+  /// 变更后状态
+  to_status   OrderStatus
+  /// 操作方：buyer/seller/system（超时任务）/admin（平台介入）
+  actor       OrderEventActor
+  /// 操作方ID（actor=system 时为 0）
+  actor_id    BigInt          @default(0) @db.UnsignedBigInt
+  /// 备注（取消理由/介入说明等）
+  note        String?         @db.VarChar(500)
+  /// 事件时间（不可变日志，无 updated_at）
+  created_at  DateTime        @default(now()) @db.DateTime(0)
+
+  /// 订单时间线查询
+  @@index([order_id, created_at], map: "idx_order")
+  @@map("order_event")
+}
+
+/// @table payment_record → PIM-AG-06 交易订单（线上支付留证，通道可插拔）
+/// @schema trade
+model PaymentRecord {
+  /// 支付记录ID
+  id                  BigInt         @id @default(autoincrement()) @db.UnsignedBigInt
+  /// 所属订单，FK→trade_order.id（不设物理外键）
+  order_id            BigInt         @db.UnsignedBigInt
+  /// 支付通道：offline_scan 线下扫码 / cash 现金 / wechat_pay 预留
+  channel             PaymentChannel
+  /// 支付金额
+  amount              Decimal        @db.Decimal(10, 2)
+  /// 状态：pending/paid/refunded/refund_failed
+  status              PaymentStatus  @default(pending)
+  /// 外部支付流水号（通道侧，可空）
+  external_txn_id     String?        @db.VarChar(128)
+  /// 退款状态：none/processing/success/failed
+  refund_status       RefundStatus?
+  /// 退款金额
+  refund_amount       Decimal?       @db.Decimal(10, 2)
+  /// 退款申请时间
+  refund_requested_at DateTime?      @db.DateTime(0)
+  /// 退款完成时间
+  refunded_at         DateTime?      @db.DateTime(0)
+  /// 退款失败原因（refund_failed 时必填，触发运营告警）
+  refund_fail_reason  String?        @db.VarChar(255)
+  /// 支付完成时间
+  paid_at             DateTime?      @db.DateTime(0)
+  created_at          DateTime       @default(now()) @db.DateTime(0)
+  updated_at          DateTime       @updatedAt @db.DateTime(0)
+
+  /// 同通道外部流水号唯一（对账幂等；NULL 不冲突）
+  @@unique([channel, external_txn_id], map: "uk_external_txn")
+  /// 订单支付记录查询
+  @@index([order_id], map: "idx_order")
+  /// 退款失败告警扫描
+  @@index([status, refund_status], map: "idx_status_refund")
+  @@map("payment_record")
+}
+
+/// @table review → PIM-AG-07 评价（双向评价；超时默认好评 is_default=true）
+/// @schema trade
+model Review {
+  /// 评价ID
+  id             BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  /// 所属订单，FK→trade_order.id（不设物理外键）
+  order_id       BigInt    @db.UnsignedBigInt
+  /// 评价人，FK→user.id
+  reviewer_id    BigInt    @db.UnsignedBigInt
+  /// 被评价人，FK→user.id
+  reviewee_id    BigInt    @db.UnsignedBigInt
+  /// 评分 1-5
+  rating         Int       @db.UnsignedTinyInt
+  /// 评价内容（可空=默认好评）
+  content        String?   @db.VarChar(500)
+  /// 是否超时系统默认好评
+  is_default     Boolean   @default(false)
+  /// 是否公开（双方均评价或超时后公开）
+  is_public      Boolean   @default(false)
+  /// 评价截止（超时自动生成默认好评）
+  review_deadline DateTime @db.DateTime(0)
+  /// 公开时间
+  public_at      DateTime? @db.DateTime(0)
+  created_at     DateTime  @default(now()) @db.DateTime(0)
+  updated_at     DateTime  @updatedAt @db.DateTime(0)
+
+  /// 一单一方向仅一条评价
+  @@unique([order_id, reviewer_id], map: "uk_order_reviewer")
+  /// 用户收到的评价列表
+  @@index([reviewee_id, is_public, created_at], map: "idx_reviewee")
+  /// 超时默认好评定时任务
+  @@index([is_default, review_deadline], map: "idx_default_deadline")
+  @@map("review")
+}
+
+/// @table report → PIM-AG-08 举报（SLA 分级：urgent 4h / high 24h / normal 48h）
+/// @schema trade
+model Report {
+  /// 举报ID
+  id            BigInt           @id @default(autoincrement()) @db.UnsignedBigInt
+  /// 举报人，FK→user.id（不设物理外键）
+  reporter_id   BigInt           @db.UnsignedBigInt
+  /// 对象类型：product/user/merchant/chat
+  target_type   ReportTargetType
+  /// 对象ID（按 target_type 解释）
+  target_id     BigInt           @db.UnsignedBigInt
+  /// 分类：fraud/prohibited/false_desc/other
+  category      ReportCategory
+  /// 举报说明
+  content       String           @db.VarChar(1000)
+  /// 证据图 URL 列表
+  evidence_urls Json?
+  /// 状态：pending/processing/resolved
+  status        ReportStatus     @default(pending)
+  /// 处理结果：off_shelf/warning/ban/rejected
+  result        ReportResult?
+  /// SLA 分级：urgent/high/normal
+  sla_level     SlaLevel         @default(normal)
+  /// SLA 截止（超时预警）
+  sla_deadline  DateTime         @db.DateTime(0)
+  /// 是否已超时（冗余标记，定时任务回写）
+  is_timeout    Boolean          @default(false)
+  /// 处理人，FK→admin_user.id
+  handled_by    BigInt?          @db.UnsignedBigInt
+  /// 处理时间
+  handled_at    DateTime?        @db.DateTime(0)
+  /// 处理说明
+  handle_note   String?          @db.VarChar(500)
+  created_at    DateTime         @default(now()) @db.DateTime(0)
+  updated_at    DateTime         @updatedAt @db.DateTime(0)
+
+  /// 后台待办队列（SLA 排序）
+  @@index([status, sla_deadline], map: "idx_status_sla")
+  /// 我的举报进度
+  @@index([reporter_id, created_at], map: "idx_reporter")
+  /// 同一对象聚合查看
+  @@index([target_type, target_id, status], map: "idx_target")
+  @@map("report")
+}
+
+/// @table appeal → PIM-AG-09 申诉（交易纠纷/处罚申诉；平台介入裁决）
+/// @schema trade
+model Appeal {
+  /// 申诉ID
+  id                 BigInt       @id @default(autoincrement()) @db.UnsignedBigInt
+  /// 申诉人，FK→user.id（不设物理外键）
+  appellant_id       BigInt       @db.UnsignedBigInt
+  /// 类型：dispute 交易纠纷 / punishment 处罚申诉
+  appeal_type        AppealType
+  /// 关联目标ID（订单/处罚记录，按 appeal_type 解释）
+  target_id          BigInt       @db.UnsignedBigInt
+  /// 申诉理由
+  reason             String       @db.VarChar(1000)
+  /// 证据图 URL 列表
+  evidence_urls      Json?
+  /// 状态：pending/processing/resolved/expired
+  status             AppealStatus @default(pending)
+  /// 平台介入截止（超时自动介入）
+  intervene_deadline DateTime     @db.DateTime(0)
+  /// 申诉有效期（逾期不可再申诉，仅可查看）
+  valid_until        DateTime     @db.DateTime(0)
+  /// 裁决结果：support/reject/partial
+  result             AppealResult?
+  /// 处理人，FK→admin_user.id
+  handled_by         BigInt?      @db.UnsignedBigInt
+  /// 处理时间
+  handled_at         DateTime?    @db.DateTime(0)
+  /// 处理说明
+  handle_note        String?      @db.VarChar(500)
+  created_at         DateTime     @default(now()) @db.DateTime(0)
+  updated_at         DateTime     @updatedAt @db.DateTime(0)
+
+  /// 后台待介入队列
+  @@index([status, intervene_deadline], map: "idx_status_intervene")
+  /// 我的申诉进度
+  @@index([appellant_id, created_at], map: "idx_appellant")
+  /// 关联目标查询（如订单的申诉）
+  @@index([appeal_type, target_id], map: "idx_target")
+  @@map("appeal")
+}
+
+/// @table admin_user → 无聚合 BC-06（运营支撑；后台账号，与 C 端 user 完全隔离）
+/// @schema trade
+model AdminUser {
+  /// 管理员ID
+  id            BigInt       @id @default(autoincrement()) @db.UnsignedBigInt
+  /// 登录用户名
+  username      String       @db.VarChar(64)
+  /// 密码哈希（bcrypt）
+  password_hash String       @db.VarChar(255)
+  /// 角色：auditor 审核员 / admin 超管
+  role          AdminRole    @default(auditor)
+  /// 状态：active 生效 / disabled 停用
+  status        EnableStatus @default(active)
+  /// 最近登录时间
+  last_login_at DateTime?    @db.DateTime(0)
+  created_at    DateTime     @default(now()) @db.DateTime(0)
+  updated_at    DateTime     @updatedAt @db.DateTime(0)
+
+  @@unique([username], map: "uk_username")
+  @@map("admin_user")
+}
+
+/// @table admin_operation_log → 无聚合 BC-06（运营支撑；后台操作审计，不可变日志）
+/// @schema trade
+model AdminOperationLog {
+  /// 日志ID
+  id          BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  /// 操作管理员，FK→admin_user.id（不设物理外键）
+  admin_id    BigInt   @db.UnsignedBigInt
+  /// 操作动作（如 report.resolve / word_list.update / user.ban）
+  action      String   @db.VarChar(64)
+  /// 目标类型（可空）
+  target_type String?  @db.VarChar(32)
+  /// 目标ID（可空）
+  target_id   BigInt?  @db.UnsignedBigInt
+  /// 操作事由（必填，变更留痕）
+  reason      String   @db.VarChar(500)
+  /// 操作明细（前后值等）
+  detail      Json?
+  /// 操作来源 IP
+  ip          String?  @db.VarChar(64)
+  /// 操作时间（不可变日志，无 updated_at）
+  created_at  DateTime @default(now()) @db.DateTime(0)
+
+  /// 按管理员追溯
+  @@index([admin_id, created_at], map: "idx_admin")
+  /// 按动作/时间检索
+  @@index([action, created_at], map: "idx_action")
+  @@map("admin_operation_log")
+}
+
+/// @table notification → 无聚合 BC-06（运营支撑；F15 站内通知）
+/// @schema trade
+model Notification {
+  /// 通知ID
+  id         BigInt           @id @default(autoincrement()) @db.UnsignedBigInt
+  /// 接收用户，FK→user.id（不设物理外键）
+  user_id    BigInt           @db.UnsignedBigInt
+  /// 通知类型：new_message/price_change/want_buy_match/order_status/report_result/appeal_result/review_remind/want_buy_expire
+  type       NotificationType
+  /// 通知标题
+  title      String           @db.VarChar(128)
+  /// 通知载荷（跳转参数、摘要等）
+  payload    Json?
+  /// 是否已读
+  is_read    Boolean          @default(false)
+  /// 已读时间
+  read_at    DateTime?        @db.DateTime(0)
+  /// 创建时间（无 updated_at，读状态变更只写 is_read/read_at）
+  created_at DateTime         @default(now()) @db.DateTime(0)
+
+  /// 我的通知列表（未读优先）
+  @@index([user_id, is_read, created_at], map: "idx_user_read")
+  @@map("notification")
+}

@@ -1,0 +1,72 @@
+<view class="page">
+  <!-- 有效期提示条 -->
+  <view class="notice">📢 求购信息有效期 30 天，到期前可在「我的求购」中续期</view>
+
+  <view class="form">
+    <!-- 标题（必填） -->
+    <view class="field">
+      <view class="field__label">标题 <text class="field__required">*</text></view>
+      <input
+        class="field__input"
+        placeholder="如：求购《高等数学（第七版）》上册"
+        maxlength="50"
+        value="{{title}}"
+        bindinput="onTitleInput"
+      />
+      <view wx:if="{{errors.title}}" class="field__error">请填写求购标题</view>
+    </view>
+
+    <!-- 品类（必填） -->
+    <view class="field">
+      <view class="field__label">品类 <text class="field__required">*</text></view>
+      <picker range="{{categories}}" value="{{categoryIndex}}" bindchange="onCategoryChange">
+        <view class="field__picker {{categoryIndex < 0 ? 'field__picker--placeholder' : ''}}">
+          {{categoryIndex >= 0 ? categories[categoryIndex] : '请选择品类'}}
+          <text class="field__picker-arrow">›</text>
+        </view>
+      </picker>
+      <view wx:if="{{errors.category}}" class="field__error">请选择品类</view>
+    </view>
+
+    <!-- 预期价位（必填，min ≤ max） -->
+    <view class="field">
+      <view class="field__label">预期价位（元） <text class="field__required">*</text></view>
+      <view class="price-range">
+        <input class="field__input price-range__input" type="digit" placeholder="最低价" value="{{minPrice}}" bindinput="onMinPriceInput" />
+        <text class="price-range__sep">—</text>
+        <input class="field__input price-range__input" type="digit" placeholder="最高价" value="{{maxPrice}}" bindinput="onMaxPriceInput" />
+      </view>
+      <view wx:if="{{errors.price}}" class="field__error">请填写正确的价位区间，且最低价不高于最高价</view>
+    </view>
+
+    <!-- 成色（必填） -->
+    <view class="field">
+      <view class="field__label">期望成色 <text class="field__required">*</text></view>
+      <picker range="{{conditions}}" value="{{conditionIndex}}" bindchange="onConditionChange">
+        <view class="field__picker {{conditionIndex < 0 ? 'field__picker--placeholder' : ''}}">
+          {{conditionIndex >= 0 ? conditions[conditionIndex] : '请选择期望成色'}}
+          <text class="field__picker-arrow">›</text>
+        </view>
+      </picker>
+      <view wx:if="{{errors.condition}}" class="field__error">请选择期望成色</view>
+    </view>
+
+    <!-- 描述（选填，≤1000 字） -->
+    <view class="field">
+      <view class="field__label">补充描述</view>
+      <textarea
+        class="field__textarea"
+        placeholder="补充说明求购需求，如新旧偏好、交货地点等（选填）"
+        maxlength="1000"
+        value="{{desc}}"
+        bindinput="onDescInput"
+      />
+    </view>
+  </view>
+
+  <view class="footer">
+    <button class="footer__submit {{submitting ? 'footer__submit--disabled' : ''}}" bindtap="onSubmit">
+      {{submitting ? '发布中…' : '发布求购'}}
+    </button>
+  </view>
+</view>

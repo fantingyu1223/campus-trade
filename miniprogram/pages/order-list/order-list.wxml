@@ -1,0 +1,30 @@
+<view class="page">
+  <view wx:if="{{loading}}" class="state">加载中…</view>
+  <view wx:elif="{{error}}" class="state state--error">
+    <text>{{error}}</text>
+    <view class="state__retry" bindtap="onRetry">点击重试</view>
+  </view>
+
+  <!-- 空态 -->
+  <view wx:elif="{{list.length === 0}}" class="state">还没有订单，去逛逛吧</view>
+
+  <view wx:else>
+    <view
+      wx:for="{{list}}"
+      wx:key="order_id"
+      class="order-item"
+      data-order-id="{{item.order_id}}"
+      bindtap="onTapOrder"
+    >
+      <view class="order-item__head">
+        <text class="order-item__time">{{item.created_at}}</text>
+        <text class="order-item__status" style="color: {{item.statusColor}}; border-color: {{item.statusColor}};">{{item.statusLabel}}</text>
+      </view>
+      <view class="order-item__title">{{item.product.title}}</view>
+      <view class="order-item__foot">
+        <text class="order-item__peer">{{item.peer.nickname}}</text>
+        <text class="order-item__amount">¥{{item.amount}}</text>
+      </view>
+    </view>
+  </view>
+</view>

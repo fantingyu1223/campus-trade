@@ -1,0 +1,82 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 120rpx 48rpx 80rpx;
+  box-sizing: border-box;
+  background: #f5f5f5;
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.brand__logo {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 32rpx;
+  background: #07c160;
+  color: #fff;
+  font-size: 72rpx;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32rpx;
+}
+
+.brand__name {
+  font-size: 44rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+
+.brand__slogan {
+  font-size: 26rpx;
+  color: #999;
+}
+
+.login-area {
+  display: flex;
+  flex-direction: column;
+}
+
+.login-btn {
+  width: 100%;
+  border-radius: 44rpx;
+  font-size: 32rpx;
+}
+
+.agreement {
+  margin-top: 32rpx;
+}
+
+.agreement__label {
+  display: flex;
+  align-items: flex-start;
+}
+
+.agreement__checkbox {
+  transform: scale(0.8);
+}
+
+.agreement__text {
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.6;
+}
+
+.agreement__link {
+  color: #576b95;
+}
+
+.guest-entry {
+  margin-top: 40rpx;
+  text-align: center;
+  font-size: 26rpx;
+  color: #999;
+}

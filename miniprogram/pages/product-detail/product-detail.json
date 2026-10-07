@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "商品详情",
+  "usingComponents": {
+    "identity-badge": "/components/identity-badge/identity-badge"
+  }
+}

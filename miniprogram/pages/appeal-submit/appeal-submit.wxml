@@ -1,0 +1,80 @@
+<view class="page">
+  <!-- 提交成功回执页 -->
+  <view wx:if="{{submitted}}" class="result">
+    <view class="result__icon">✅</view>
+    <view class="result__title">申诉已提交</view>
+    <view class="result__row">
+      <text class="result__label">回执编号</text>
+      <text class="result__value">A{{appealId}}</text>
+    </view>
+    <view class="result__row">
+      <text class="result__label">处理状态</text>
+      <text class="result__value result__value--status">已受理</text>
+    </view>
+    <view class="result__desc">运营将在 48 小时内介入处理，结果将通过站内通知告知</view>
+    <button class="result__btn" bindtap="onBack">返回</button>
+  </view>
+
+  <block wx:else>
+    <!-- 处罚记录引用条 -->
+    <view class="punish-bar">
+      <view class="punish-bar__row">
+        <text class="punish-bar__type">{{punish.type_label}}</text>
+        <text class="punish-bar__time">{{punish.created_at}}</text>
+      </view>
+      <view class="punish-bar__reason">处罚原因：{{punish.reason}}</view>
+    </view>
+
+    <!-- 申诉类型 picker -->
+    <view class="card">
+      <view class="card__label">申诉类型 <text class="card__required">*</text></view>
+      <picker
+        range="{{appealTypes}}"
+        range-key="label"
+        value="{{typeIndex}}"
+        bindchange="onTypeChange"
+      >
+        <view class="card__picker {{typeIndex < 0 ? 'card__picker--placeholder' : ''}}">
+          {{typeIndex >= 0 ? appealTypes[typeIndex].label : '请选择（卖家失联/错标已售/货不对板/误封复核）'}}
+        </view>
+      </picker>
+    </view>
+
+    <!-- 申诉理由 -->
+    <view class="card">
+      <view class="card__label">申诉理由 <text class="card__required">*</text></view>
+      <textarea
+        class="card__textarea"
+        placeholder="请说明申诉理由，附相关约定信息更佳"
+        maxlength="{{500}}"
+        value="{{reason}}"
+        bindinput="onReasonInput"
+      />
+      <view class="card__counter">{{reasonLen}}/500</view>
+    </view>
+
+    <!-- 凭证上传 -->
+    <view class="card">
+      <view class="card__label">凭证材料 <text class="card__hint">（聊天记录/付款凭证等，最多 9 张）</text></view>
+      <view class="images">
+        <view wx:for="{{images}}" wx:key="*this" class="images__wrap">
+          <image class="images__item" src="{{item}}" mode="aspectFill" />
+          <view class="images__del" data-index="{{index}}" catchtap="onRemoveImage">×</view>
+        </view>
+        <view wx:if="{{images.length < 9}}" class="images__add" bindtap="onChooseImage">+</view>
+      </view>
+    </view>
+
+    <!-- 48h 介入时限提示条（F30-AC1） -->
+    <view class="sla-notice">
+      ⏱️ 运营将在 48 小时内介入处理，请保持联系方式畅通
+    </view>
+
+    <view class="footer">
+      <button
+        class="footer__submit {{submitting ? 'footer__submit--disabled' : ''}}"
+        bindtap="onSubmit"
+      >{{submitting ? '提交中…' : '提交申诉'}}</button>
+    </view>
+  </block>
+</view>

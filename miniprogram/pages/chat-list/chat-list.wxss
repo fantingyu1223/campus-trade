@@ -1,0 +1,95 @@
+.page {
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+.state {
+  text-align: center;
+  color: #999;
+  font-size: 26rpx;
+  padding: 160rpx 0;
+}
+.state--error {
+  color: #ff4d4f;
+}
+.state__retry {
+  color: #07c160;
+  margin-top: 20rpx;
+}
+.state__empty-icon {
+  font-size: 72rpx;
+  margin-bottom: 16rpx;
+}
+.state__empty-sub {
+  font-size: 24rpx;
+  color: #bbb;
+  margin-top: 12rpx;
+}
+.conv-item {
+  display: flex;
+  background: #fff;
+  padding: 24rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.conv-item__avatar {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+  background: #e8f7ee;
+  color: #07c160;
+  font-size: 34rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+.conv-item__main {
+  flex: 1;
+  min-width: 0;
+}
+.conv-item__top {
+  display: flex;
+  align-items: center;
+}
+.conv-item__nickname {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 600;
+  margin-right: 12rpx;
+}
+.conv-item__time {
+  margin-left: auto;
+  font-size: 22rpx;
+  color: #999;
+  flex-shrink: 0;
+}
+.conv-item__bottom {
+  display: flex;
+  align-items: center;
+  margin-top: 10rpx;
+}
+.conv-item__last {
+  flex: 1;
+  min-width: 0;
+  font-size: 26rpx;
+  color: #999;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.conv-item__last--unread {
+  color: #333;
+}
+.conv-item__badge {
+  min-width: 36rpx;
+  height: 36rpx;
+  line-height: 36rpx;
+  border-radius: 18rpx;
+  background: #ff4d4f;
+  color: #fff;
+  font-size: 20rpx;
+  text-align: center;
+  padding: 0 8rpx;
+  margin-left: 16rpx;
+  flex-shrink: 0;
+}

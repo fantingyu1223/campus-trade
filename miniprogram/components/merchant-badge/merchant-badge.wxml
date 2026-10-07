@@ -1,0 +1,4 @@
+<view class="merchant-badge merchant-badge--{{size}}">
+  <text class="merchant-badge__icon">🏅</text>
+  <text class="merchant-badge__text">认证商家</text>
+</view>

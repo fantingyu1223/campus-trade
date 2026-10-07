@@ -1,0 +1,29 @@
+<view wx:if="{{visible}}" class="mark-sold-modal">
+  <view class="mark-sold-modal__mask" bindtap="onCancel"></view>
+  <view class="mark-sold-modal__panel" catchtap="noop">
+    <view class="mark-sold-modal__title">标记已售 · 指定买家</view>
+    <view class="mark-sold-modal__tip">成交买家将用于生成线下订单与后续评价，必须指定。</view>
+
+    <scroll-view scroll-y class="mark-sold-modal__list">
+      <view wx:if="{{buyers.length === 0}}" class="mark-sold-modal__empty">
+        暂无买家候选（可先在聊天中确认买家）
+      </view>
+      <view
+        wx:for="{{buyers}}"
+        wx:key="id"
+        class="buyer-item {{selectedId === item.id ? 'buyer-item--active' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="onSelectBuyer"
+      >
+        <view class="buyer-item__avatar">{{item.nickname[0]}}</view>
+        <view class="buyer-item__nickname">{{item.nickname}}</view>
+        <view class="buyer-item__check">{{selectedId === item.id ? '✓' : ''}}</view>
+      </view>
+    </scroll-view>
+
+    <view class="mark-sold-modal__actions">
+      <view class="mark-sold-modal__btn mark-sold-modal__btn--cancel" bindtap="onCancel">取消</view>
+      <view class="mark-sold-modal__btn mark-sold-modal__btn--confirm" bindtap="onConfirm">确认已售</view>
+    </view>
+  </view>
+</view>

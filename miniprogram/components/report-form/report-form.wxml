@@ -1,0 +1,56 @@
+<view class="report-form">
+  <!-- 举报对象信息条 -->
+  <view class="report-form__target">
+    <text class="report-form__target-type">{{targetTypeLabel}}</text>
+    <text class="report-form__target-title">{{targetTitle}}</text>
+  </view>
+
+  <!-- 理由枚举 picker -->
+  <view class="report-form__card">
+    <view class="report-form__label">举报理由 <text class="report-form__required">*</text></view>
+    <picker
+      class="report-form__picker"
+      range="{{categories}}"
+      range-key="label"
+      value="{{categoryIndex}}"
+      bindchange="onCategoryChange"
+    >
+      <view class="report-form__picker-value {{categoryIndex < 0 ? 'report-form__picker-value--placeholder' : ''}}">
+        {{categoryIndex >= 0 ? categories[categoryIndex].label : '请选择（诈骗/违禁品/虚假描述/其他）'}}
+      </view>
+    </picker>
+  </view>
+
+  <!-- 补充描述 -->
+  <view class="report-form__card">
+    <view class="report-form__label">补充描述 <text class="report-form__required">*</text></view>
+    <textarea
+      class="report-form__textarea"
+      placeholder="请描述具体情况，便于运营核实"
+      maxlength="{{500}}"
+      value="{{desc}}"
+      bindinput="onDescInput"
+    />
+    <view class="report-form__counter">{{descLen}}/500</view>
+  </view>
+
+  <!-- 凭证上传 -->
+  <view class="report-form__card">
+    <view class="report-form__label">凭证截图 <text class="report-form__hint">（最多 9 张）</text></view>
+    <view class="report-form__images">
+      <view wx:for="{{images}}" wx:key="*this" class="report-form__image-wrap">
+        <image class="report-form__image" src="{{item}}" mode="aspectFill" />
+        <view class="report-form__image-del" data-index="{{index}}" catchtap="onRemoveImage">×</view>
+      </view>
+      <view wx:if="{{images.length < 9}}" class="report-form__image-add" bindtap="onChooseImage">+</view>
+    </view>
+  </view>
+
+  <!-- 提交 -->
+  <view class="report-form__footer">
+    <button
+      class="report-form__submit {{submitting ? 'report-form__submit--disabled' : ''}}"
+      bindtap="onSubmit"
+    >{{submitting ? '提交中…' : '提交举报'}}</button>
+  </view>
+</view>

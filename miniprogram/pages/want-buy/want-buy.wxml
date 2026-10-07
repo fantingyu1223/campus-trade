@@ -1,0 +1,32 @@
+<view class="page">
+  <!-- tab 栏 + 发布入口 -->
+  <view class="topbar">
+    <view class="tabs">
+      <view class="tabs__item {{tab === 'all' ? 'tabs__item--active' : ''}}" data-tab="all" bindtap="onTabChange">全部</view>
+      <view class="tabs__item {{tab === 'mine' ? 'tabs__item--active' : ''}}" data-tab="mine" bindtap="onTabChange">我的</view>
+    </view>
+    <view class="topbar__publish" bindtap="onPublish">+ 发布求购</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="state">加载中…</view>
+  <view wx:elif="{{error}}" class="state state--error">
+    <text>{{error}}</text>
+    <view class="state__retry" bindtap="onRetry">点击重试</view>
+  </view>
+
+  <scroll-view wx:else scroll-y class="list" enhanced>
+    <view wx:if="{{list.length === 0}}" class="state">
+      {{tab === 'mine' ? '你还没有发布求购，点右上角「发布求购」试试' : '暂无求购信息'}}
+    </view>
+    <want-buy-card
+      wx:for="{{list}}"
+      wx:key="id"
+      item="{{item}}"
+      is-mine="{{tab === 'mine'}}"
+      bind:renew="onRenew"
+      bind:close="onClose"
+      bind:bought="onBought"
+    />
+    <view class="list__safe"></view>
+  </scroll-view>
+</view>

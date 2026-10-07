@@ -1,0 +1,6 @@
+{
+  "component": true,
+  "usingComponents": {
+    "identity-badge": "/components/identity-badge/identity-badge"
+  }
+}
