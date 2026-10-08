@@ -11,15 +11,17 @@ interface CategoryItem {
   id: number;
   name: string;
   icon: string;
+  /** 五色 chip 底样式后缀（规范 §1.6），对应 category-item__icon--chipN */
+  chip: string;
 }
 
 // 一级分类（与后台 category 表一致；子品类筛选由服务端父类目展开承接）
 const CATEGORIES: CategoryItem[] = [
-  { id: 1, name: '教材书籍', icon: '📚' },
-  { id: 2, name: '数码电子', icon: '💻' },
-  { id: 3, name: '生活用品', icon: '🪑' },
-  { id: 4, name: '服饰鞋包', icon: '👟' },
-  { id: 12, name: '其他闲置', icon: '📦' },
+  { id: 1, name: '教材书籍', icon: '📚', chip: 'chip1' },
+  { id: 2, name: '数码电子', icon: '💻', chip: 'chip2' },
+  { id: 3, name: '生活用品', icon: '🪑', chip: 'chip3' },
+  { id: 4, name: '服饰鞋包', icon: '👟', chip: 'chip4' },
+  { id: 12, name: '其他闲置', icon: '📦', chip: 'chip5' },
 ];
 
 Page({
@@ -30,10 +32,20 @@ Page({
     productsError: '',
     searchKeyword: '',
     loggedIn: false,
+    // 「橙市」入场编排（规范 §5）：静态模块 pageReady、商品列表 productsReady、FAB 动画结束后摘除类
+    pageReady: false,
+    productsReady: false,
+    fabSettled: false,
   },
 
   onLoad() {
     this.loadProducts();
+  },
+
+  onReady() {
+    this.setData({ pageReady: true });
+    // FAB 弹跳入场 400ms + 500ms 延迟，结束后摘除入场类，避免延迟污染按压反馈
+    setTimeout(() => this.setData({ fabSettled: true }), 1000);
   },
 
   onShow() {
@@ -42,10 +54,13 @@ Page({
 
   /** 商品流加载（§5.2 #15 GET /products，默认排除已售、按最新排序） */
   loadProducts() {
-    this.setData({ productsLoading: true, productsError: '' });
+    this.setData({ productsLoading: true, productsError: '', productsReady: false });
     listProducts({ exclude_sold: 1, sort: 'new', page: 1, pageSize: 20 })
       .then((res) => {
-        this.setData({ products: res.list, productsLoading: false });
+        // 先渲染列表再置位 productsReady，触发 stagger 入场（只动 transform/opacity）
+        this.setData({ products: res.list, productsLoading: false }, () => {
+          this.setData({ productsReady: true });
+        });
       })
       .catch((err: Error) => {
         this.setData({ productsError: err.message || '加载失败', productsLoading: false });

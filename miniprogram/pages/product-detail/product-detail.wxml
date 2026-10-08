@@ -62,7 +62,7 @@
 
     <!-- 底部操作条 -->
     <view class="footer">
-      <view class="footer__btn footer__btn--primary" bindtap="onContactSeller">联系卖家</view>
+      <view class="footer__btn footer__btn--primary" hover-class="ct-press" bindtap="onContactSeller">联系卖家</view>
     </view>
     <view class="footer__placeholder"></view>
   </block>

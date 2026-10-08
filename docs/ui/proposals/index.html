@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>campus-trade 小程序首页视觉升级 · 方案比稿</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #EDEEF1;
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #1E2229;
+    min-height: 100vh; padding-bottom: 80px;
+  }
+
+  .hero { max-width: 1200px; margin: 0 auto; padding: 64px 32px 40px; }
+  .hero .kicker {
+    font-size: 12px; letter-spacing: 4px; color: #8A919C; font-weight: 600;
+    opacity: 0; animation: fadeUp 400ms cubic-bezier(0.22,1,0.36,1) forwards;
+  }
+  .hero h1 {
+    font-size: 36px; font-weight: 700; margin: 12px 0 14px; letter-spacing: 1px;
+    opacity: 0; animation: fadeUp 400ms cubic-bezier(0.22,1,0.36,1) 80ms forwards;
+  }
+  .hero p {
+    font-size: 14px; color: #5F6873; max-width: 640px; line-height: 1.7;
+    opacity: 0; animation: fadeUp 400ms cubic-bezier(0.22,1,0.36,1) 160ms forwards;
+  }
+
+  .grid {
+    max-width: 1200px; margin: 0 auto; padding: 0 32px;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 28px;
+  }
+  .card {
+    background: #fff; border-radius: 20px; overflow: hidden;
+    box-shadow: 0 6px 24px rgba(20, 24, 30, 0.07);
+    opacity: 0; transform: translateY(24px);
+    animation: cardIn 480ms cubic-bezier(0.22,1,0.36,1) forwards;
+    transition: transform 240ms cubic-bezier(0.22,1,0.36,1);
+  }
+  .card:nth-child(1) { animation-delay: 240ms; }
+  .card:nth-child(2) { animation-delay: 340ms; }
+  .card:nth-child(3) { animation-delay: 440ms; }
+  .card:hover { transform: translateY(-4px); }
+
+  .preview {
+    height: 300px; overflow: hidden; position: relative; background: #F4F5F7;
+  }
+  .preview iframe {
+    width: 1200px; height: 3400px; border: 0;
+    transform: scale(0.31); transform-origin: top left;
+    pointer-events: none;
+  }
+  .preview::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 70%, rgba(244,245,247,0.9));
+  }
+
+  .card-body { padding: 22px 24px 24px; }
+  .card-body .name { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+  .card-body .name .no {
+    font-size: 11px; font-weight: 600; letter-spacing: 1px; color: #fff;
+    width: 22px; height: 22px; border-radius: 7px;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .card-body .mood { font-size: 13px; color: #5F6873; line-height: 1.65; margin: 10px 0 16px; }
+  .palette { display: flex; gap: 6px; margin-bottom: 18px; }
+  .palette span { flex: 1; height: 10px; border-radius: 5px; }
+  .cta {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; text-decoration: none;
+    padding: 9px 20px; border-radius: 999px;
+    transition: transform 150ms ease-out, opacity 150ms ease-out;
+  }
+  .cta:active { transform: scale(0.95); }
+  .cta .arrow { transition: transform 200ms cubic-bezier(0.34,1.56,0.64,1); }
+  .cta:hover .arrow { transform: translateX(3px); }
+
+  .note {
+    max-width: 1200px; margin: 48px auto 0; padding: 0 32px;
+    font-size: 12px; color: #8A919C; line-height: 1.8;
+    opacity: 0; animation: fadeUp 400ms cubic-bezier(0.22,1,0.36,1) 560ms forwards;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="kicker">CAMPUS-TRADE · UI PROPOSALS</div>
+  <h1>小程序首页视觉升级 · 三套方案比稿</h1>
+  <p>基于现有首页真实结构（安全提示条 / 搜索框 / 五个分类入口 / 商品流 / 发布悬浮按钮 / tabBar）出品。
+     三套方向气质互相拉开，均可完整落地 WXSS；配色对比度 ≥ WCAG AA，动效仅使用 transform / opacity。点击进入单案查看高保真稿、动效演示与完整 design tokens。</p>
+</header>
+
+<div class="grid">
+  <!-- 方案 A -->
+  <div class="card">
+    <div class="preview"><iframe src="scheme-a.html" loading="lazy" scrolling="no"></iframe></div>
+    <div class="card-body">
+      <div class="name"><span class="no" style="background:#0FA36B">A</span>青藤 · 清新校园风</div>
+      <div class="mood">信任绿基底，像校园公告栏一样安静可信。低饱和、柔阴影、缓 ease-out 入场，适合作为平台长期默认气质。</div>
+      <div class="palette">
+        <span style="background:#0FA36B"></span><span style="background:#E3F5EC"></span>
+        <span style="background:#F3F7F4"></span><span style="background:#1C2B24"></span>
+        <span style="background:#FFF6DE"></span><span style="background:#C2400F"></span>
+      </div>
+      <a class="cta" style="background:#0FA36B;color:#fff" href="scheme-a.html">查看方案 <span class="arrow">→</span></a>
+    </div>
+  </div>
+
+  <!-- 方案 B -->
+  <div class="card">
+    <div class="preview"><iframe src="scheme-b.html" loading="lazy" scrolling="no"></iframe></div>
+    <div class="card-body">
+      <div class="name"><span class="no" style="background:#FF5A2D">B</span>橙市 · 活力市集风</div>
+      <div class="mood">柿子橙高饱和 + 校蓝撞色，五彩分类摊位、spring 回弹动效，像跳蚤市场开集。适合拉新促活与大促季运营。</div>
+      <div class="palette">
+        <span style="background:#FF5A2D"></span><span style="background:#2B5BFF"></span>
+        <span style="background:#FFF6EF"></span><span style="background:#2B1D16"></span>
+        <span style="background:#FFF3C4"></span><span style="background:#D81E3F"></span>
+      </div>
+      <a class="cta" style="background:#FF5A2D;color:#fff" href="scheme-b.html">查看方案 <span class="arrow">→</span></a>
+    </div>
+  </div>
+
+  <!-- 方案 C -->
+  <div class="card">
+    <div class="preview"><iframe src="scheme-c.html" loading="lazy" scrolling="no"></iframe></div>
+    <div class="card-body">
+      <div class="name"><span class="no" style="background:#3457F0">C</span>素集 · 极简质感风</div>
+      <div class="mood">90% 黑白灰以线代影，10% 靛蓝只给行动点。去emoji化、字距排版、无回弹动效，塑造买手店式品质感与差异化品牌。</div>
+      <div class="palette">
+        <span style="background:#1A1D26"></span><span style="background:#3457F0"></span>
+        <span style="background:#F6F7F9"></span><span style="background:#E6E9EF"></span>
+        <span style="background:#EDF1FE"></span><span style="background:#FBF6E9"></span>
+      </div>
+      <a class="cta" style="background:#3457F0;color:#fff" href="scheme-c.html">查看方案 <span class="arrow">→</span></a>
+    </div>
+  </div>
+</div>
+
+<p class="note">
+  评审提示：单案页面左侧为 375px 高保真手机稿（列表 stagger 入场 / 卡片 hover 与按压 / tabBar 可点击切换），右侧为色板、字号阶梯、圆角阴影间距 token 与动效参数表。
+  商品图为色块占位；文案与线上小程序一致。定稿后将在 docs/ui/ 输出设计规范并映射至 miniprogram 各页面 WXSS。
+</p>
+
+</body>
+</html>

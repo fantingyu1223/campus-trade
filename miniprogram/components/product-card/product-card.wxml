@@ -1,4 +1,4 @@
-<view class="product-card" bindtap="onTap" data-id="{{product.id}}">
+<view class="product-card" hover-class="product-card--press" bindtap="onTap" data-id="{{product.id}}">
   <view class="product-card__cover">
     <image wx:if="{{product.cover}}" src="{{product.cover}}" mode="aspectFill" class="product-card__img" />
     <view wx:else class="product-card__img product-card__img--placeholder">实拍图</view>

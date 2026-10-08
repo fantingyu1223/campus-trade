@@ -1,8 +1,16 @@
+/* 商品卡组件 · 设计规范「橙市」（规范 §4.2）：圆角 28rpx / 暖色浅阴影 / 急出品红 / 价格橙大字 */
 .product-card {
-  background: #fff;
-  border-radius: 12rpx;
+  background: var(--ct-card);
+  border-radius: var(--ct-radius-card);
   overflow: hidden;
   margin-bottom: 20rpx;
+  box-shadow: var(--ct-shadow-card);
+  transition: transform 120ms ease-out, opacity 120ms ease-out;
+}
+/* 按压反馈（hover-class，只动 transform/opacity） */
+.product-card--press {
+  transform: scale(0.96);
+  opacity: 0.9;
 }
 .product-card__cover {
   position: relative;
@@ -15,22 +23,25 @@
   display: block;
 }
 .product-card__img--placeholder {
-  background: #e8e8e8;
-  color: #999;
+  background: var(--ct-primary-soft);
+  color: var(--ct-primary-strong);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 26rpx;
 }
+/* 急出：品红 pill + 品红投影 */
 .product-card__urgent {
   position: absolute;
   top: 12rpx;
   left: 12rpx;
-  background: #ff4d4f;
+  background: var(--ct-urgent);
   color: #fff;
   font-size: 20rpx;
-  padding: 4rpx 12rpx;
-  border-radius: 6rpx;
+  font-weight: 700;
+  padding: 6rpx 16rpx;
+  border-radius: 999px;
+  box-shadow: var(--ct-shadow-urgent);
 }
 .product-card__sold {
   position: absolute;
@@ -40,40 +51,48 @@
   color: #fff;
   font-size: 20rpx;
   padding: 4rpx 12rpx;
-  border-radius: 6rpx;
+  border-radius: 999px;
 }
 .product-card__body {
-  padding: 16rpx 20rpx;
+  padding: 16rpx 24rpx 20rpx;
 }
 .product-card__title {
   font-size: 28rpx;
-  color: #333;
+  font-weight: 700;
+  color: var(--ct-ink-900);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .product-card__meta {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   margin-top: 8rpx;
 }
+/* 价格：小字主橙 38rpx/700 tabular-nums */
 .product-card__price {
-  color: #ff4d4f;
-  font-size: 32rpx;
-  font-weight: 600;
+  color: var(--ct-primary-strong);
+  font-size: 38rpx;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
+/* 成色：橙浅底 chip */
 .product-card__condition {
-  color: #999;
-  font-size: 22rpx;
+  color: var(--ct-primary-strong);
+  background: var(--ct-primary-soft);
+  font-size: 20rpx;
+  font-weight: 500;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
   margin-left: 16rpx;
 }
 .product-card__seller {
   display: flex;
   align-items: center;
-  margin-top: 8rpx;
+  margin-top: 12rpx;
 }
 .product-card__nickname {
-  color: #666;
+  color: var(--ct-ink-600);
   font-size: 22rpx;
   margin-right: 12rpx;
 }

@@ -1,5 +1,90 @@
-/** 全局样式 */
+/* 全局样式 · 设计规范「橙市」（docs/ui/2026-10-08-设计规范-橙市.md）
+   token 命名 --ct-*（ct = campus-trade），WXSS 支持 page 上的 CSS 自定义属性 */
 page {
-  background-color: #f5f5f5;
+  /* 主色 · 柿子橙 */
+  --ct-primary: #FF5A2D;          /* CTA / FAB / 描边（仅大号白字） */
+  --ct-primary-light: #FF7A45;    /* 渐变亮端 */
+  --ct-primary-strong: #D93E10;   /* 小字主色：价格 / 选中态（白底 4.6:1） */
+  --ct-primary-pressed: #B33209;  /* 深按压态 */
+  --ct-primary-soft: #FFE4D6;     /* 橙浅底：chip / 选中底 */
+  /* 撞色 · 校蓝 */
+  --ct-accent: #2B5BFF;           /* 链接 / 运营入口（白底 5.9:1） */
+  --ct-accent-strong: #1D46C8;    /* 认证商家文字 */
+  --ct-accent-soft: #E0EBFF;      /* 商家标底 / 分类 chip 底 */
+  /* 营销 · 急出品红 */
+  --ct-urgent: #D81E3F;
+  /* 中性暖灰 */
+  --ct-bg: #FFF6EF;               /* 页面底色（米白暖调） */
+  --ct-card: #FFFFFF;
+  --ct-neutral-100: #F1EAE4;      /* 个人身份标底 / 次级填充 */
+  --ct-ink-900: #2B1D16;          /* 标题 */
+  --ct-ink-600: #6B584C;          /* 次级正文 */
+  --ct-ink-400: #A08D80;          /* 辅助（仅大字/图标级） */
+  /* 语义 · 安全提示暖黄 / 成功绿 */
+  --ct-warn-bg: #FFF3C4;
+  --ct-warn-line: #E8C44A;
+  --ct-warn-text: #6E4E00;
+  --ct-success: #2FA55C;
+  /* 圆角 / 阴影 / 缓动 */
+  --ct-radius-card: 28rpx;
+  --ct-radius-banner: 24rpx;
+  --ct-radius-sm: 12rpx;
+  --ct-shadow-card: 0 6rpx 20rpx rgba(178, 88, 42, 0.08);
+  --ct-shadow-fab: 0 12rpx 32rpx rgba(255, 90, 45, 0.38);
+  --ct-shadow-urgent: 0 4rpx 12rpx rgba(216, 30, 63, 0.35);
+  --ct-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ct-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  background-color: var(--ct-bg);
   font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif;
+  color: var(--ct-ink-900);
+}
+
+/* ===== 全局复用基础类（规范 §6） ===== */
+
+/* 按钮：主橙渐变 pill / ghost 浅底 */
+.ct-btn {
+  text-align: center;
+  padding: 20rpx 0;
+  border-radius: 999px;
+  font-size: 30rpx;
+  font-weight: 700;
+  transition: transform 120ms ease-out, opacity 120ms ease-out;
+}
+.ct-btn--primary {
+  background: linear-gradient(135deg, var(--ct-primary-light), var(--ct-primary));
+  color: #fff;
+  box-shadow: var(--ct-shadow-fab);
+}
+.ct-btn--ghost {
+  background: var(--ct-neutral-100);
+  color: var(--ct-ink-600);
+}
+.ct-btn--disabled {
+  opacity: 0.5;
+  box-shadow: none;
+}
+
+/* 卡片容器 */
+.ct-card {
+  background: var(--ct-card);
+  border-radius: var(--ct-radius-card);
+  box-shadow: var(--ct-shadow-card);
+}
+
+/* 通用按压反馈（配合 hover-class="ct-press" 使用，只动 transform/opacity） */
+.ct-press {
+  transform: scale(0.96);
+  opacity: 0.9;
+}
+
+/* 列表/模块入场：spring 上浮微弹，配合 *--in 类切换 */
+.ct-enter {
+  opacity: 0;
+  transform: translateY(40rpx) scale(0.97);
+  transition: opacity 360ms var(--ct-ease-spring), transform 360ms var(--ct-ease-spring);
+}
+.ct-enter--in {
+  opacity: 1;
+  transform: translateY(0) scale(1);
 }

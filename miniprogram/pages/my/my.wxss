@@ -1,6 +1,7 @@
+/* 我的页 · 设计规范「橙市」：用户卡 / cell 列表套用 token */
 .page {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: var(--ct-bg);
   padding-bottom: 32rpx;
 }
 
@@ -8,15 +9,17 @@
 .user-card {
   display: flex;
   align-items: center;
-  background: #fff;
+  background: var(--ct-card);
+  border-radius: var(--ct-radius-card);
+  box-shadow: var(--ct-shadow-card);
   padding: 32rpx 24rpx;
-  margin-bottom: 16rpx;
+  margin: 24rpx 24rpx 16rpx;
 }
 .user-card__avatar {
   width: 120rpx;
   height: 120rpx;
   border-radius: 50%;
-  background: #f0f0f0;
+  background: var(--ct-primary-soft);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -29,7 +32,7 @@
 }
 .user-card__avatar-placeholder {
   font-size: 56rpx;
-  color: #ccc;
+  color: var(--ct-primary-strong);
 }
 .user-card__info {
   margin-left: 24rpx;
@@ -41,8 +44,8 @@
 }
 .user-card__nickname {
   font-size: 34rpx;
-  font-weight: 600;
-  color: #333;
+  font-weight: 700;
+  color: var(--ct-ink-900);
   margin-right: 16rpx;
 }
 .user-card__merchant {
@@ -51,12 +54,15 @@
 
 /* 分组与功能项 */
 .group {
-  background: #fff;
-  margin-bottom: 16rpx;
+  background: var(--ct-card);
+  border-radius: var(--ct-radius-card);
+  box-shadow: var(--ct-shadow-card);
+  margin: 0 24rpx 16rpx;
+  overflow: hidden;
 }
 .group__title {
   font-size: 24rpx;
-  color: #999;
+  color: var(--ct-ink-400);
   padding: 20rpx 24rpx 0;
 }
 .cell {
@@ -64,28 +70,30 @@
   align-items: center;
   justify-content: space-between;
   padding: 28rpx 24rpx;
-  border-bottom: 1rpx solid #f5f5f5;
+  border-bottom: 1rpx solid var(--ct-neutral-100);
+  transition: transform 120ms ease-out, opacity 120ms ease-out;
 }
 .cell:last-child {
   border-bottom: none;
 }
 .cell__label {
   font-size: 28rpx;
-  color: #333;
+  color: var(--ct-ink-900);
 }
 .cell__label--danger {
-  color: #ff4d4f;
+  color: var(--ct-urgent);
 }
 .cell__arrow {
-  color: #ccc;
+  color: var(--ct-ink-400);
   font-size: 32rpx;
 }
 
 /* 已注销终态 */
 .cancelled {
-  background: #fff;
+  background: var(--ct-card);
+  border-radius: var(--ct-radius-card);
+  box-shadow: var(--ct-shadow-card);
   margin: 32rpx 24rpx;
-  border-radius: 16rpx;
   padding: 64rpx 32rpx;
   text-align: center;
 }
@@ -94,20 +102,21 @@
 }
 .cancelled__title {
   font-size: 34rpx;
-  font-weight: 600;
-  color: #333;
+  font-weight: 700;
+  color: var(--ct-ink-900);
   margin-top: 16rpx;
 }
 .cancelled__desc {
   font-size: 24rpx;
-  color: #999;
+  color: var(--ct-ink-400);
   margin-top: 16rpx;
 }
 .cancelled__btn {
-  background: #07c160;
+  background: linear-gradient(135deg, var(--ct-primary-light), var(--ct-primary));
   color: #fff;
   font-size: 30rpx;
-  border-radius: 44rpx;
+  font-weight: 700;
+  border-radius: 999px;
   margin-top: 40rpx;
 }
 
@@ -126,14 +135,16 @@
 
 .guest__desc {
   font-size: 26rpx;
-  color: #999;
+  color: var(--ct-ink-600);
   margin-bottom: 40rpx;
 }
 
 .guest__btn {
-  background: #07c160;
+  background: linear-gradient(135deg, var(--ct-primary-light), var(--ct-primary));
   color: #fff;
   font-size: 30rpx;
-  border-radius: 48rpx;
+  font-weight: 700;
+  border-radius: 999px;
+  box-shadow: var(--ct-shadow-fab);
   padding: 0 64rpx;
 }

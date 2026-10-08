@@ -26,13 +26,13 @@
         <image src="{{item}}" mode="aspectFill" class="img-grid__img" />
         <view class="img-grid__delete" data-index="{{index}}" catchtap="onDeleteImage">×</view>
       </view>
-      <view wx:if="{{images.length < 9}}" class="img-grid__add" bindtap="onChooseImage">
+      <view wx:if="{{images.length < 9}}" class="img-grid__add" hover-class="ct-press" bindtap="onChooseImage">
         <view class="img-grid__add-icon">+</view>
         <view class="img-grid__add-text">拍照/选图</view>
       </view>
     </view>
     <view wx:if="{{errors.images}}" class="field-error">{{errors.images}}</view>
-    <view class="btn btn--primary" bindtap="onNextStep">下一步</view>
+    <view class="btn btn--primary" hover-class="ct-press" bindtap="onNextStep">下一步</view>
   </view>
 
   <!-- step 2：商品信息表单 -->
@@ -101,13 +101,13 @@
 
     <view class="form-item form-item--switch">
       <view class="form-item__label">急出</view>
-      <switch checked="{{isUrgent}}" color="#07c160" bindchange="onUrgentChange" />
+      <switch checked="{{isUrgent}}" color="#FF5A2D" bindchange="onUrgentChange" />
     </view>
     <view wx:if="{{isUrgent}}" class="form-item__hint">急出商品将优先展示，同一账号同时最多 3 件急出商品</view>
 
     <view class="btn-row">
-      <view class="btn btn--ghost" bindtap="onPrevStep">上一步</view>
-      <view class="btn btn--primary" bindtap="onNextStep">下一步</view>
+      <view class="btn btn--ghost" hover-class="ct-press" bindtap="onPrevStep">上一步</view>
+      <view class="btn btn--primary" hover-class="ct-press" bindtap="onNextStep">下一步</view>
     </view>
   </view>
 
@@ -127,8 +127,8 @@
     <view class="summary__row"><text class="summary__label">描述</text><text class="summary__value">{{desc}}</text></view>
 
     <view class="btn-row">
-      <view class="btn btn--ghost" bindtap="onPrevStep">上一步</view>
-      <view class="btn btn--primary {{submitting ? 'btn--disabled' : ''}}" bindtap="onSubmit">
+      <view class="btn btn--ghost" hover-class="ct-press" bindtap="onPrevStep">上一步</view>
+      <view class="btn btn--primary {{submitting ? 'btn--disabled' : ''}}" hover-class="{{submitting ? 'none' : 'ct-press'}}" bindtap="onSubmit">
         {{submitting ? '提交中…' : '确认发布'}}
       </view>
     </view>

@@ -1,52 +1,69 @@
+/* 搜索页 · 设计规范「橙市」：工具条 / 筛选面板 / 排序选中态套用 token */
 .page {
   padding: 20rpx;
   min-height: 100vh;
-  background: #f5f5f5;
+  background: var(--ct-bg);
 }
+/* 搜索框：白底 pill + 橙描边（与首页同一语言，规范 §4.4） */
 .search-bar {
   display: flex;
   align-items: center;
+  background: var(--ct-card);
+  border: 4rpx solid var(--ct-primary);
+  border-radius: 999px;
+  padding: 8rpx 8rpx 8rpx 28rpx;
+  box-shadow: var(--ct-shadow-card);
 }
 .search-bar__input {
   flex: 1;
-  background: #fff;
-  border-radius: 32rpx;
-  padding: 16rpx 28rpx;
+  padding: 8rpx 0;
   font-size: 28rpx;
+  color: var(--ct-ink-900);
 }
 .search-bar__btn {
   margin-left: 20rpx;
-  color: #07c160;
-  font-size: 30rpx;
+  background: linear-gradient(135deg, var(--ct-primary-light), var(--ct-primary));
+  color: #fff;
+  font-size: 26rpx;
+  font-weight: 700;
+  padding: 14rpx 40rpx;
+  border-radius: 999px;
+  transition: transform 120ms ease-out, opacity 120ms ease-out;
 }
+/* 工具条 */
 .toolbar {
   display: flex;
   align-items: center;
-  background: #fff;
-  border-radius: 12rpx;
+  background: var(--ct-card);
+  border-radius: var(--ct-radius-card);
+  box-shadow: var(--ct-shadow-card);
   margin-top: 20rpx;
-  padding: 20rpx;
+  padding: 20rpx 24rpx;
 }
 .toolbar__filter {
   font-size: 26rpx;
-  color: #333;
+  color: var(--ct-ink-900);
   margin-right: 40rpx;
 }
 .toolbar__filter--active {
-  color: #07c160;
+  color: var(--ct-primary-strong);
+  font-weight: 700;
 }
 .toolbar__sort {
   font-size: 26rpx;
-  color: #666;
+  color: var(--ct-ink-600);
   margin-right: 32rpx;
+  transition: transform 120ms ease-out, opacity 120ms ease-out;
 }
 .toolbar__sort--active {
-  color: #07c160;
-  font-weight: 600;
+  color: var(--ct-primary-strong);
+  font-weight: 700;
 }
+/* 筛选面板 */
 .filter-panel {
-  background: #fff;
-  border-radius: 12rpx;
+  background: var(--ct-card);
+  border-radius: var(--ct-radius-card);
+  box-shadow: var(--ct-shadow-card);
   margin-top: 16rpx;
   padding: 24rpx;
 }
@@ -55,7 +72,8 @@
 }
 .filter-panel__label {
   font-size: 26rpx;
-  color: #333;
+  font-weight: 500;
+  color: var(--ct-ink-900);
   margin-bottom: 16rpx;
 }
 .filter-panel__price {
@@ -64,30 +82,33 @@
 }
 .filter-panel__price-input {
   flex: 1;
-  background: #f5f5f5;
-  border-radius: 8rpx;
+  background: var(--ct-bg);
+  border-radius: var(--ct-radius-sm);
   padding: 12rpx 20rpx;
   font-size: 26rpx;
+  color: var(--ct-ink-900);
 }
 .filter-panel__price-sep {
   margin: 0 16rpx;
-  color: #999;
+  color: var(--ct-ink-400);
 }
 .filter-panel__tags {
   display: flex;
   flex-wrap: wrap;
 }
 .filter-panel__tag {
-  background: #f5f5f5;
-  color: #666;
+  background: var(--ct-neutral-100);
+  color: var(--ct-ink-600);
   font-size: 24rpx;
   padding: 10rpx 24rpx;
-  border-radius: 24rpx;
+  border-radius: 999px;
   margin: 0 16rpx 16rpx 0;
+  transition: transform 120ms ease-out, opacity 120ms ease-out;
 }
 .filter-panel__tag--active {
-  background: #e8f7ee;
-  color: #07c160;
+  background: var(--ct-primary-soft);
+  color: var(--ct-primary-strong);
+  font-weight: 700;
 }
 .filter-panel__actions {
   display: flex;
@@ -96,36 +117,39 @@
   flex: 1;
   text-align: center;
   padding: 18rpx 0;
-  border-radius: 12rpx;
+  border-radius: 999px;
   font-size: 28rpx;
+  font-weight: 700;
+  transition: transform 120ms ease-out, opacity 120ms ease-out;
 }
 .filter-panel__btn--reset {
-  background: #f5f5f5;
-  color: #666;
+  background: var(--ct-neutral-100);
+  color: var(--ct-ink-600);
   margin-right: 20rpx;
 }
 .filter-panel__btn--apply {
-  background: #07c160;
+  background: linear-gradient(135deg, var(--ct-primary-light), var(--ct-primary));
   color: #fff;
+  box-shadow: var(--ct-shadow-fab);
 }
 .state {
   text-align: center;
-  color: #999;
+  color: var(--ct-ink-400);
   font-size: 26rpx;
   padding: 120rpx 0;
 }
 .state--error {
-  color: #ff4d4f;
+  color: var(--ct-urgent);
 }
 .state__retry {
-  color: #07c160;
+  color: var(--ct-accent);
   margin-top: 20rpx;
 }
 .result-list {
   margin-top: 20rpx;
 }
 .result-list__total {
-  color: #999;
+  color: var(--ct-ink-400);
   font-size: 24rpx;
   margin-bottom: 16rpx;
 }

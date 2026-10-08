@@ -1,13 +1,16 @@
+/* 发布页 · 设计规范「橙市」：步骤条 / 按钮 / 输入框套用 token */
 .page {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: var(--ct-bg);
   padding: 20rpx;
 }
+/* 步骤条：激活态主橙 */
 .steps {
   display: flex;
   align-items: center;
-  background: #fff;
-  border-radius: 12rpx;
+  background: var(--ct-card);
+  border-radius: var(--ct-radius-card);
+  box-shadow: var(--ct-shadow-card);
   padding: 28rpx 24rpx;
   margin-bottom: 20rpx;
 }
@@ -20,8 +23,8 @@
   width: 44rpx;
   height: 44rpx;
   border-radius: 50%;
-  background: #f5f5f5;
-  color: #999;
+  background: var(--ct-neutral-100);
+  color: var(--ct-ink-400);
   font-size: 24rpx;
   display: flex;
   align-items: center;
@@ -29,38 +32,41 @@
 }
 .steps__label {
   font-size: 22rpx;
-  color: #999;
+  color: var(--ct-ink-400);
   margin-top: 8rpx;
 }
 .steps__item--active .steps__dot {
-  background: #07c160;
+  background: linear-gradient(135deg, var(--ct-primary-light), var(--ct-primary));
   color: #fff;
+  font-weight: 700;
 }
 .steps__item--active .steps__label {
-  color: #07c160;
+  color: var(--ct-primary-strong);
+  font-weight: 700;
 }
 .steps__line {
   flex: 1;
   height: 2rpx;
-  background: #eee;
+  background: var(--ct-neutral-100);
   margin: 0 16rpx 32rpx;
 }
 .steps__line--active {
-  background: #07c160;
+  background: var(--ct-primary);
 }
 .card {
-  background: #fff;
-  border-radius: 12rpx;
+  background: var(--ct-card);
+  border-radius: var(--ct-radius-card);
+  box-shadow: var(--ct-shadow-card);
   padding: 28rpx 24rpx;
 }
 .card__title {
   font-size: 30rpx;
-  color: #333;
-  font-weight: 600;
+  color: var(--ct-ink-900);
+  font-weight: 700;
 }
 .card__tip {
   font-size: 24rpx;
-  color: #999;
+  color: var(--ct-ink-400);
   margin: 12rpx 0 24rpx;
 }
 .img-grid {
@@ -76,7 +82,7 @@
 .img-grid__img {
   width: 100%;
   height: 100%;
-  border-radius: 12rpx;
+  border-radius: var(--ct-radius-sm);
 }
 .img-grid__delete {
   position: absolute;
@@ -85,7 +91,7 @@
   width: 40rpx;
   height: 40rpx;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(43, 29, 22, 0.6);
   color: #fff;
   font-size: 28rpx;
   display: flex;
@@ -95,13 +101,15 @@
 .img-grid__add {
   width: 200rpx;
   height: 200rpx;
-  border: 2rpx dashed #ddd;
-  border-radius: 12rpx;
+  border: 2rpx dashed var(--ct-primary);
+  background: var(--ct-primary-soft);
+  border-radius: var(--ct-radius-sm);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #999;
+  color: var(--ct-primary-strong);
+  transition: transform 120ms ease-out, opacity 120ms ease-out;
 }
 .img-grid__add-icon {
   font-size: 56rpx;
@@ -111,8 +119,9 @@
   font-size: 22rpx;
   margin-top: 8rpx;
 }
+/* 字段错误：品红（与急出同族，规范 §1.5） */
 .field-error {
-  color: #ff4d4f;
+  color: var(--ct-urgent);
   font-size: 22rpx;
   margin-top: 10rpx;
 }
@@ -121,35 +130,39 @@
 }
 .form-item__label {
   font-size: 26rpx;
-  color: #333;
+  font-weight: 500;
+  color: var(--ct-ink-900);
   margin-bottom: 14rpx;
 }
 .form-item__required {
-  color: #ff4d4f;
+  color: var(--ct-urgent);
 }
+/* 输入控件：页面底色浅底（WXSS 不支持 :focus，聚焦态策略见规范 §7） */
 .form-item__input {
-  background: #f5f5f5;
-  border-radius: 8rpx;
+  background: var(--ct-bg);
+  border-radius: var(--ct-radius-sm);
   padding: 16rpx 20rpx;
   font-size: 28rpx;
+  color: var(--ct-ink-900);
 }
 .form-item__textarea {
-  background: #f5f5f5;
-  border-radius: 8rpx;
+  background: var(--ct-bg);
+  border-radius: var(--ct-radius-sm);
   padding: 16rpx 20rpx;
   font-size: 28rpx;
+  color: var(--ct-ink-900);
   width: auto;
   min-height: 160rpx;
 }
 .form-item__picker {
-  background: #f5f5f5;
-  border-radius: 8rpx;
+  background: var(--ct-bg);
+  border-radius: var(--ct-radius-sm);
   padding: 16rpx 20rpx;
   font-size: 28rpx;
-  color: #333;
+  color: var(--ct-ink-900);
 }
 .form-item__picker--placeholder {
-  color: #999;
+  color: var(--ct-ink-400);
 }
 .form-item--switch {
   display: flex;
@@ -159,8 +172,9 @@
 .form-item--switch .form-item__label {
   margin-bottom: 0;
 }
+/* 急出提示：暖黄语义 */
 .form-item__hint {
-  color: #ad6800;
+  color: var(--ct-warn-text);
   font-size: 22rpx;
   margin: -12rpx 0 20rpx;
 }
@@ -172,12 +186,15 @@
   flex: 1;
   text-align: center;
   padding: 20rpx 0;
-  border-radius: 12rpx;
+  border-radius: 999px;
   font-size: 28rpx;
+  font-weight: 700;
+  transition: transform 120ms ease-out, opacity 120ms ease-out;
 }
 .btn--primary {
-  background: #07c160;
+  background: linear-gradient(135deg, var(--ct-primary-light), var(--ct-primary));
   color: #fff;
+  box-shadow: var(--ct-shadow-fab);
   margin-top: 24rpx;
 }
 .btn-row .btn--primary {
@@ -185,11 +202,12 @@
   margin-left: 20rpx;
 }
 .btn--ghost {
-  background: #f5f5f5;
-  color: #666;
+  background: var(--ct-neutral-100);
+  color: var(--ct-ink-600);
 }
 .btn--disabled {
-  opacity: 0.6;
+  opacity: 0.5;
+  box-shadow: none;
 }
 .summary__images {
   display: flex;
@@ -199,26 +217,27 @@
 .summary__img {
   width: 140rpx;
   height: 140rpx;
-  border-radius: 12rpx;
+  border-radius: var(--ct-radius-sm);
   margin: 0 16rpx 16rpx 0;
 }
 .summary__row {
   display: flex;
   padding: 16rpx 0;
   font-size: 26rpx;
-  border-bottom: 1rpx solid #f5f5f5;
+  border-bottom: 1rpx solid var(--ct-neutral-100);
 }
 .summary__label {
-  color: #999;
+  color: var(--ct-ink-400);
   width: 140rpx;
 }
 .summary__value {
-  color: #333;
+  color: var(--ct-ink-900);
   flex: 1;
 }
 .summary__value--price {
-  color: #ff4d4f;
-  font-weight: 600;
+  color: var(--ct-primary-strong);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 .summary__row + .btn-row {
   margin-top: 28rpx;

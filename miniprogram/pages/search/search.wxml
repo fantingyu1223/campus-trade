@@ -9,7 +9,7 @@
       bindinput="onKeywordInput"
       bindconfirm="onSearchConfirm"
     />
-    <view class="search-bar__btn" bindtap="onSearchConfirm">搜索</view>
+    <view class="search-bar__btn" hover-class="ct-press" bindtap="onSearchConfirm">搜索</view>
   </view>
 
   <!-- 工具条：筛选入口 + 排序 -->
@@ -64,8 +64,8 @@
     </view>
 
     <view class="filter-panel__actions">
-      <view class="filter-panel__btn filter-panel__btn--reset" bindtap="onResetFilter">重置</view>
-      <view class="filter-panel__btn filter-panel__btn--apply" bindtap="onApplyFilter">确定</view>
+      <view class="filter-panel__btn filter-panel__btn--reset" hover-class="ct-press" bindtap="onResetFilter">重置</view>
+      <view class="filter-panel__btn filter-panel__btn--apply" hover-class="ct-press" bindtap="onApplyFilter">确定</view>
     </view>
   </view>
 

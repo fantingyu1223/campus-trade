@@ -1,3 +1,5 @@
+/* 首页 · 设计规范「橙市」落地（docs/ui/2026-10-08-设计规范-橙市.md）
+   动效仅 transform/opacity；入场编排为同一组 stagger，单屏同时动效 ≤ 3 */
 .page {
   padding: 24rpx 32rpx 60rpx;
   box-sizing: border-box;
@@ -7,75 +9,102 @@
   margin-bottom: 24rpx;
 }
 
+/* 搜索框：白底 pill + 橙描边 + 实心橙按钮（规范 §4.4） */
 .search-bar {
   display: flex;
   align-items: center;
-  background: #fff;
-  border-radius: 44rpx;
-  padding: 8rpx 8rpx 8rpx 28rpx;
+  background: var(--ct-card);
+  border: 4rpx solid var(--ct-primary);
+  border-radius: 999px;
+  padding: 8rpx 8rpx 8rpx 32rpx;
   margin-bottom: 24rpx;
+  box-shadow: var(--ct-shadow-card);
 }
 
 .search-bar__input {
   flex: 1;
-  font-size: 28rpx;
+  font-size: 26rpx;
+  color: var(--ct-ink-900);
 }
 
 .search-bar__btn {
-  background: #07c160;
+  background: linear-gradient(135deg, var(--ct-primary-light), var(--ct-primary));
   color: #fff;
   font-size: 26rpx;
-  padding: 12rpx 32rpx;
-  border-radius: 36rpx;
+  font-weight: 700;
+  padding: 16rpx 44rpx;
+  border-radius: 999px;
+  transition: transform 120ms ease-out, opacity 120ms ease-out;
 }
 
+/* 分类入口：五色 chip 正圆「摊位感」（规范 §1.6） */
 .category-grid {
   display: flex;
   flex-wrap: wrap;
-  background: #fff;
-  border-radius: 16rpx;
-  padding: 24rpx 0;
-  margin-bottom: 24rpx;
+  background: var(--ct-card);
+  border-radius: var(--ct-radius-card);
+  box-shadow: var(--ct-shadow-card);
+  padding: 28rpx 0;
+  margin-bottom: 32rpx;
 }
 
 .category-item {
-  width: 25%;
+  width: 20%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 16rpx 0;
+  padding: 8rpx 0;
+  transition: transform 120ms ease-out, opacity 120ms ease-out;
 }
 
 .category-item__icon {
-  font-size: 48rpx;
+  width: 92rpx;
+  height: 92rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 44rpx;
   margin-bottom: 12rpx;
 }
 
+/* 五色 chip 底（与 CATEGORIES 的 chip 字段一一对应） */
+.category-item__icon--chip1 { background: var(--ct-primary-soft); }
+.category-item__icon--chip2 { background: var(--ct-accent-soft); }
+.category-item__icon--chip3 { background: var(--ct-warn-bg); }
+.category-item__icon--chip4 { background: #EFE4FF; }
+.category-item__icon--chip5 { background: #DDF5E4; }
+
 .category-item__name {
-  font-size: 24rpx;
-  color: #333;
+  font-size: 22rpx;
+  font-weight: 500;
+  color: var(--ct-ink-600);
 }
 
+/* 区块标题：火焰 + 大字重，右侧「换一批」校蓝撞色 */
 .section-title {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: #333;
-  margin: 8rpx 0 20rpx;
+  font-size: 34rpx;
+  font-weight: 700;
+  color: var(--ct-ink-900);
+  margin: 8rpx 4rpx 24rpx;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
 }
 
 .state {
   font-size: 26rpx;
-  color: #999;
+  color: var(--ct-ink-400);
   text-align: center;
   padding: 60rpx 0;
 }
 
 .state--error {
-  color: #f56c6c;
+  color: var(--ct-urgent);
 }
 
 .state__retry {
-  color: #576b95;
+  color: var(--ct-accent);
   margin-top: 12rpx;
 }
 
@@ -85,12 +114,15 @@
   justify-content: space-between;
 }
 
+/* 商品卡（首页内联版）：橙市卡片规范 §4.2 */
 .product-card {
   width: 336rpx;
-  background: #fff;
-  border-radius: 16rpx;
+  background: var(--ct-card);
+  border-radius: var(--ct-radius-card);
   overflow: hidden;
   margin-bottom: 24rpx;
+  box-shadow: var(--ct-shadow-card);
+  transition: transform 120ms ease-out, opacity 120ms ease-out;
 }
 
 .product-card__cover {
@@ -104,32 +136,36 @@
 }
 
 .product-card__img--placeholder {
-  background: #eee;
-  color: #bbb;
+  background: var(--ct-primary-soft);
+  color: var(--ct-primary-strong);
   font-size: 26rpx;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+/* 急出：品红 pill + 品红投影 */
 .product-card__urgent {
   position: absolute;
   top: 16rpx;
   left: 16rpx;
-  background: #f56c6c;
+  background: var(--ct-urgent);
   color: #fff;
   font-size: 20rpx;
-  padding: 4rpx 12rpx;
-  border-radius: 8rpx;
+  font-weight: 700;
+  padding: 6rpx 16rpx;
+  border-radius: 999px;
+  box-shadow: var(--ct-shadow-urgent);
 }
 
 .product-card__body {
-  padding: 20rpx;
+  padding: 20rpx 24rpx 24rpx;
 }
 
 .product-card__title {
-  font-size: 28rpx;
-  color: #333;
+  font-size: 26rpx;
+  font-weight: 700;
+  color: var(--ct-ink-900);
   line-height: 1.4;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -143,16 +179,23 @@
   margin-bottom: 12rpx;
 }
 
+/* 价格：小字主橙 38rpx/700 tabular-nums */
 .product-card__price {
-  font-size: 34rpx;
-  font-weight: 600;
-  color: #f56c6c;
+  font-size: 38rpx;
+  font-weight: 700;
+  color: var(--ct-primary-strong);
+  font-variant-numeric: tabular-nums;
   margin-right: 16rpx;
 }
 
+/* 成色：橙浅底 chip */
 .product-card__condition {
-  font-size: 22rpx;
-  color: #999;
+  font-size: 20rpx;
+  font-weight: 500;
+  color: var(--ct-primary-strong);
+  background: var(--ct-primary-soft);
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
 }
 
 .product-card__seller {
@@ -162,24 +205,38 @@
 }
 
 .product-card__nickname {
-  font-size: 24rpx;
-  color: #999;
+  font-size: 22rpx;
+  color: var(--ct-ink-600);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 180rpx;
 }
 
-/* 发布悬浮按钮 */
+/* 发布悬浮按钮：橙渐变 pill + spring 弹跳入场（规范 §4.6） */
 .publish-fab {
   position: fixed;
   right: 32rpx;
   bottom: 48rpx;
-  background: #07c160;
+  background: linear-gradient(135deg, var(--ct-primary-light), var(--ct-primary));
   color: #fff;
   font-size: 30rpx;
-  padding: 20rpx 36rpx;
-  border-radius: 48rpx;
-  box-shadow: 0 6rpx 16rpx rgba(7, 193, 96, 0.35);
+  font-weight: 700;
+  padding: 26rpx 48rpx;
+  border-radius: 999px;
+  box-shadow: var(--ct-shadow-fab);
   z-index: 10;
+  transition: transform 120ms ease-out, opacity 120ms ease-out;
+}
+
+/* FAB 入场编排：scale 弹跳，pageReady 后触发；
+   动画结束后 ts 侧摘除 --enter/--in 类，避免 500ms 延迟污染按压反馈 */
+.publish-fab--enter {
+  opacity: 0;
+  transform: scale(0.4);
+}
+.publish-fab--enter.publish-fab--in {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 400ms var(--ct-ease-spring) 500ms, transform 400ms var(--ct-ease-spring) 500ms;
 }

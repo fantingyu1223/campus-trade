@@ -1,9 +1,9 @@
 <view class="page">
-  <!-- 常驻安全提示条（F13-AC3） -->
-  <safety-banner class="page__banner" />
+  <!-- 常驻安全提示条（F13-AC3），入场 stagger 第 1 项 -->
+  <safety-banner class="page__banner ct-enter {{pageReady ? 'ct-enter--in' : ''}}" />
 
-  <!-- 搜索框 -->
-  <view class="search-bar">
+  <!-- 搜索框（橙描边，规范 §4.4），stagger 第 2 项 -->
+  <view class="search-bar ct-enter {{pageReady ? 'ct-enter--in' : ''}}" style="transition-delay: 40ms">
     <input
       class="search-bar__input"
       placeholder="搜索校内闲置好物"
@@ -12,26 +12,27 @@
       bindinput="onSearchInput"
       bindconfirm="onSearch"
     />
-    <view class="search-bar__btn" bindtap="onSearch">搜索</view>
+    <view class="search-bar__btn" hover-class="ct-press" bindtap="onSearch">搜索</view>
   </view>
 
-  <!-- 分类入口 -->
-  <view class="category-grid">
+  <!-- 分类入口（五色 chip，规范 §1.6），stagger 第 3 项 -->
+  <view class="category-grid ct-enter {{pageReady ? 'ct-enter--in' : ''}}" style="transition-delay: 80ms">
     <view
       wx:for="{{categories}}"
       wx:key="id"
       class="category-item"
+      hover-class="ct-press"
       data-id="{{item.id}}"
       data-name="{{item.name}}"
       bindtap="onCategoryTap"
     >
-      <view class="category-item__icon">{{item.icon}}</view>
+      <view class="category-item__icon category-item__icon--{{item.chip}}">{{item.icon}}</view>
       <view class="category-item__name">{{item.name}}</view>
     </view>
   </view>
 
   <!-- 商品流 -->
-  <view class="section-title">推荐闲置</view>
+  <view class="section-title ct-enter {{pageReady ? 'ct-enter--in' : ''}}" style="transition-delay: 120ms">🔥 推荐闲置</view>
 
   <view wx:if="{{productsLoading}}" class="state">商品加载中…</view>
   <view wx:elif="{{productsError}}" class="state state--error">
@@ -40,11 +41,14 @@
   </view>
   <view wx:elif="{{products.length === 0}}" class="state">暂无商品，去发布第一件闲置吧</view>
 
+  <!-- 列表入场：数据返回后 productsReady 置位，stagger 40ms/项封顶 240ms（规范 §5） -->
   <view wx:else class="product-flow">
     <view
       wx:for="{{products}}"
       wx:key="id"
-      class="product-card"
+      class="product-card ct-enter {{productsReady ? 'ct-enter--in' : ''}}"
+      style="transition-delay: {{index * 40 > 240 ? 240 : index * 40}}ms"
+      hover-class="ct-press"
       data-id="{{item.id}}"
       bindtap="onProductTap"
     >
@@ -67,6 +71,10 @@
     </view>
   </view>
 
-  <!-- 发布入口（悬浮按钮） -->
-  <view class="publish-fab" bindtap="onPublishTap">+ 发布</view>
+  <!-- 发布入口（悬浮按钮，spring 弹跳入场，规范 §4.6） -->
+  <view
+    class="publish-fab {{fabSettled ? '' : 'publish-fab--enter'}} {{pageReady && !fabSettled ? 'publish-fab--in' : ''}}"
+    hover-class="ct-press"
+    bindtap="onPublishTap"
+  >+ 发布</view>
 </view>

@@ -1,9 +1,11 @@
+/* 安全提示条 · 设计规范「橙市」：便签黄 + 虚线描边（暖黄不用红，避免惊吓感） */
 .safety-banner {
   display: flex;
   align-items: center;
   padding: 16rpx 24rpx;
-  background: #fdf6ec;
-  border-radius: 12rpx;
+  background: var(--ct-warn-bg);
+  border: 2rpx dashed var(--ct-warn-line);
+  border-radius: var(--ct-radius-banner);
   box-sizing: border-box;
 }
 
@@ -13,8 +15,9 @@
 }
 
 .safety-banner__text {
-  font-size: 24rpx;
+  font-size: 22rpx;
+  font-weight: 500;
   line-height: 1.5;
-  color: #e6a23c;
+  color: var(--ct-warn-text);
   flex: 1;
 }

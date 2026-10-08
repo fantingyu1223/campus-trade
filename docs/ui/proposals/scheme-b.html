@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>方案 B · 橙市 —— 活力市集风 · 暖色高饱和</title>
+<style>
+  /* ============ 设计稿外层（评审环境，非小程序样式） ============ */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #EEF0F2;
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #23282D;
+    padding-bottom: 96px;
+  }
+  .page-head {
+    max-width: 1120px; margin: 0 auto; padding: 40px 32px 8px;
+    display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap;
+  }
+  .page-head h1 { font-size: 24px; font-weight: 600; letter-spacing: 1px; }
+  .page-head .tag {
+    font-size: 12px; color: #C23A10; background: #FFE4D6;
+    padding: 4px 12px; border-radius: 999px; font-weight: 500;
+  }
+  .page-head .back { margin-left: auto; font-size: 13px; color: #6B7280; text-decoration: none; }
+  .page-head .back:hover { color: #FF5A2D; }
+  .page-sub { max-width: 1120px; margin: 0 auto; padding: 4px 32px 24px; font-size: 14px; color: #5F6B73; }
+
+  .layout { max-width: 1120px; margin: 0 auto; padding: 0 32px; display: flex; gap: 40px; flex-wrap: wrap; }
+  .stage { flex: 0 0 auto; }
+  .side { flex: 1 1 420px; min-width: 380px; display: flex; flex-direction: column; gap: 24px; }
+
+  /* ============ 手机框 ============ */
+  .phone {
+    width: 395px; padding: 10px; background: #16181C; border-radius: 48px;
+    box-shadow: 0 24px 64px rgba(20, 24, 30, 0.25);
+  }
+  .screen {
+    width: 375px; height: 812px; border-radius: 38px; overflow: hidden;
+    position: relative; background: #FFF6EF; display: flex; flex-direction: column;
+  }
+
+  /* ============ 小程序页面样式（可映射 WXSS，1px = 2rpx） ============ */
+  .screen {
+    --c-primary: #FF5A2D;        /* 主色：柿子橙 CTA / FAB / 价格族 */
+    --c-primary-strong: #D93E10; /* 小字主色 / 按压态（白底 4.6:1） */
+    --c-primary-soft: #FFE4D6;   /* 橙浅底 */
+    --c-accent: #2B5BFF;         /* 撞色校蓝：链接 / 卖家认证 */
+    --c-accent-soft: #E8EFFF;
+    --c-bg: #FFF6EF;             /* 米白暖底 */
+    --c-card: #FFFFFF;
+    --c-ink-900: #2B1D16;        /* 暖调墨色标题 */
+    --c-ink-600: #6B584C;        /* 次级正文（白底 7.2:1） */
+    --c-ink-400: #A08D80;        /* 辅助（白底 3.4:1，仅大字/图标级） */
+    --c-warn-bg: #FFF3C4;
+    --c-warn-text: #6E4E00;      /* 对比 8.2:1 */
+    --c-urgent: #D81E3F;         /* 急出品红（白字 5.0:1） */
+    --c-merchant-bg: #E8EFFF;
+    --c-merchant-text: #1D46C8;
+    --r-card: 14px;              /* 28rpx，更圆润 */
+    --r-pill: 999px;
+    --shadow-card: 0 3px 10px rgba(178, 88, 42, 0.08);
+    --shadow-fab: 0 6px 16px rgba(255, 90, 45, 0.38);
+  }
+
+  .statusbar {
+    height: 44px; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px; font-size: 13px; font-weight: 600; color: #2B1D16; background: #fff;
+  }
+  .statusbar .icons { font-size: 11px; letter-spacing: 2px; }
+  .navbar {
+    height: 44px; background: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 700; color: #2B1D16; letter-spacing: 1px;
+  }
+
+  .scroll { flex: 1; overflow-y: auto; padding: 12px 16px 96px; }
+  .scroll::-webkit-scrollbar { width: 0; }
+
+  /* 安全提示条：横幅贴纸感 */
+  .safety-banner {
+    display: flex; align-items: flex-start; gap: 8px;
+    background: var(--c-warn-bg); border-radius: 12px;
+    border: 1px dashed #E8C44A;
+    padding: 10px 12px; margin-bottom: 12px;
+  }
+  .safety-banner .icon { font-size: 14px; line-height: 1.5; }
+  .safety-banner .text { font-size: 11px; line-height: 1.5; color: var(--c-warn-text); font-weight: 500; }
+
+  /* 搜索框：橙底实心按钮 */
+  .search-bar {
+    display: flex; align-items: center; background: var(--c-card);
+    border-radius: var(--r-pill); padding: 4px 4px 4px 16px; margin-bottom: 12px;
+    box-shadow: var(--shadow-card); border: 2px solid var(--c-primary);
+  }
+  .search-bar .ph { flex: 1; font-size: 13px; color: var(--c-ink-400); }
+  .search-bar .btn {
+    background: var(--c-primary); color: #fff; font-size: 13px; font-weight: 600;
+    padding: 8px 22px; border-radius: var(--r-pill); cursor: pointer;
+    transition: transform 120ms ease-out, opacity 120ms ease-out;
+  }
+  .search-bar .btn.is-press { transform: scale(0.93); opacity: 0.85; }
+
+  /* 分类入口：五彩 chip */
+  .category-grid {
+    display: flex; background: var(--c-card); border-radius: var(--r-card);
+    padding: 14px 0; margin-bottom: 16px; box-shadow: var(--shadow-card);
+  }
+  .category-item {
+    width: 20%; display: flex; flex-direction: column; align-items: center; gap: 6px;
+    cursor: pointer; border-radius: 10px;
+    transition: transform 120ms ease-out, opacity 120ms ease-out;
+  }
+  .category-item .icon {
+    width: 46px; height: 46px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 22px;
+    transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .category-item:nth-child(1) .icon { background: #FFE4D6; }
+  .category-item:nth-child(2) .icon { background: #E0EBFF; }
+  .category-item:nth-child(3) .icon { background: #FFF3C4; }
+  .category-item:nth-child(4) .icon { background: #EFE4FF; }
+  .category-item:nth-child(5) .icon { background: #DDF5E4; }
+  .category-item:hover .icon { transform: scale(1.08); }
+  .category-item.is-press { transform: scale(0.92); opacity: 0.8; }
+  .category-item .name { font-size: 11px; font-weight: 500; color: var(--c-ink-600); }
+
+  .section-title {
+    font-size: 17px; font-weight: 700; color: var(--c-ink-900);
+    margin: 4px 2px 12px; display: flex; align-items: center; gap: 8px;
+  }
+  .section-title .flame { font-size: 16px; }
+  .section-title .more { margin-left: auto; font-size: 11px; font-weight: 500; color: var(--c-accent); }
+
+  .product-flow { display: flex; flex-wrap: wrap; justify-content: space-between; }
+  .product-card {
+    width: 168px; background: var(--c-card); border-radius: var(--r-card);
+    overflow: hidden; margin-bottom: 12px; box-shadow: var(--shadow-card);
+    cursor: pointer;
+    transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .product-card:hover { transform: translateY(-3px) scale(1.01); }
+  .product-card.is-press { transform: scale(0.96); transition-duration: 120ms; }
+  .product-card .cover {
+    width: 168px; height: 150px; position: relative;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: rgba(255,255,255,0.9);
+  }
+  .cover.c1 { background: linear-gradient(135deg, #FF9A6B, #F06A3A); }
+  .cover.c2 { background: linear-gradient(135deg, #6B8CFF, #3D5BD9); }
+  .cover.c3 { background: linear-gradient(135deg, #FFC65C, #E89B1E); }
+  .cover.c4 { background: linear-gradient(135deg, #B98CFF, #7C4DD9); }
+  .product-card .urgent {
+    position: absolute; top: 8px; left: 8px;
+    background: var(--c-urgent); color: #fff; font-size: 10px; font-weight: 600;
+    padding: 3px 8px; border-radius: 999px;
+    box-shadow: 0 2px 6px rgba(216, 30, 63, 0.35);
+  }
+  .product-card .body { padding: 10px 12px 12px; }
+  .product-card .title {
+    font-size: 13px; color: var(--c-ink-900); line-height: 1.4; font-weight: 600;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 6px;
+  }
+  .product-card .meta { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
+  .product-card .price {
+    font-size: 19px; font-weight: 700; color: var(--c-primary-strong);
+    font-variant-numeric: tabular-nums;
+  }
+  .product-card .price .yen { font-size: 12px; margin-right: 1px; }
+  .product-card .condition {
+    font-size: 10px; color: var(--c-primary-strong); background: var(--c-primary-soft);
+    padding: 2px 6px; border-radius: 4px; font-weight: 500;
+  }
+  .product-card .seller { display: flex; align-items: center; justify-content: space-between; }
+  .product-card .nickname {
+    font-size: 11px; color: var(--c-ink-600);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 86px;
+  }
+  .badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; }
+  .badge--person { background: #F1EAE4; color: var(--c-ink-600); }
+  .badge--merchant { background: var(--c-merchant-bg); color: var(--c-merchant-text); font-weight: 600; }
+
+  .fab {
+    position: absolute; right: 16px; bottom: 76px;
+    background: linear-gradient(135deg, #FF7A45, #FF5A2D); color: #fff;
+    font-size: 15px; font-weight: 600;
+    padding: 13px 24px; border-radius: var(--r-pill); box-shadow: var(--shadow-fab);
+    cursor: pointer; z-index: 5;
+    transition: transform 120ms ease-out, opacity 120ms ease-out;
+  }
+  .fab:hover { transform: translateY(-2px) scale(1.02); }
+  .fab.is-press { transform: scale(0.92); opacity: 0.9; }
+
+  .tabbar {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 62px;
+    background: #fff; border-top: 1px solid rgba(178, 88, 42, 0.1);
+    display: flex; z-index: 4;
+  }
+  .tab {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2px; cursor: pointer; color: var(--c-ink-400); position: relative;
+    transition: color 200ms ease-out;
+  }
+  .tab .t-icon {
+    font-size: 20px; position: relative;
+    transition: transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .tab .t-label { font-size: 10px; font-weight: 500; }
+  .tab .bar {
+    position: absolute; top: 0; width: 20px; height: 3px; border-radius: 0 0 3px 3px;
+    background: var(--c-primary); transform: scaleX(0);
+    transition: transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .tab .dot {
+    position: absolute; top: 4px; right: calc(50% - 16px);
+    min-width: 14px; height: 14px; border-radius: 7px; background: var(--c-urgent);
+    color: #fff; font-size: 9px; display: flex; align-items: center; justify-content: center; padding: 0 3px;
+  }
+  .tab.is-active { color: var(--c-primary-strong); }
+  .tab.is-active .t-icon { transform: translateY(-2px) scale(1.12); }
+  .tab.is-active .bar { transform: scaleX(1); }
+
+  /* 入场 stagger：spring 回弹签名 */
+  .stagger {
+    opacity: 0; transform: translateY(20px) scale(0.97);
+    transition: opacity 360ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 360ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition-delay: var(--d, 0ms);
+  }
+  .stagger.in { opacity: 1; transform: translateY(0) scale(1); }
+  .fab-stagger {
+    opacity: 0; transform: scale(0.4);
+    transition: opacity 400ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition-delay: var(--d, 0ms);
+  }
+  .fab-stagger.in { opacity: 1; transform: scale(1); }
+  .fab-stagger.in:hover { transform: translateY(-2px) scale(1.02); }
+  .fab-stagger.in.is-press { transform: scale(0.92); opacity: 0.9; }
+
+  /* ============ 评审面板 ============ */
+  .panel { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(20,24,30,0.06); }
+  .panel h2 { font-size: 15px; font-weight: 600; margin-bottom: 16px; color: #23282D; }
+  .panel h2 .en { font-size: 11px; color: #9AA1A9; font-weight: 400; margin-left: 8px; }
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; }
+  .swatch { border-radius: 10px; overflow: hidden; border: 1px solid rgba(0,0,0,0.06); }
+  .swatch .chip { height: 44px; }
+  .swatch .info { padding: 6px 8px 8px; background: #fff; }
+  .swatch .hex { font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .swatch .use { font-size: 10px; color: #6B7280; margin-top: 2px; line-height: 1.4; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #EEF0F2; }
+  th { color: #6B7280; font-weight: 500; font-size: 11px; }
+  td.mono { font-family: ui-monospace, Consolas, monospace; font-size: 11px; }
+  .token-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 24px; font-size: 12px; }
+  .token-grid .row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px dashed #EEF0F2; }
+  .token-grid .k { color: #6B7280; }
+  .token-grid .v { font-family: ui-monospace, Consolas, monospace; font-size: 11px; }
+</style>
+</head>
+<body>
+
+<header class="page-head">
+  <h1>方案 B · 橙市</h1>
+  <span class="tag">活力市集风 · 暖色高饱和</span>
+  <a class="back" href="index.html">← 返回方案总览</a>
+</header>
+<p class="page-sub">一句话定位：像周末跳蚤市场开集一样热闹的捡漏现场 —— 柿子橙点燃交易欲，校蓝撞色守住校园感，适合拉新促活、大促季运营。</p>
+
+<div class="layout">
+  <!-- ============ 手机稿 ============ -->
+  <div class="stage">
+    <div class="phone">
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="icons">●●●○ 📶 🔋</span></div>
+        <div class="navbar">校园二手平台</div>
+
+        <div class="scroll">
+          <div class="safety-banner stagger" style="--d:0ms">
+            <span class="icon">🛡</span>
+            <span class="text">平台不托管资金，请当面交易并验货后再付款，谨防诈骗与私下转账。</span>
+          </div>
+
+          <div class="search-bar stagger" style="--d:40ms">
+            <span class="ph">🔍 搜索校内闲置好物</span>
+            <span class="btn pressable">搜索</span>
+          </div>
+
+          <div class="category-grid stagger" style="--d:80ms">
+            <div class="category-item pressable"><span class="icon">📚</span><span class="name">教材书籍</span></div>
+            <div class="category-item pressable"><span class="icon">💻</span><span class="name">数码电子</span></div>
+            <div class="category-item pressable"><span class="icon">🪑</span><span class="name">生活用品</span></div>
+            <div class="category-item pressable"><span class="icon">👟</span><span class="name">服饰鞋包</span></div>
+            <div class="category-item pressable"><span class="icon">📦</span><span class="name">其他闲置</span></div>
+          </div>
+
+          <div class="section-title stagger" style="--d:120ms">
+            <span class="flame">🔥</span>推荐闲置<span class="more">换一批 ›</span>
+          </div>
+
+          <div class="product-flow">
+            <div class="product-card stagger" style="--d:150ms">
+              <div class="cover c1"><span>实拍图</span><span class="urgent">急出</span></div>
+              <div class="body">
+                <div class="title">高等数学 同济七版 上下册</div>
+                <div class="meta"><span class="price"><span class="yen">¥</span>15</span><span class="condition">九成新</span></div>
+                <div class="seller"><span class="nickname">张同学</span><span class="badge badge--person">学生</span></div>
+              </div>
+            </div>
+            <div class="product-card stagger" style="--d:190ms">
+              <div class="cover c2"><span>实拍图</span></div>
+              <div class="body">
+                <div class="title">AirPods Pro 二代 宿舍自提</div>
+                <div class="meta"><span class="price"><span class="yen">¥</span>799</span><span class="condition">九成新</span></div>
+                <div class="seller"><span class="nickname">李老师</span><span class="badge badge--person">教职工</span></div>
+              </div>
+            </div>
+            <div class="product-card stagger" style="--d:230ms">
+              <div class="cover c3"><span>实拍图</span><span class="urgent">急出</span></div>
+              <div class="body">
+                <div class="title">宿舍小冰箱 60L 可小刀</div>
+                <div class="meta"><span class="price"><span class="yen">¥</span>180</span><span class="condition">八成新</span></div>
+                <div class="seller"><span class="nickname">王学姐</span><span class="badge badge--person">学生</span></div>
+              </div>
+            </div>
+            <div class="product-card stagger" style="--d:270ms">
+              <div class="cover c4"><span>实拍图</span></div>
+              <div class="body">
+                <div class="title">青轴机械键盘 全新未拆</div>
+                <div class="meta"><span class="price"><span class="yen">¥</span>129</span><span class="condition">全新</span></div>
+                <div class="seller"><span class="nickname">数码小铺</span><span class="badge badge--merchant">认证商家</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fab pressable fab-stagger" style="--d:500ms">+ 发布</div>
+
+        <div class="tabbar">
+          <div class="tab is-active"><span class="bar"></span><span class="t-icon">🏠</span><span class="t-label">首页</span></div>
+          <div class="tab"><span class="bar"></span><span class="t-icon">🛒</span><span class="t-label">求购</span></div>
+          <div class="tab"><span class="bar"></span><span class="t-icon">💬</span><span class="t-label">消息</span><span class="dot">3</span></div>
+          <div class="tab"><span class="bar"></span><span class="t-icon">👤</span><span class="t-label">我的</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 评审面板 ============ -->
+  <div class="side">
+    <section class="panel">
+      <h2>色板<span class="en">COLOR TOKENS · 对比度均 ≥ WCAG AA</span></h2>
+      <div class="swatches">
+        <div class="swatch"><div class="chip" style="background:#FF5A2D"></div><div class="info"><div class="hex">#FF5A2D</div><div class="use">主色 · CTA / FAB / 描边（白字 3.3:1，仅大号按钮文字）</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#D93E10"></div><div class="info"><div class="hex">#D93E10</div><div class="use">小字主色 · 价格 / 选中态 / 按压态（白底 4.6:1）</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#2B5BFF"></div><div class="info"><div class="hex">#2B5BFF</div><div class="use">撞色校蓝 · 链接 / 运营入口（白底 5.9:1），与橙互补提神</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#FFF6EF"></div><div class="info"><div class="hex">#FFF6EF</div><div class="use">页面底色 · 米白暖调</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#2B1D16"></div><div class="info"><div class="hex">#2B1D16</div><div class="use">标题文字 · 暖调墨色（白底 14.9:1）</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#6B584C"></div><div class="info"><div class="hex">#6B584C</div><div class="use">次级正文（白底 7.2:1）</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#FFF3C4"></div><div class="info"><div class="hex">#FFF3C4 + #6E4E00</div><div class="use">安全提示 · 便签黄 + 虚线描边（8.2:1）</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#D81E3F"></div><div class="info"><div class="hex">#D81E3F</div><div class="use">急出标签 · 品红胶囊（白字 5.0:1）</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#E8EFFF"></div><div class="info"><div class="hex">#E8EFFF + #1D46C8</div><div class="use">认证商家标 · 校蓝系，与个人闲置拉开（F33-AC1）</div></div></div>
+        <div class="swatch"><div class="chip" style="background:linear-gradient(90deg,#FFE4D6,#E0EBFF,#FFF3C4,#EFE4FF,#DDF5E4)"></div><div class="info"><div class="hex">五彩 chip</div><div class="use">分类图标底 · 每类一个柔色，市集的「摊位感」</div></div></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>字号阶梯<span class="en">TYPE SCALE · 比率 ≈ 1.125–1.25（px@375 / rpx）</span></h2>
+      <table>
+        <tr><th>用途</th><th>px</th><th>rpx</th><th>字重</th><th>行高</th></tr>
+        <tr><td>标签 / 角标</td><td class="mono">10</td><td class="mono">20</td><td>500–600</td><td>1.4</td></tr>
+        <tr><td>辅助说明 / 昵称</td><td class="mono">11</td><td class="mono">22</td><td>400–500</td><td>1.5</td></tr>
+        <tr><td>正文 / 搜索占位</td><td class="mono">13</td><td class="mono">26</td><td>400</td><td>1.5</td></tr>
+        <tr><td>卡片标题</td><td class="mono">13</td><td class="mono">26</td><td>600</td><td>1.4</td></tr>
+        <tr><td>区块标题</td><td class="mono">17</td><td class="mono">34</td><td>700</td><td>1.3</td></tr>
+        <tr><td>价格数字（tabular-nums）</td><td class="mono">19</td><td class="mono">38</td><td>700</td><td>1.2</td></tr>
+      </table>
+    </section>
+
+    <section class="panel">
+      <h2>圆角 / 阴影 / 间距<span class="en">SHAPE &amp; SPACING TOKENS</span></h2>
+      <div class="token-grid">
+        <div class="row"><span class="k">radius-card</span><span class="v">28rpx / 14px（更圆润）</span></div>
+        <div class="row"><span class="k">radius-banner</span><span class="v">24rpx / 12px</span></div>
+        <div class="row"><span class="k">radius-pill（搜索/FAB/急出）</span><span class="v">999px 全圆角</span></div>
+        <div class="row"><span class="k">radius-分类图标</span><span class="v">50% 正圆</span></div>
+        <div class="row"><span class="k">shadow-card</span><span class="v">0 6rpx 20rpx rgba(178,88,42,.08)</span></div>
+        <div class="row"><span class="k">shadow-fab</span><span class="v">0 12rpx 32rpx rgba(255,90,45,.38)</span></div>
+        <div class="row"><span class="k">spacing 页面左右边距</span><span class="v">32rpx / 16px</span></div>
+        <div class="row"><span class="k">spacing 卡片间距</span><span class="v">24rpx / 12px</span></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>动效参数表<span class="en">MOTION SPECS · 仅 transform / opacity · spring 签名</span></h2>
+      <table>
+        <tr><th>元素</th><th>属性</th><th>时长</th><th>缓动</th><th>延迟</th></tr>
+        <tr><td>页面加载 · 各模块入场</td><td class="mono">opacity + translateY(20px) + scale(0.97)</td><td class="mono">360ms</td><td class="mono">cubic-bezier(0.34,1.56,0.64,1)</td><td class="mono">stagger 40ms/项</td></tr>
+        <tr><td>商品卡片 hover</td><td class="mono">translateY(-3px) + scale(1.01)</td><td class="mono">220ms</td><td class="mono">cubic-bezier(0.34,1.56,0.64,1)</td><td class="mono">0</td></tr>
+        <tr><td>按压反馈</td><td class="mono">scale(0.92–0.96) + opacity</td><td class="mono">120ms</td><td class="mono">ease-out</td><td class="mono">0</td></tr>
+        <tr><td>分类图标 hover</td><td class="mono">scale(1.08)</td><td class="mono">220ms</td><td class="mono">spring</td><td class="mono">0</td></tr>
+        <tr><td>FAB 入场（弹跳）</td><td class="mono">scale(0.4→1) + opacity</td><td class="mono">400ms</td><td class="mono">cubic-bezier(0.34,1.56,0.64,1)</td><td class="mono">列表入场后 160ms</td></tr>
+        <tr><td>tabBar 切换</td><td class="mono">图标 scale(1.12) + 顶部指示条 scaleX</td><td class="mono">280ms</td><td class="mono">spring</td><td class="mono">0</td></tr>
+      </table>
+    </section>
+  </div>
+</div>
+
+<script>
+  window.addEventListener('load', function () {
+    requestAnimationFrame(function () {
+      document.querySelectorAll('.stagger, .fab-stagger').forEach(function (el) { el.classList.add('in'); });
+    });
+  });
+  document.querySelectorAll('.pressable, .product-card').forEach(function (el) {
+    var down = function () { el.classList.add('is-press'); };
+    var up = function () { el.classList.remove('is-press'); };
+    el.addEventListener('mousedown', down);
+    el.addEventListener('touchstart', down, { passive: true });
+    ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach(function (ev) { el.addEventListener(ev, up); });
+  });
+  document.querySelectorAll('.tab').forEach(function (t) {
+    t.addEventListener('click', function () {
+      document.querySelectorAll('.tab').forEach(function (x) { x.classList.remove('is-active'); });
+      t.classList.add('is-active');
+    });
+  });
+</script>
+</body>
+</html>

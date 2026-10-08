@@ -1,25 +1,26 @@
+/* 详情页 · 设计规范「橙市」：底部操作条 / 价格区 / 急出标套用 token */
 .page {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: var(--ct-bg);
   padding-bottom: 20rpx;
 }
 .state {
   text-align: center;
-  color: #999;
+  color: var(--ct-ink-400);
   font-size: 26rpx;
   padding: 160rpx 0;
 }
 .state--error {
-  color: #ff4d4f;
+  color: var(--ct-urgent);
 }
 .state__retry {
-  color: #07c160;
+  color: var(--ct-accent);
   margin-top: 20rpx;
 }
 .gallery {
   width: 100%;
   height: 560rpx;
-  background: #fff;
+  background: var(--ct-card);
 }
 .gallery__img {
   width: 100%;
@@ -29,52 +30,59 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ccc;
+  color: var(--ct-primary-strong);
   font-size: 32rpx;
-  background: #eee;
+  background: var(--ct-primary-soft);
 }
 .info {
-  background: #fff;
+  background: var(--ct-card);
   padding: 24rpx;
 }
 .info__price-row {
   display: flex;
-  align-items: baseline;
+  align-items: center;
 }
+/* 价格：小字主橙 44rpx/700 tabular-nums */
 .info__price {
-  color: #ff4d4f;
+  color: var(--ct-primary-strong);
   font-size: 44rpx;
-  font-weight: 600;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 .info__original {
-  color: #999;
+  color: var(--ct-ink-400);
   font-size: 24rpx;
   text-decoration: line-through;
   margin-left: 16rpx;
 }
+/* 急出：品红实心 pill */
 .info__urgent {
-  background: #fff1f0;
-  color: #ff4d4f;
+  background: var(--ct-urgent);
+  color: #fff;
   font-size: 20rpx;
-  padding: 4rpx 12rpx;
-  border-radius: 8rpx;
+  font-weight: 700;
+  padding: 6rpx 16rpx;
+  border-radius: 999px;
+  box-shadow: var(--ct-shadow-urgent);
   margin-left: 16rpx;
 }
 .info__title {
   font-size: 32rpx;
-  color: #333;
-  font-weight: 600;
+  color: var(--ct-ink-900);
+  font-weight: 700;
   margin-top: 16rpx;
 }
 .info__meta {
   margin-top: 16rpx;
 }
+/* 属性 tag：橙浅底 chip */
 .info__tag {
-  background: #f5f5f5;
-  color: #666;
+  background: var(--ct-primary-soft);
+  color: var(--ct-primary-strong);
   font-size: 22rpx;
+  font-weight: 500;
   padding: 6rpx 16rpx;
-  border-radius: 16rpx;
+  border-radius: 999px;
   margin-right: 16rpx;
 }
 .info__row {
@@ -83,43 +91,45 @@
   font-size: 26rpx;
 }
 .info__label {
-  color: #999;
+  color: var(--ct-ink-400);
   width: 140rpx;
 }
 .info__value {
-  color: #333;
+  color: var(--ct-ink-900);
   flex: 1;
 }
 .section {
-  background: #fff;
+  background: var(--ct-card);
   margin-top: 16rpx;
   padding: 24rpx;
 }
 .section__title {
   font-size: 28rpx;
-  color: #333;
-  font-weight: 600;
+  color: var(--ct-ink-900);
+  font-weight: 700;
   margin-bottom: 16rpx;
 }
 .section__body {
   font-size: 26rpx;
-  color: #666;
+  color: var(--ct-ink-600);
   line-height: 1.6;
 }
 .seller {
-  background: #fff;
+  background: var(--ct-card);
   margin-top: 16rpx;
   padding: 24rpx;
   display: flex;
   align-items: center;
 }
+/* 卖家头像占位：橙浅底 + 主橙字 */
 .seller__avatar {
   width: 72rpx;
   height: 72rpx;
   border-radius: 50%;
-  background: #e8f7ee;
-  color: #07c160;
+  background: var(--ct-primary-soft);
+  color: var(--ct-primary-strong);
   font-size: 30rpx;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -132,46 +142,53 @@
 }
 .seller__nickname {
   font-size: 28rpx;
-  color: #333;
+  color: var(--ct-ink-900);
+  font-weight: 500;
   margin-right: 16rpx;
 }
 .seller__credit {
-  color: #999;
+  color: var(--ct-ink-400);
   font-size: 22rpx;
 }
+/* 安全提示：便签黄 + 虚线描边（与 safety-banner 组件同语言） */
 .safety-tip {
   margin: 16rpx 20rpx 0;
-  background: #fffbe6;
-  color: #ad6800;
+  background: var(--ct-warn-bg);
+  border: 2rpx dashed var(--ct-warn-line);
+  color: var(--ct-warn-text);
   font-size: 22rpx;
   padding: 16rpx 20rpx;
-  border-radius: 12rpx;
+  border-radius: var(--ct-radius-banner);
   line-height: 1.6;
 }
 .report {
   text-align: center;
-  color: #999;
+  color: var(--ct-ink-400);
   font-size: 24rpx;
   padding: 32rpx 0 16rpx;
 }
+/* 底部操作条：橙渐变主按钮 + FAB 级投影 */
 .footer {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
-  background: #fff;
+  background: var(--ct-card);
   padding: 16rpx 20rpx calc(16rpx + env(safe-area-inset-bottom));
-  box-shadow: 0 -2rpx 12rpx rgba(0, 0, 0, 0.05);
+  box-shadow: 0 -2rpx 12rpx rgba(178, 88, 42, 0.08);
 }
 .footer__btn {
   text-align: center;
   padding: 22rpx 0;
-  border-radius: 40rpx;
+  border-radius: 999px;
   font-size: 30rpx;
+  font-weight: 700;
+  transition: transform 120ms ease-out, opacity 120ms ease-out;
 }
 .footer__btn--primary {
-  background: #07c160;
+  background: linear-gradient(135deg, var(--ct-primary-light), var(--ct-primary));
   color: #fff;
+  box-shadow: var(--ct-shadow-fab);
 }
 .footer__placeholder {
   height: 140rpx;
@@ -182,7 +199,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(43, 29, 22, 0.65);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -192,7 +209,7 @@
 .sold-mask__text {
   color: #fff;
   font-size: 56rpx;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 8rpx;
 }
 .sold-mask__sub {

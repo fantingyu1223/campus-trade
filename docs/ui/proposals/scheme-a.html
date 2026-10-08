@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>方案 A · 青藤 —— 清新校园风 · 信任绿基底</title>
+<style>
+  /* ============ 设计稿外层（评审环境，非小程序样式） ============ */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #EEF0F2;
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #23282D;
+    padding-bottom: 96px;
+  }
+  .page-head {
+    max-width: 1120px; margin: 0 auto; padding: 40px 32px 8px;
+    display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap;
+  }
+  .page-head h1 { font-size: 24px; font-weight: 600; letter-spacing: 1px; }
+  .page-head .tag {
+    font-size: 12px; color: #0B7A50; background: #E3F5EC;
+    padding: 4px 12px; border-radius: 999px; font-weight: 500;
+  }
+  .page-head .back { margin-left: auto; font-size: 13px; color: #6B7280; text-decoration: none; }
+  .page-head .back:hover { color: #0FA36B; }
+  .page-sub { max-width: 1120px; margin: 0 auto; padding: 4px 32px 24px; font-size: 14px; color: #5F6B73; }
+
+  .layout { max-width: 1120px; margin: 0 auto; padding: 0 32px; display: flex; gap: 40px; flex-wrap: wrap; }
+  .stage { flex: 0 0 auto; }
+  .side { flex: 1 1 420px; min-width: 380px; display: flex; flex-direction: column; gap: 24px; }
+
+  /* ============ 手机框 ============ */
+  .phone {
+    width: 395px; padding: 10px; background: #16181C; border-radius: 48px;
+    box-shadow: 0 24px 64px rgba(20, 24, 30, 0.25);
+  }
+  .screen {
+    width: 375px; height: 812px; border-radius: 38px; overflow: hidden;
+    position: relative; background: #F3F7F4; display: flex; flex-direction: column;
+  }
+
+  /* ============ 小程序页面样式（可映射 WXSS，1px = 2rpx） ============ */
+  /* token 定义 */
+  .screen {
+    --c-primary: #0FA36B;        /* 主色：CTA / 选中态 */
+    --c-primary-strong: #0B7A50; /* 文字态主色 / 按压态 */
+    --c-primary-soft: #E3F5EC;   /* 主色浅底：标签底 */
+    --c-bg: #F3F7F4;             /* 页面底：带绿偏中性 */
+    --c-card: #FFFFFF;
+    --c-ink-900: #1C2B24;        /* 标题 */
+    --c-ink-600: #51645A;        /* 次级正文（白底对比 7.1:1） */
+    --c-ink-400: #8A9A91;        /* 辅助说明（白底对比 3.4:1，仅大字/图标级辅助） */
+    --c-warn-bg: #FFF6DE;        /* 安全提示底（暖黄，不用红） */
+    --c-warn-text: #7A5200;      /* 安全提示文字（对比 7.4:1） */
+    --c-urgent: #C2400F;         /* 急出标签（白字对比 5.1:1） */
+    --c-merchant-bg: #FDF1DC;    /* 认证商家底 */
+    --c-merchant-text: #8A5A00;  /* 认证商家文字 */
+    --r-card: 12px;              /* 24rpx */
+    --r-pill: 999px;
+    --shadow-card: 0 2px 8px rgba(28, 43, 36, 0.05);
+    --shadow-fab: 0 4px 12px rgba(15, 163, 107, 0.32);
+  }
+
+  /* 状态栏 + 导航栏 */
+  .statusbar {
+    height: 44px; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px; font-size: 13px; font-weight: 600; color: #1C2B24; background: #fff;
+  }
+  .statusbar .icons { font-size: 11px; letter-spacing: 2px; color: #1C2B24; }
+  .navbar {
+    height: 44px; background: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 600; color: #1C2B24;
+  }
+
+  .scroll { flex: 1; overflow-y: auto; padding: 12px 16px 96px; }
+  .scroll::-webkit-scrollbar { width: 0; }
+
+  /* 安全提示条（F13-AC3） */
+  .safety-banner {
+    display: flex; align-items: flex-start; gap: 8px;
+    background: var(--c-warn-bg); border-radius: 8px;
+    padding: 10px 12px; margin-bottom: 12px;
+  }
+  .safety-banner .icon { font-size: 13px; line-height: 1.5; }
+  .safety-banner .text { font-size: 11px; line-height: 1.5; color: var(--c-warn-text); }
+
+  /* 搜索框 */
+  .search-bar {
+    display: flex; align-items: center; background: var(--c-card);
+    border-radius: var(--r-pill); padding: 4px 4px 4px 16px; margin-bottom: 12px;
+    box-shadow: var(--shadow-card);
+  }
+  .search-bar .ph { flex: 1; font-size: 13px; color: var(--c-ink-400); }
+  .search-bar .btn {
+    background: var(--c-primary); color: #fff; font-size: 13px; font-weight: 500;
+    padding: 8px 20px; border-radius: var(--r-pill); cursor: pointer;
+    transition: transform 120ms ease-out, opacity 120ms ease-out;
+  }
+  .search-bar .btn.is-press { transform: scale(0.95); opacity: 0.85; }
+
+  /* 分类入口 */
+  .category-grid {
+    display: flex; background: var(--c-card); border-radius: var(--r-card);
+    padding: 14px 0; margin-bottom: 16px; box-shadow: var(--shadow-card);
+  }
+  .category-item {
+    width: 20%; display: flex; flex-direction: column; align-items: center; gap: 6px;
+    cursor: pointer; border-radius: 8px;
+    transition: transform 120ms ease-out, opacity 120ms ease-out;
+  }
+  .category-item .icon {
+    width: 44px; height: 44px; border-radius: 14px; background: var(--c-primary-soft);
+    display: flex; align-items: center; justify-content: center; font-size: 22px;
+    transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .category-item:hover .icon { transform: translateY(-2px); }
+  .category-item.is-press { transform: scale(0.94); opacity: 0.8; }
+  .category-item .name { font-size: 11px; color: var(--c-ink-600); }
+
+  /* 区块标题 */
+  .section-title {
+    font-size: 16px; font-weight: 600; color: var(--c-ink-900);
+    margin: 4px 2px 12px; display: flex; align-items: center; gap: 8px;
+  }
+  .section-title::before {
+    content: ''; width: 4px; height: 16px; border-radius: 2px; background: var(--c-primary);
+  }
+
+  /* 商品流 */
+  .product-flow { display: flex; flex-wrap: wrap; justify-content: space-between; }
+  .product-card {
+    width: 168px; background: var(--c-card); border-radius: var(--r-card);
+    overflow: hidden; margin-bottom: 12px; box-shadow: var(--shadow-card);
+    cursor: pointer;
+    transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .product-card:hover { transform: translateY(-2px); }
+  .product-card.is-press { transform: scale(0.97); transition-duration: 120ms; }
+  .product-card .cover {
+    width: 168px; height: 168px; position: relative;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: rgba(255,255,255,0.85);
+  }
+  .cover.c1 { background: linear-gradient(135deg, #7FBFA0, #5A9E82); }
+  .cover.c2 { background: linear-gradient(135deg, #8FA8C9, #6B84A8); }
+  .cover.c3 { background: linear-gradient(135deg, #D9B98A, #B8946B); }
+  .cover.c4 { background: linear-gradient(135deg, #A79BC9, #8479A8); }
+  .product-card .urgent {
+    position: absolute; top: 8px; left: 8px;
+    background: var(--c-urgent); color: #fff; font-size: 10px; font-weight: 500;
+    padding: 3px 8px; border-radius: 6px;
+  }
+  .product-card .body { padding: 10px 12px 12px; }
+  .product-card .title {
+    font-size: 13px; color: var(--c-ink-900); line-height: 1.4; font-weight: 500;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 6px;
+  }
+  .product-card .meta { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
+  .product-card .price {
+    font-size: 17px; font-weight: 600; color: var(--c-primary-strong);
+    font-variant-numeric: tabular-nums;
+  }
+  .product-card .price .yen { font-size: 12px; margin-right: 1px; }
+  .product-card .condition { font-size: 10px; color: var(--c-ink-400); }
+  .product-card .seller { display: flex; align-items: center; justify-content: space-between; }
+  .product-card .nickname {
+    font-size: 11px; color: var(--c-ink-600);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 86px;
+  }
+  .badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; }
+  .badge--person { background: var(--c-primary-soft); color: var(--c-primary-strong); }
+  .badge--merchant { background: var(--c-merchant-bg); color: var(--c-merchant-text); font-weight: 500; }
+
+  /* 发布悬浮按钮 */
+  .fab {
+    position: absolute; right: 16px; bottom: 76px;
+    background: var(--c-primary); color: #fff; font-size: 15px; font-weight: 500;
+    padding: 12px 22px; border-radius: var(--r-pill); box-shadow: var(--shadow-fab);
+    cursor: pointer; z-index: 5;
+    transition: transform 120ms ease-out, opacity 120ms ease-out;
+  }
+  .fab:hover { transform: translateY(-2px); }
+  .fab.is-press { transform: scale(0.94); opacity: 0.9; }
+
+  /* tabBar */
+  .tabbar {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 60px;
+    background: #fff; border-top: 1px solid rgba(28, 43, 36, 0.06);
+    display: flex; z-index: 4;
+  }
+  .tab {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2px; cursor: pointer; color: var(--c-ink-400); position: relative;
+    transition: color 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .tab .t-icon { font-size: 20px; position: relative; transition: transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .tab .t-label { font-size: 10px; }
+  .tab .dot {
+    position: absolute; top: 4px; right: calc(50% - 16px);
+    min-width: 14px; height: 14px; border-radius: 7px; background: var(--c-urgent);
+    color: #fff; font-size: 9px; display: flex; align-items: center; justify-content: center; padding: 0 3px;
+  }
+  .tab.is-active { color: var(--c-primary); }
+  .tab.is-active .t-icon { transform: translateY(-2px); }
+
+  /* 入场 stagger（仅 transform/opacity） */
+  .stagger {
+    opacity: 0; transform: translateY(16px);
+    transition: opacity 320ms cubic-bezier(0.22, 1, 0.36, 1), transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: var(--d, 0ms);
+  }
+  .stagger.in { opacity: 1; transform: translateY(0); }
+  .fab-stagger {
+    opacity: 0; transform: scale(0.6);
+    transition: opacity 350ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition-delay: var(--d, 0ms);
+  }
+  .fab-stagger.in { opacity: 1; transform: scale(1); }
+  .fab-stagger.in:hover { transform: translateY(-2px); }
+  .fab-stagger.in.is-press { transform: scale(0.94); opacity: 0.9; }
+
+  /* ============ 评审面板 ============ */
+  .panel { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(20,24,30,0.06); }
+  .panel h2 { font-size: 15px; font-weight: 600; margin-bottom: 16px; color: #23282D; }
+  .panel h2 .en { font-size: 11px; color: #9AA1A9; font-weight: 400; margin-left: 8px; }
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; }
+  .swatch { border-radius: 10px; overflow: hidden; border: 1px solid rgba(0,0,0,0.06); }
+  .swatch .chip { height: 44px; }
+  .swatch .info { padding: 6px 8px 8px; background: #fff; }
+  .swatch .hex { font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .swatch .use { font-size: 10px; color: #6B7280; margin-top: 2px; line-height: 1.4; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #EEF0F2; }
+  th { color: #6B7280; font-weight: 500; font-size: 11px; }
+  td.mono { font-family: ui-monospace, Consolas, monospace; font-size: 11px; }
+  .token-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 24px; font-size: 12px; }
+  .token-grid .row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px dashed #EEF0F2; }
+  .token-grid .k { color: #6B7280; }
+  .token-grid .v { font-family: ui-monospace, Consolas, monospace; font-size: 11px; }
+</style>
+</head>
+<body>
+
+<header class="page-head">
+  <h1>方案 A · 青藤</h1>
+  <span class="tag">清新校园风 · 信任绿基底</span>
+  <a class="back" href="index.html">← 返回方案总览</a>
+</header>
+<p class="page-sub">一句话定位：像校园公告栏一样安静可信的闲置市集 —— 用低饱和绿传递「校内、当面交易、可信赖」，适合作为平台长期默认气质。</p>
+
+<div class="layout">
+  <!-- ============ 手机稿 ============ -->
+  <div class="stage">
+    <div class="phone">
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="icons">●●●○ 📶 🔋</span></div>
+        <div class="navbar">校园二手平台</div>
+
+        <div class="scroll">
+          <!-- 安全提示条 -->
+          <div class="safety-banner stagger" style="--d:0ms">
+            <span class="icon">🛡</span>
+            <span class="text">平台不托管资金，请当面交易并验货后再付款，谨防诈骗与私下转账。</span>
+          </div>
+
+          <!-- 搜索框 -->
+          <div class="search-bar stagger" style="--d:50ms">
+            <span class="ph">🔍 搜索校内闲置好物</span>
+            <span class="btn pressable">搜索</span>
+          </div>
+
+          <!-- 分类入口 -->
+          <div class="category-grid stagger" style="--d:100ms">
+            <div class="category-item pressable"><span class="icon">📚</span><span class="name">教材书籍</span></div>
+            <div class="category-item pressable"><span class="icon">💻</span><span class="name">数码电子</span></div>
+            <div class="category-item pressable"><span class="icon">🪑</span><span class="name">生活用品</span></div>
+            <div class="category-item pressable"><span class="icon">👟</span><span class="name">服饰鞋包</span></div>
+            <div class="category-item pressable"><span class="icon">📦</span><span class="name">其他闲置</span></div>
+          </div>
+
+          <div class="section-title stagger" style="--d:150ms">推荐闲置</div>
+
+          <!-- 商品流 -->
+          <div class="product-flow">
+            <div class="product-card stagger" style="--d:180ms">
+              <div class="cover c1"><span>实拍图</span><span class="urgent">急出</span></div>
+              <div class="body">
+                <div class="title">高等数学 同济七版 上下册</div>
+                <div class="meta"><span class="price"><span class="yen">¥</span>15</span><span class="condition">九成新</span></div>
+                <div class="seller"><span class="nickname">张同学</span><span class="badge badge--person">学生</span></div>
+              </div>
+            </div>
+            <div class="product-card stagger" style="--d:230ms">
+              <div class="cover c2"><span>实拍图</span></div>
+              <div class="body">
+                <div class="title">AirPods Pro 二代 宿舍自提</div>
+                <div class="meta"><span class="price"><span class="yen">¥</span>799</span><span class="condition">九成新</span></div>
+                <div class="seller"><span class="nickname">李老师</span><span class="badge badge--person">教职工</span></div>
+              </div>
+            </div>
+            <div class="product-card stagger" style="--d:280ms">
+              <div class="cover c3"><span>实拍图</span><span class="urgent">急出</span></div>
+              <div class="body">
+                <div class="title">宿舍小冰箱 60L 可小刀</div>
+                <div class="meta"><span class="price"><span class="yen">¥</span>180</span><span class="condition">八成新</span></div>
+                <div class="seller"><span class="nickname">王学姐</span><span class="badge badge--person">学生</span></div>
+              </div>
+            </div>
+            <div class="product-card stagger" style="--d:330ms">
+              <div class="cover c4"><span>实拍图</span></div>
+              <div class="body">
+                <div class="title">青轴机械键盘 全新未拆</div>
+                <div class="meta"><span class="price"><span class="yen">¥</span>129</span><span class="condition">全新</span></div>
+                <div class="seller"><span class="nickname">数码小铺</span><span class="badge badge--merchant">认证商家</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fab pressable fab-stagger" style="--d:520ms">+ 发布</div>
+
+        <div class="tabbar">
+          <div class="tab is-active"><span class="t-icon">🏠</span><span class="t-label">首页</span></div>
+          <div class="tab"><span class="t-icon">🛒</span><span class="t-label">求购</span></div>
+          <div class="tab"><span class="t-icon">💬</span><span class="t-label">消息</span><span class="dot">3</span></div>
+          <div class="tab"><span class="t-icon">👤</span><span class="t-label">我的</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 评审面板 ============ -->
+  <div class="side">
+    <section class="panel">
+      <h2>色板<span class="en">COLOR TOKENS · 对比度均 ≥ WCAG AA</span></h2>
+      <div class="swatches">
+        <div class="swatch"><div class="chip" style="background:#0FA36B"></div><div class="info"><div class="hex">#0FA36B</div><div class="use">主色 · CTA / FAB / 选中态（白字 3.3:1，仅大号按钮文字）</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#0B7A50"></div><div class="info"><div class="hex">#0B7A50</div><div class="use">文字态主色 · 价格 / 链接 / 按压态（白底 5.8:1）</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#E3F5EC"></div><div class="info"><div class="hex">#E3F5EC</div><div class="use">主色浅底 · 身份标签 / 图标底</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#F3F7F4"></div><div class="info"><div class="hex">#F3F7F4</div><div class="use">页面底色 · 带绿偏中性</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#1C2B24"></div><div class="info"><div class="hex">#1C2B24</div><div class="use">标题文字 · 带绿偏墨色（白底 14.7:1）</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#51645A"></div><div class="info"><div class="hex">#51645A</div><div class="use">次级正文 · 昵称 / 分类名（白底 7.1:1）</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#FFF6DE"></div><div class="info"><div class="hex">#FFF6DE + #7A5200</div><div class="use">安全提示 · 暖黄底 + 深棕字（7.4:1，不用红避免惊吓感）</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#C2400F"></div><div class="info"><div class="hex">#C2400F</div><div class="use">急出标签 · 高饱和暖橙（白字 5.1:1）</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#FDF1DC"></div><div class="info"><div class="hex">#FDF1DC + #8A5A00</div><div class="use">认证商家标 · 金色系，与个人闲置拉开（F33-AC1）</div></div></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>字号阶梯<span class="en">TYPE SCALE · 比率 ≈ 1.125（px@375 / rpx）</span></h2>
+      <table>
+        <tr><th>用途</th><th>px</th><th>rpx</th><th>字重</th><th>行高</th></tr>
+        <tr><td>标签 / 角标</td><td class="mono">10</td><td class="mono">20</td><td>500</td><td>1.4</td></tr>
+        <tr><td>辅助说明 / 昵称</td><td class="mono">11</td><td class="mono">22</td><td>400</td><td>1.5</td></tr>
+        <tr><td>正文 / 搜索占位</td><td class="mono">13</td><td class="mono">26</td><td>400</td><td>1.5</td></tr>
+        <tr><td>卡片标题 / 正文强调</td><td class="mono">13–14</td><td class="mono">26–28</td><td>500</td><td>1.4</td></tr>
+        <tr><td>区块标题 / 导航标题</td><td class="mono">16</td><td class="mono">32</td><td>600</td><td>1.3</td></tr>
+        <tr><td>价格数字（tabular-nums）</td><td class="mono">17</td><td class="mono">34</td><td>600</td><td>1.2</td></tr>
+      </table>
+    </section>
+
+    <section class="panel">
+      <h2>圆角 / 阴影 / 间距<span class="en">SHAPE &amp; SPACING TOKENS</span></h2>
+      <div class="token-grid">
+        <div class="row"><span class="k">radius-card</span><span class="v">24rpx / 12px</span></div>
+        <div class="row"><span class="k">radius-banner / badge</span><span class="v">16rpx / 8px</span></div>
+        <div class="row"><span class="k">radius-pill（搜索/FAB）</span><span class="v">999px 全圆角</span></div>
+        <div class="row"><span class="k">shadow-card</span><span class="v">0 4rpx 16rpx rgba(28,43,36,.05)</span></div>
+        <div class="row"><span class="k">shadow-fab</span><span class="v">0 8rpx 24rpx rgba(15,163,107,.32)</span></div>
+        <div class="row"><span class="k">spacing 页面左右边距</span><span class="v">32rpx / 16px</span></div>
+        <div class="row"><span class="k">spacing 卡片间距</span><span class="v">24rpx / 12px</span></div>
+        <div class="row"><span class="k">spacing 卡片内边距</span><span class="v">24rpx / 12px</span></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>动效参数表<span class="en">MOTION SPECS · 仅 transform / opacity</span></h2>
+      <table>
+        <tr><th>元素</th><th>属性</th><th>时长</th><th>缓动</th><th>延迟</th></tr>
+        <tr><td>页面加载 · 各模块入场</td><td class="mono">opacity + translateY(16px→0)</td><td class="mono">320ms</td><td class="mono">cubic-bezier(0.22,1,0.36,1)</td><td class="mono">stagger 50ms/项</td></tr>
+        <tr><td>商品卡片 hover</td><td class="mono">translateY(-2px)</td><td class="mono">200ms</td><td class="mono">cubic-bezier(0.22,1,0.36,1)</td><td class="mono">0</td></tr>
+        <tr><td>卡片 / 分类 / 按钮按压</td><td class="mono">scale(0.94–0.97) + opacity</td><td class="mono">120ms</td><td class="mono">ease-out</td><td class="mono">0</td></tr>
+        <tr><td>分类图标 hover</td><td class="mono">translateY(-2px)</td><td class="mono">200ms</td><td class="mono">cubic-bezier(0.34,1.56,0.64,1)</td><td class="mono">0</td></tr>
+        <tr><td>FAB 入场</td><td class="mono">scale(0.6→1) + opacity</td><td class="mono">350ms</td><td class="mono">cubic-bezier(0.34,1.56,0.64,1)</td><td class="mono">列表入场后 190ms</td></tr>
+        <tr><td>tabBar 切换</td><td class="mono">color + 图标 translateY(-2px)</td><td class="mono">200/250ms</td><td class="mono">ease-out / spring</td><td class="mono">0</td></tr>
+      </table>
+    </section>
+  </div>
+</div>
+
+<script>
+  window.addEventListener('load', function () {
+    requestAnimationFrame(function () {
+      document.querySelectorAll('.stagger, .fab-stagger').forEach(function (el) { el.classList.add('in'); });
+    });
+  });
+  document.querySelectorAll('.pressable, .product-card').forEach(function (el) {
+    var down = function () { el.classList.add('is-press'); };
+    var up = function () { el.classList.remove('is-press'); };
+    el.addEventListener('mousedown', down);
+    el.addEventListener('touchstart', down, { passive: true });
+    ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach(function (ev) { el.addEventListener(ev, up); });
+  });
+  document.querySelectorAll('.tab').forEach(function (t) {
+    t.addEventListener('click', function () {
+      document.querySelectorAll('.tab').forEach(function (x) { x.classList.remove('is-active'); });
+      t.classList.add('is-active');
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,6 +1,8 @@
+/* 身份标 · 设计规范「橙市」：个人退到中性灰，认证商家校蓝亮标（F33-AC1） */
 .identity-badge {
   display: inline-block;
   font-size: 20rpx;
+  font-weight: 500;
   line-height: 1;
   padding: 6rpx 12rpx;
   border-radius: 8rpx;
@@ -9,15 +11,13 @@
 
 /* 个人身份：学生/教职工 */
 .identity-badge--person {
-  color: #409eff;
-  background: #ecf5ff;
-  border: 1rpx solid #b3d8ff;
+  color: var(--ct-ink-600);
+  background: var(--ct-neutral-100);
 }
 
-/* 认证商家：与个人闲置可区分（F33-AC1） */
+/* 认证商家：校蓝撞色，与个人闲置可区分（F33-AC1） */
 .identity-badge--merchant {
-  color: #b88230;
-  background: #faecd8;
-  border: 1rpx solid #e6a23c;
-  font-weight: 600;
+  color: var(--ct-accent-strong);
+  background: var(--ct-accent-soft);
+  font-weight: 700;
 }
