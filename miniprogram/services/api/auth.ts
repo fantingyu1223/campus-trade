@@ -27,16 +27,22 @@ export function request<T>(options: RequestOptions): Promise<T> {
     const token = getToken();
     if (token) header.Authorization = `Bearer ${token}`;
   }
+  // wx.request 会把 undefined 序列化成字符串 "undefined" 发给服务端，
+  // 导致后端参数校验误报（如 min_price 非法），统一剥离 undefined 键
+  const cleanData: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(data)) {
+    if (v !== undefined && v !== '') cleanData[k] = v;
+  }
   return new Promise<T>((resolve, reject) => {
     wx.request({
       url: BASE_URL + url,
       method,
-      data,
+      data: cleanData,
       header,
       success: (res) => {
         const body = res.data as ApiResponse<T>;
         if (!body || typeof body.code !== 'number') {
-          reject(new Error('响应格式异常'));
+          reject(new Error(`服务异常（${res.statusCode}），请稍后重试`));
           return;
         }
         if (body.code === 0) {

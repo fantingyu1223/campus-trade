@@ -60,6 +60,13 @@ export class AuthService {
       await this.repo.updateLastLogin(user.id, new Date());
     }
 
+    // WX_MOCK 开发联调：未挂靠学校的用户自动挂靠首个启用学校，
+    // 使发布/搜索等以 school_id 为数据隔离边界的链路可本地跑通（正式流程由认证/加入申请写入）
+    if (process.env.WX_MOCK === 'true' && !user.school_id) {
+      const schoolId = await this.repo.findFirstActiveSchoolId();
+      if (schoolId) user = await this.repo.assignSchool(user.id, schoolId);
+    }
+
     const schoolId = user.school_id ? user.school_id.toString() : null;
     const token = signToken(
       { uid: user.id.toString(), role: user.identity_type, school_id: schoolId },

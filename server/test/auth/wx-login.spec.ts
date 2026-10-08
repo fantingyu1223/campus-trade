@@ -50,8 +50,12 @@ const makePrismaMock = () =>
       create: jest.fn(),
       update: jest.fn(),
     },
+    school: {
+      findFirst: jest.fn().mockResolvedValue(null),
+    },
   }) as unknown as PrismaService & {
     user: { findUnique: jest.Mock; create: jest.Mock; update: jest.Mock };
+    school: { findFirst: jest.Mock };
   };
 
 const makeWxClientMock = () =>
@@ -128,6 +132,31 @@ describe('AuthService.wxLogin（@api §5.2 #1，@ac F1）', () => {
       }),
     );
     expect(result.user.id).toBe('1');
+  });
+
+  it('WX_MOCK 联调：未挂靠学校的用户自动挂靠首个启用学校', async () => {
+    const { repo, wx, service } = setup();
+    wx.code2session.mockResolvedValue({ openid: 'openid-noschool', session_key: 'sk' });
+    const prisma = (repo as unknown as { prisma: ReturnType<typeof makePrismaMock> }).prisma;
+    prisma.user.findUnique.mockResolvedValue(makeUser({ school_id: null }));
+    prisma.user.update
+      .mockResolvedValueOnce(makeUser({ last_login_at: new Date() })) // updateLastLogin
+      .mockResolvedValueOnce(makeUser({ school_id: BigInt(7) })); // assignSchool
+    prisma.school.findFirst.mockResolvedValue({ id: BigInt(7) });
+
+    const result = await service.wxLogin({ code: 'valid-code' });
+
+    expect(prisma.school.findFirst).toHaveBeenCalledWith({
+      where: { status: 'active' },
+      orderBy: { id: 'asc' },
+      select: { id: true },
+    });
+    expect(prisma.user.update).toHaveBeenLastCalledWith({
+      where: { id: BigInt(1) },
+      data: { school_id: BigInt(7) },
+    });
+    expect(result.user.school_id).toBe('7');
+    expect(decodePayload(result.token).school_id).toBe('7');
   });
 
   it('无效 code：code2session 失败 → 业务错误 1001', async () => {

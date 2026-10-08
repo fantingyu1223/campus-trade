@@ -50,6 +50,25 @@ export class AuthRepository {
     return row as unknown as UserRow;
   }
 
+  /** 首个启用学校（WX_MOCK 开发联调：新注册用户自动挂靠用） */
+  async findFirstActiveSchoolId(): Promise<bigint | null> {
+    const row = await this.prisma.school.findFirst({
+      where: { status: 'active' },
+      orderBy: { id: 'asc' },
+      select: { id: true },
+    });
+    return row?.id ?? null;
+  }
+
+  /** 挂靠学校（WX_MOCK 开发联调专用；正式流程由认证/加入申请写入） */
+  async assignSchool(userId: bigint, schoolId: bigint): Promise<UserRow> {
+    const row = await this.prisma.user.update({
+      where: { id: userId },
+      data: { school_id: schoolId },
+    });
+    return row as unknown as UserRow;
+  }
+
   async updateLastLogin(id: bigint, at: Date): Promise<void> {
     await this.prisma.user.update({
       where: { id },

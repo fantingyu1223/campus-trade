@@ -19,7 +19,7 @@ interface ApiResponse<T> {
 
 /** 认证上下文（JWT 载荷写入 req.user；id/school_id 为 string，需转 BigInt） */
 interface AuthedRequest {
-  user?: { id: string; school_id: string; identity_type: string };
+  user?: { id: string; school_id: string | null; identity_type: string };
 }
 
 @Controller('products')
@@ -35,6 +35,9 @@ export class ProductController {
   ): Promise<ApiResponse<PublishProductResult>> {
     if (!req.user) {
       throw new BusinessError(ERROR_CODES.AUTH_TOKEN_INVALID, '未登录或登录已过期');
+    }
+    if (!req.user.school_id) {
+      throw new BusinessError(ERROR_CODES.NOT_VERIFIED, '请先完成校园认证（选择学校）后再发布商品');
     }
     const seller: SellerContext = {
       id: BigInt(req.user.id),
