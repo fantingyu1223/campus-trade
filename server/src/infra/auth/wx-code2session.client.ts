@@ -25,8 +25,13 @@ export interface WxCode2SessionResult {
 export class WxCode2SessionClient {
   async code2session(code: string): Promise<WxCode2SessionResult> {
     if (process.env.WX_MOCK === 'true') {
+      // mock 口径：真实 wx.login 返回的是一次性随机 code（长串），若直接当 openid
+      // 会导致每次登录都注册新账号、用户数据全部"丢失"；故长 code 一律映射为
+      // 稳定 mock openid（单账号开发联调），短字面量 code（如 qa-seller-* 等
+      // API 测试/脚本显式传入）保留独立账号以支持多用户场景。
+      const openid = code.length > 24 ? 'mock_openid_default' : code;
       return {
-        openid: code,
+        openid,
         unionid: null,
         session_key: 'mock-session-key',
       };

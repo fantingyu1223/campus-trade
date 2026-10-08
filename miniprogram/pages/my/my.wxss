@@ -163,3 +163,48 @@
   box-shadow: var(--ct-shadow-fab);
   padding: 0 64rpx;
 }
+
+/* 校园认证引导条（橙市 token） */
+.verify-banner {
+  display: flex;
+  align-items: center;
+  margin: 24rpx 24rpx 0;
+  padding: 24rpx 28rpx;
+  background: linear-gradient(135deg, #fff1e8, #ffe4d3);
+  border: 1rpx solid #ffc9ad;
+  border-radius: 28rpx;
+}
+
+.verify-banner__icon {
+  font-size: 44rpx;
+  margin-right: 20rpx;
+}
+
+.verify-banner__body {
+  flex: 1;
+}
+
+.verify-banner__title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #d93e10;
+}
+
+.verify-banner__desc {
+  font-size: 24rpx;
+  color: #a0694f;
+  margin-top: 4rpx;
+}
+
+.verify-banner__arrow {
+  font-size: 36rpx;
+  color: #d93e10;
+}
+
+.cell__value {
+  flex: 1;
+  text-align: right;
+  font-size: 24rpx;
+  color: #a08d80;
+  margin-right: 8rpx;
+}

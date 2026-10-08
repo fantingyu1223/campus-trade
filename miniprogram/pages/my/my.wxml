@@ -36,8 +36,23 @@
       </view>
     </view>
 
+    <!-- 校园认证引导（guest 未认证时展示；F1-AC2 未认证受限操作前置引导） -->
+    <view wx:if="{{isGuest}}" class="verify-banner" hover-class="ct-press" bindtap="onGotoVerify">
+      <text class="verify-banner__icon">🎓</text>
+      <view class="verify-banner__body">
+        <view class="verify-banner__title">完成校园认证</view>
+        <view class="verify-banner__desc">认证后解锁发布、会话与交易全功能</view>
+      </view>
+      <text class="verify-banner__arrow">›</text>
+    </view>
+
     <!-- 功能列表 -->
     <view class="group">
+      <view class="cell" hover-class="ct-press" bindtap="onGotoVerify">
+        <text class="cell__label">🎓 校园认证</text>
+        <text class="cell__value">{{verifyStatusText}}</text>
+        <text class="cell__arrow">›</text>
+      </view>
       <view class="cell" hover-class="ct-press" data-url="/pages/my-products/my-products" bindtap="onNav">
         <text class="cell__label">📦 我的商品</text>
         <text class="cell__arrow">›</text>

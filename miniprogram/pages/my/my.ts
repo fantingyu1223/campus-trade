@@ -28,6 +28,8 @@ Page({
       identity_type: UserIdentityType.GUEST as string,
     },
     isMerchant: false,
+    isGuest: true,
+    verifyStatusText: '未认证',
     modalVisible: false,
     confirming: false,
     /** 注销成功后的终态页 */
@@ -62,7 +64,29 @@ Page({
         identity_type: identityType,
       },
       isMerchant: identityType === UserIdentityType.MERCHANT,
+      isGuest: identityType === UserIdentityType.GUEST,
+      verifyStatusText:
+        identityType === UserIdentityType.GUEST
+          ? '未认证'
+          : identityType === UserIdentityType.MERCHANT
+            ? '认证商家'
+            : identityType === UserIdentityType.STAFF
+              ? '已认证·教职工'
+              : '已认证·学生',
     });
+  },
+
+  /** 校园认证入口（guest 引导认证；已认证查看状态） */
+  onGotoVerify() {
+    if (!isLoggedIn()) {
+      wx.navigateTo({ url: '/pages/login/login' });
+      return;
+    }
+    if (this.data.isGuest) {
+      wx.navigateTo({ url: '/pages/verify/verify' });
+    } else {
+      wx.navigateTo({ url: '/pages/verify-result/verify-result' });
+    }
   },
 
   /** 未登录态：去登录页 */
