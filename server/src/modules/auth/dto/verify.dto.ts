@@ -23,7 +23,8 @@ export interface VerifySubmitRequest {
 
 export interface VerifySubmitResponse {
   id: string;
-  status: 'pending';
+  /** pending=待审核（生产流程）；approved=WX_MOCK 联调自动通过 */
+  status: 'pending' | 'approved';
   submitted_at: string;
 }
 

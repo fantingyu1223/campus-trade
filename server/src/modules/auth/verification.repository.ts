@@ -102,4 +102,20 @@ export class VerificationRepository {
     });
     return row as unknown as VerificationRow;
   }
+
+  /** 认证通过：置 approved（WX_MOCK 开发联调自动审核用；正式流程由后台审核流转） */
+  async approve(id: bigint): Promise<void> {
+    await this.prisma.identityVerification.update({
+      where: { id },
+      data: { status: 'approved', reviewed_at: new Date(), reject_reason: null },
+    });
+  }
+
+  /** 认证通过后回写用户身份与学校（staff_flag → staff，否则 student） */
+  async updateUserIdentity(userId: bigint, identityType: 'student' | 'staff', schoolId: bigint): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { identity_type: identityType, school_id: schoolId },
+    });
+  }
 }

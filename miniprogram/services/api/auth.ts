@@ -84,18 +84,21 @@ export function getMe(): Promise<SessionUser> {
   return request<SessionUser>({ url: '/auth/me' });
 }
 
-// ---------- #3 POST /auth/verify 提交实名认证（F1/F36，三类身份） ----------
+// ---------- #3 POST /auth/verify 提交实名认证（F1/F36，两通道+教职工标记） ----------
+/** 对齐服务端 verification.validator：school_id 为字符串，verify_type 两通道，staff_flag 标记教职工 */
 export interface VerifySubmitPayload {
-  type: 'student' | 'teacher' | 'merchant';
-  real_name: string;
-  school_id: number;
-  id_no?: string;
-  evidence?: string[];
+  school_id: string;
+  verify_type: 'student_no' | 'campus_email';
+  student_no?: string;
+  campus_email?: string;
+  real_name?: string;
+  staff_flag?: boolean;
 }
 
 export interface VerifySubmitResult {
-  verify_id: number;
-  status: 'pending';
+  id: string;
+  /** pending=待审核（生产流程）；approved=WX_MOCK 联调自动通过 */
+  status: 'pending' | 'approved';
 }
 
 export function submitVerify(payload: VerifySubmitPayload): Promise<VerifySubmitResult> {

@@ -72,7 +72,7 @@ const makePrismaMock = () =>
       create: jest.fn(),
       update: jest.fn(),
     },
-    user: { findUnique: jest.fn() },
+    user: { findUnique: jest.fn(), update: jest.fn() },
   }) as unknown as PrismaService & {
     school: { findUnique: jest.Mock };
     identityVerification: {
@@ -81,7 +81,7 @@ const makePrismaMock = () =>
       create: jest.Mock;
       update: jest.Mock;
     };
-    user: { findUnique: jest.Mock };
+    user: { findUnique: jest.Mock; update: jest.Mock };
   };
 
 const setup = () => {
@@ -95,6 +95,15 @@ const setup = () => {
 // ---------- §5.2 #3 POST /auth/verify ----------
 
 describe('VerificationService.submit（@api §5.2 #3，@ac F1-AC1/AC2/AC3）', () => {
+  // 生产审核语义：固定 WX_MOCK=false，走 pending 待审核流程
+  const ORIGINAL_MOCK = process.env.WX_MOCK;
+  beforeAll(() => {
+    process.env.WX_MOCK = 'false';
+  });
+  afterAll(() => {
+    process.env.WX_MOCK = ORIGINAL_MOCK;
+  });
+
   it('AC1 学号通道提交成功：创建 pending 记录', async () => {
     const { prisma, service } = setup();
     prisma.school.findUnique.mockResolvedValue(makeSchool());
@@ -250,8 +259,61 @@ describe('VerificationService.submit（@api §5.2 #3，@ac F1-AC1/AC2/AC3）', (
   });
 });
 
-// ---------- §5.2 #4 GET /auth/verify/status ----------
+// ---------- WX_MOCK 联调：提交即自动通过 ----------
 
+describe('VerificationService.submit WX_MOCK 自动审核（开发联调口径）', () => {
+  const ORIGINAL_MOCK = process.env.WX_MOCK;
+  beforeAll(() => {
+    process.env.WX_MOCK = 'true';
+  });
+  afterAll(() => {
+    process.env.WX_MOCK = ORIGINAL_MOCK;
+  });
+
+  it('学生：提交即 approved，并回写 user.identity_type=student + school_id', async () => {
+    const { prisma, service } = setup();
+    prisma.school.findUnique.mockResolvedValue(makeSchool());
+    prisma.identityVerification.findUnique.mockResolvedValue(null);
+    prisma.identityVerification.create.mockResolvedValue(makeVerification());
+
+    const res = await service.submit(UID, {
+      school_id: '10',
+      verify_type: VerifyType.STUDENT_NO,
+      student_no: '20240001',
+    });
+
+    expect(res.status).toBe('approved');
+    expect(prisma.identityVerification.update).toHaveBeenCalledWith({
+      where: { id: expect.any(BigInt) },
+      data: expect.objectContaining({ status: 'approved' }),
+    });
+    expect(prisma.user.update).toHaveBeenCalledWith({
+      where: { id: BigInt(UID) },
+      data: { identity_type: 'student', school_id: BigInt(10) },
+    });
+  });
+
+  it('教职工：staff_flag=true → user.identity_type=staff', async () => {
+    const { prisma, service } = setup();
+    prisma.school.findUnique.mockResolvedValue(makeSchool());
+    prisma.identityVerification.findUnique.mockResolvedValue(null);
+    prisma.identityVerification.create.mockResolvedValue(makeVerification({ staff_flag: true }));
+
+    await service.submit(UID, {
+      school_id: '10',
+      verify_type: VerifyType.STUDENT_NO,
+      student_no: '20240001',
+      staff_flag: true,
+    });
+
+    expect(prisma.user.update).toHaveBeenCalledWith({
+      where: { id: BigInt(UID) },
+      data: { identity_type: 'staff', school_id: BigInt(10) },
+    });
+  });
+});
+
+// ---------- §5.2 #4 GET /auth/verify/status ----------
 describe('VerificationService.getStatus（@api §5.2 #4，@ac F1）', () => {
   it.each([
     [VerificationStatus.PENDING],
@@ -301,6 +363,15 @@ describe('VerificationService.getStatus（@api §5.2 #4，@ac F1）', () => {
 // ---------- controller 包装 ----------
 
 describe('VerificationController（@api §5.2 #3/#4）', () => {
+  // 生产审核语义：固定 WX_MOCK=false
+  const ORIGINAL_MOCK = process.env.WX_MOCK;
+  beforeAll(() => {
+    process.env.WX_MOCK = 'false';
+  });
+  afterAll(() => {
+    process.env.WX_MOCK = ORIGINAL_MOCK;
+  });
+
   it('POST /auth/verify 返回 {code:0,data}', async () => {
     const { prisma, controller } = setup();
     prisma.school.findUnique.mockResolvedValue(makeSchool());

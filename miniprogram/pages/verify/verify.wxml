@@ -34,7 +34,7 @@
           bindtap="onSelectSchool"
         >
           <text class="school-item__name">{{item.name}}</text>
-          <text class="school-item__city">{{item.city}}</text>
+          <text class="school-item__city">{{item.city || ''}}</text>
         </view>
         <view wx:if="{{schools.length === 0 && !showJoinForm}}" class="state">暂无可选学校</view>
       </scroll-view>

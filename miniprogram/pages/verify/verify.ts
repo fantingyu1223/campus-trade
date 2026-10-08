@@ -153,6 +153,8 @@ Page({
       wx.showToast({ title: '请填写真实姓名', icon: 'none' });
       return;
     }
+    const schoolId = String(d.selectedSchoolId);
+    const realName = d.realName.trim();
     let payload: VerifySubmitPayload;
     if (d.identityTab === 'student') {
       if (d.verifyType === 'student_no') {
@@ -160,16 +162,16 @@ Page({
           wx.showToast({ title: '请填写学号', icon: 'none' });
           return;
         }
-        payload = { type: 'student', real_name: d.realName.trim(), school_id: d.selectedSchoolId, id_no: d.studentNo.trim() };
+        payload = { school_id: schoolId, verify_type: 'student_no', student_no: d.studentNo.trim(), real_name: realName, staff_flag: false };
       } else {
         if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(d.campusEmail.trim())) {
           wx.showToast({ title: '请填写正确的校园邮箱', icon: 'none' });
           return;
         }
-        payload = { type: 'student', real_name: d.realName.trim(), school_id: d.selectedSchoolId, evidence: [d.campusEmail.trim()] };
+        payload = { school_id: schoolId, verify_type: 'campus_email', campus_email: d.campusEmail.trim(), real_name: realName, staff_flag: false };
       }
     } else {
-      // 教职工：工号 + 校园邮箱（MVP 沿用学生校验规则）
+      // 教职工：工号走 student_no 通道 + staff_flag=true（MVP 沿用学生规则，校园邮箱仅前端留存校验）
       if (!d.staffNo.trim()) {
         wx.showToast({ title: '请填写工号', icon: 'none' });
         return;
@@ -178,14 +180,14 @@ Page({
         wx.showToast({ title: '请填写正确的校园邮箱', icon: 'none' });
         return;
       }
-      payload = { type: 'teacher', real_name: d.realName.trim(), school_id: d.selectedSchoolId, id_no: d.staffNo.trim(), evidence: [d.staffEmail.trim()] };
+      payload = { school_id: schoolId, verify_type: 'student_no', student_no: d.staffNo.trim(), real_name: realName, staff_flag: true };
     }
 
     if (d.submitting) return;
     this.setData({ submitting: true });
     submitVerify(payload)
-      .then(() => {
-        wx.redirectTo({ url: '/pages/verify-result/verify-result?status=pending' });
+      .then((res) => {
+        wx.redirectTo({ url: `/pages/verify-result/verify-result?status=${res.status}` });
       })
       .catch((err: Error & { code?: number }) => {
         // F1-AC3：1006 学校未开放 → 提示"该校暂不支持"并展示申请加入入口

@@ -83,6 +83,22 @@ export class VerificationService {
       throw new BusinessError(ERROR_CODES.PARAM_VALIDATION_FAILED, '已完成认证，无需重复提交');
     }
 
+    // WX_MOCK 开发联调：提交即自动通过并回写用户身份（staff_flag→staff 否则 student）；
+    // 生产流程由后台审核流转 pending→approved/rejected
+    if (process.env.WX_MOCK === 'true') {
+      await this.repo.approve(row.id);
+      await this.repo.updateUserIdentity(
+        BigInt(uid),
+        data.staff_flag ? 'staff' : 'student',
+        data.school_id,
+      );
+      return {
+        id: row.id.toString(),
+        status: 'approved',
+        submitted_at: row.submitted_at.toISOString(),
+      };
+    }
+
     return {
       id: row.id.toString(),
       status: 'pending',

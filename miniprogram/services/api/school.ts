@@ -10,7 +10,7 @@ import { request } from './auth';
 export interface SchoolItem {
   id: number;
   name: string;
-  city: string;
+  city: string | null;
 }
 
 export interface SchoolQuery {
