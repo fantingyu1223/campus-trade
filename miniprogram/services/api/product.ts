@@ -20,7 +20,7 @@ import { PageResult } from '../../types/contract';
 /** 成色五档（§4.8 product.condition_level） */
 export type ConditionLevel = 'new' | 'like_new' | 'good' | 'fair' | 'poor';
 /** 身份过滤（契约 student/teacher/merchant；person 为前端聚合值，见头注释偏离 3） */
-export type RoleFilter = 'student' | 'teacher' | 'merchant' | 'person';
+export type RoleFilter = 'student' | 'teacher' | 'merchant' | 'personal';
 /** 排序（§5.2 #15 sort 枚举） */
 export type ProductSort = 'new' | 'price_asc' | 'price_desc';
 /** 商品状态（§4.8 status / types/contract ProductStatus） */
@@ -41,43 +41,42 @@ export interface ProductListItem {
   seller_nickname?: string;
 }
 
-/** 详情（§5.2 #14 响应结构） */
+/** 详情（服务端 #14 实际响应：扁平结构，seller 内嵌；condition 即成色枚举） */
 export interface ProductDetailResult {
-  product: {
-    id: number;
-    title: string;
-    description: string;
-    price: number;
-    original_price?: number;
-    condition_level: ConditionLevel;
-    trade_mode: TradeMode;
-    meet_location: string;
-    images: string[];
-    status: ProductStatusStr;
-    is_urgent: boolean;
-    published_at?: string;
-  };
+  id: number | string;
+  title: string;
+  desc: string;
+  price: number | string;
+  original_price?: number | string | null;
+  condition: ConditionLevel;
+  trade_mode: TradeMode;
+  meet_location: string;
+  available_time?: string | null;
+  images: string[];
+  status: ProductStatusStr;
+  is_urgent: boolean;
+  published_at?: string | null;
   seller: {
-    id: number;
+    id: number | string;
     nickname: string;
     avatar?: string;
-    credit_score: number;
     identity_type: string;
+    is_merchant?: boolean;
+    credit_score?: number | null;
   };
-  is_favorited: boolean;
 }
 
-/** 发布入参（§5.2 #10；desc 对应表字段 description） */
+/** 发布入参（对齐服务端 PublishProductDto：price/category_id 为字符串，成色字段名 condition） */
 export interface PublishPayload {
   title: string;
   desc: string;
-  price: number;
-  category_id: number;
+  price: string;
+  category_id: string;
   images: string[];
   stock: number;
   is_urgent: boolean;
   trade_point: string;
-  condition_level: ConditionLevel;
+  condition: ConditionLevel;
   trade_mode: TradeMode;
 }
 

@@ -4,8 +4,7 @@
  *     F6-AC2（排序：最新 / 价格升 / 价格降）
  *     F10a-AC1（急出商品亮标展示）
  * @module PIM-BC-02 商品与交易
- * 接口：§5.2 #15 GET /products（keyword/min_price/max_price/role_filter/sort）。
- * 接口未就绪：USE_MOCK=true 时走本地 Mock（按契约结构），就绪后置 false 切换。
+ * 接口：§5.2 #15 GET /products（keyword/category_id/min_price/max_price/role_filter/sort）。
  */
 import {
   listProducts,
@@ -14,8 +13,6 @@ import {
   RoleFilter,
   ProductSort,
 } from '../../services/api/product';
-
-const USE_MOCK = true;
 
 interface ConditionOption {
   value: ConditionLevel | '';
@@ -40,10 +37,10 @@ const CONDITION_OPTIONS: ConditionOption[] = [
   { value: 'poor', label: '较旧' },
 ];
 
-/** 身份过滤：全部 / 个人闲置（person=非商家，契约偏离见 product.ts） / 认证商家 */
+/** 身份过滤：全部 / 个人闲置（personal=非商家，对齐服务端枚举） / 认证商家 */
 const ROLE_OPTIONS: RoleOption[] = [
   { value: '', label: '全部' },
-  { value: 'person', label: '个人闲置' },
+  { value: 'personal', label: '个人闲置' },
   { value: 'merchant', label: '认证商家' },
 ];
 
@@ -51,15 +48,6 @@ const SORT_OPTIONS: SortOption[] = [
   { value: 'new', label: '最新' },
   { value: 'price_asc', label: '价格升序' },
   { value: 'price_desc', label: '价格降序' },
-];
-
-/** Mock 搜索结果（按 §5.2 #15 list 契约结构），就绪后删除 */
-const MOCK_LIST: ProductListItem[] = [
-  { id: 101, title: '高等数学（下）教材', price: 12, cover: '', is_urgent: true, condition_level: 'good', status: 'on_sale', seller_role: 'student', seller_nickname: '高数学长' },
-  { id: 102, title: '罗技无线鼠标 M330', price: 45, cover: '', is_urgent: false, condition_level: 'fair', status: 'on_sale', seller_role: 'student', seller_nickname: '数码控' },
-  { id: 103, title: '宿舍用小风扇 静音款', price: 20, cover: '', is_urgent: false, condition_level: 'fair', status: 'on_sale', seller_role: 'merchant', seller_nickname: '清凉小铺' },
-  { id: 104, title: '瑜伽垫 加厚防滑', price: 15, cover: '', is_urgent: true, condition_level: 'like_new', status: 'on_sale', seller_role: 'staff', seller_nickname: '爱运动的TA' },
-  { id: 105, title: '全新未拆封英语六级真题', price: 30, cover: '', is_urgent: false, condition_level: 'new', status: 'on_sale', seller_role: 'student', seller_nickname: '六级必过' },
 ];
 
 Page({
@@ -81,11 +69,21 @@ Page({
     error: '',
     total: 0,
     searched: false,
+    categoryId: 0,
   },
 
   onLoad(options: Record<string, string | undefined>) {
-    if (options.keyword) {
-      this.setData({ keyword: decodeURIComponent(options.keyword) }, () => this.doSearch());
+    const patch: Record<string, unknown> = {};
+    if (options.keyword) patch.keyword = decodeURIComponent(options.keyword);
+    if (options.category_id) patch.categoryId = Number(options.category_id);
+    if (options.category_name) {
+      wx.setNavigationBarTitle({ title: decodeURIComponent(options.category_name) });
+    }
+    // 带关键词/分类进入或显式 auto=1（首页空关键词搜索全部）时自动执行
+    if (options.keyword || options.category_id || options.auto === '1') {
+      this.setData(patch, () => this.doSearch());
+    } else if (Object.keys(patch).length > 0) {
+      this.setData(patch);
     }
   },
 
@@ -99,11 +97,12 @@ Page({
 
   /** 执行搜索（F6-AC1/AC2：筛选 + 排序参数组装） */
   doSearch() {
-    const { keyword, minPrice, maxPrice, condition, roleFilter, sort } = this.data;
+    const { keyword, minPrice, maxPrice, condition, roleFilter, sort, categoryId } = this.data;
     this.setData({ loading: true, error: '', searched: true, panelVisible: false });
 
     const query = {
-      keyword,
+      keyword: keyword || undefined,
+      category_id: categoryId || undefined,
       min_price: minPrice ? Number(minPrice) : undefined,
       max_price: maxPrice ? Number(maxPrice) : undefined,
       condition_level: condition || undefined,
@@ -113,21 +112,6 @@ Page({
       page: 1,
       pageSize: 20,
     };
-
-    if (USE_MOCK) {
-      setTimeout(() => {
-        let list = MOCK_LIST.filter((p) => !keyword || p.title.includes(keyword));
-        if (query.min_price !== undefined) list = list.filter((p) => p.price >= (query.min_price as number));
-        if (query.max_price !== undefined) list = list.filter((p) => p.price <= (query.max_price as number));
-        if (condition) list = list.filter((p) => p.condition_level === condition);
-        if (roleFilter === 'merchant') list = list.filter((p) => p.seller_role === 'merchant');
-        if (roleFilter === 'person') list = list.filter((p) => p.seller_role !== 'merchant');
-        if (sort === 'price_asc') list = [...list].sort((a, b) => a.price - b.price);
-        if (sort === 'price_desc') list = [...list].sort((a, b) => b.price - a.price);
-        this.setData({ list, total: list.length, loading: false });
-      }, 300);
-      return;
-    }
 
     listProducts(query)
       .then((res) => this.setData({ list: res.list, total: res.total, loading: false }))

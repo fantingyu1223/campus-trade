@@ -30,3 +30,9 @@ Thumbs.db
 
 # 临时工作区（含本地调试令牌）
 .tmp/
+
+# 本地便携 MySQL（开发环境，非项目文件）
+.local-mysql/
+
+# 微信开发者工具本地私有配置
+miniprogram/project.private.config.json

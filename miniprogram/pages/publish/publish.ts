@@ -4,10 +4,9 @@
  *     F5-AC2（实拍图上传 wx.chooseImage，最多 9 张，缩略图可删除）
  *     F5-AC3（提交成功反馈并返回；急出标识附「同时最多 3 件」提示）
  *     F10a-AC1（急出商品标识录入）
- * 违规拦截：后端敏感词/违规内容返回 9001（Mock 分支以标题含「代考」模拟 showModal 拦截）。
+ * 违规拦截：后端敏感词/违规内容返回 9001（showModal 拦截承接）。
  * @module PIM-BC-02 商品与交易
  * 接口：§5.2 #10 POST /products（入参对齐 PublishPayload）。
- * 接口未就绪：USE_MOCK=true 时走本地 Mock（按契约结构），就绪后置 false 切换。
  */
 import {
   publishProduct,
@@ -15,17 +14,18 @@ import {
   ConditionLevel,
   TradeMode,
 } from '../../services/api/product';
+import { ensureLogin } from '../../utils/session';
+import { STATIC_PLACEHOLDER_IMAGE } from '../../config';
 
-const USE_MOCK = true;
-
-/** 静态分类（契约扩展前占位；就绪后应由分类接口下发） */
+/** 叶子品类（与数据库 category 表一致；服务端 CIM-R-07 只接受叶子节点） */
 const CATEGORY_OPTIONS = [
-  { id: 1, name: '教材书籍' },
-  { id: 2, name: '数码电子' },
-  { id: 3, name: '生活用品' },
-  { id: 4, name: '服饰鞋包' },
-  { id: 5, name: '运动户外' },
-  { id: 6, name: '其他' },
+  { id: 5, name: '教材教辅' },
+  { id: 6, name: '考试用书' },
+  { id: 7, name: '手机/平板' },
+  { id: 8, name: '笔记本电脑' },
+  { id: 9, name: '耳机/音箱' },
+  { id: 10, name: '宿舍用品' },
+  { id: 11, name: '洗护清洁' },
 ];
 
 /** 成色五档（§4.8 condition_level） */
@@ -76,6 +76,11 @@ Page({
     // 校验错误：{ field: 提示文案 }
     errors: {} as Record<string, string>,
     submitting: false,
+  },
+
+  onLoad() {
+    // 发布为受限操作（F1-AC2）：未登录先跳 U2 登录页
+    ensureLogin().catch(() => wx.navigateBack());
   },
 
   // ---------- step1 实拍图（F5-AC2） ----------
@@ -193,36 +198,18 @@ Page({
     const payload: PublishPayload = {
       title: d.title.trim(),
       desc: d.desc.trim(),
-      price: Number(d.price),
-      category_id: d.categoryOptions[d.categoryIndex].id,
-      images: d.images,
+      price: Number(d.price).toFixed(2),
+      category_id: String(d.categoryOptions[d.categoryIndex].id),
+      // COS 未开通、无上传接口：本地图暂以占位图 URL 提交（见 config.ts）
+      images: d.images.map(() => STATIC_PLACEHOLDER_IMAGE),
       stock: 1,
       is_urgent: d.isUrgent,
       trade_point: d.meetLocation.trim(),
-      condition_level: d.conditionOptions[d.conditionIndex].value,
+      condition: d.conditionOptions[d.conditionIndex].value,
       trade_mode: d.tradeModeOptions[d.tradeModeIndex].value,
     };
 
     this.setData({ submitting: true });
-
-    if (USE_MOCK) {
-      setTimeout(() => {
-        this.setData({ submitting: false });
-        // 模拟后端 9001 违规内容拦截
-        if (payload.title.includes('代考')) {
-          wx.showModal({
-            title: '发布失败',
-            content: '商品信息包含违规内容，已被平台拦截（错误码 9001），请修改后重新发布。',
-            showCancel: false,
-            confirmText: '我知道了',
-          });
-          return;
-        }
-        wx.showToast({ title: '发布成功', icon: 'success' });
-        setTimeout(() => wx.navigateBack(), 800);
-      }, 500);
-      return;
-    }
 
     publishProduct(payload)
       .then(() => {

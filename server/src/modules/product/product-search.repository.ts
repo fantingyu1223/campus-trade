@@ -64,6 +64,15 @@ export class ProductSearchRepository {
     return this.prisma.product.findUnique({ where: { id } });
   }
 
+  /** 查子品类 id 集合（category_id 筛选父品类时展开为 父+子，CIM 正面清单两级结构） */
+  async findChildCategoryIds(parentId: bigint): Promise<bigint[]> {
+    const rows = await this.prisma.category.findMany({
+      where: { parent_id: parentId, status: 'active' },
+      select: { id: true },
+    });
+    return rows.map((row) => row.id);
+  }
+
   /** 详情：全部图片按 sort_order 升序（0=首图） */
   findImagesByProductId(id: bigint) {
     return this.prisma.productImage.findMany({

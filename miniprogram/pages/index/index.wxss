@@ -169,3 +169,17 @@
   white-space: nowrap;
   max-width: 180rpx;
 }
+
+/* 发布悬浮按钮 */
+.publish-fab {
+  position: fixed;
+  right: 32rpx;
+  bottom: 48rpx;
+  background: #07c160;
+  color: #fff;
+  font-size: 30rpx;
+  padding: 20rpx 36rpx;
+  border-radius: 48rpx;
+  box-shadow: 0 6rpx 16rpx rgba(7, 193, 96, 0.35);
+  z-index: 10;
+}

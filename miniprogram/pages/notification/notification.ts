@@ -144,7 +144,7 @@ Page({
         }
         break;
       case 'want_buy_expire':
-        wx.navigateTo({ url: '/pages/want-buy/want-buy' });
+        wx.switchTab({ url: '/pages/want-buy/want-buy' });
         break;
       case 'report_result':
         wx.showToast({ title: item.title, icon: 'none' });

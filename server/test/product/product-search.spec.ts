@@ -62,10 +62,12 @@ const makePrismaMock = () =>
     product: { findMany: jest.fn(), count: jest.fn(), findUnique: jest.fn() },
     user: { findMany: jest.fn() },
     productImage: { findMany: jest.fn() },
+    category: { findMany: jest.fn().mockResolvedValue([]) },
   }) as unknown as PrismaService & {
     product: { findMany: jest.Mock; count: jest.Mock; findUnique: jest.Mock };
     user: { findMany: jest.Mock };
     productImage: { findMany: jest.Mock };
+    category: { findMany: jest.Mock };
   };
 
 const setup = () => {
@@ -171,6 +173,20 @@ describe('search 筛选条件组装（@ac F6-AC1）', () => {
     expect(where.price).toEqual({ gte: '10.00', lte: '99.99' });
     expect(where.condition_level).toBe('like_new');
     expect(where.is_urgent).toBe(true);
+  });
+
+  it('category_id 命中父品类 → 展开为 父+子 in 集合', async () => {
+    const { prisma, service } = setup();
+    mockListHappyPath(prisma);
+    prisma.category.findMany.mockResolvedValue([{ id: BigInt(5) }, { id: BigInt(6) }]);
+
+    await service.search({ category_id: '1' });
+
+    expect(prisma.category.findMany).toHaveBeenCalledWith({
+      where: { parent_id: BigInt(1), status: 'active' },
+      select: { id: true },
+    });
+    expect(lastWhere(prisma).category_id).toEqual({ in: [BigInt(1), BigInt(5), BigInt(6)] });
   });
 
   it('exclude_sold 缺省默认 true → status not sold', async () => {

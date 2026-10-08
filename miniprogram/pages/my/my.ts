@@ -4,30 +4,26 @@
  *      存在在途交易被拦截并 toast 提示）
  *     F33-AC1（identity_type === 'merchant' 时额外展示 merchant-badge 强化亮标）
  * @module PIM-BC-01 用户与认证
- * 接口：§5.2 #50（services/api/account.ts cancelAccount）。
- * 接口未就绪：USE_MOCK=true 时走本地 Mock（按契约结构），就绪后置 false 切换。
+ * 接口：§5.2 #2 GET /auth/me（用户信息）、#50（services/api/account.ts cancelAccount）。
  */
 import { cancelAccount } from '../../services/api/account';
+import { getMe } from '../../services/api/auth';
+import { isLoggedIn, getUser, SessionUser } from '../../utils/session';
 import { UserIdentityType } from '../../types/contract';
 
-const USE_MOCK = true;
+/** tabBar 页面清单（navigateTo 不可跳 tabBar 页，须 switchTab） */
+const TAB_PAGES = ['/pages/want-buy/want-buy'];
 
 Page({
   data: {
-    /** 用户信息（Mock；接口就绪后由 users/me 拉取） */
+    loggedIn: false,
+    /** 用户信息（/auth/me；role 即 identity_type） */
     user: {
-      nickname: '王同学',
+      nickname: '',
       avatar: '',
-      identity_type: UserIdentityType.MERCHANT as string,
+      identity_type: UserIdentityType.GUEST as string,
     },
     isMerchant: false,
-    /**
-     * 注销 Mock 分支开关：
-     *  - false：注销成功 → 展示「已注销，感谢使用」态；
-     *  - true：模拟存在在途交易（契约 4002）→ toast「存在未完成交易，请先完结后再注销」。
-     * 联调时手工切换本值复测两个分支；接口就绪后删除。
-     */
-    mockBlocked: false,
     modalVisible: false,
     confirming: false,
     /** 注销成功后的终态页 */
@@ -35,13 +31,47 @@ Page({
     effectiveAt: '',
   },
 
-  onLoad() {
-    this.setData({ isMerchant: this.data.user.identity_type === UserIdentityType.MERCHANT });
+  onShow() {
+    if (!isLoggedIn()) {
+      this.setData({ loggedIn: false });
+      return;
+    }
+    const cached = getUser();
+    if (cached) this.applyUser(cached);
+    getMe()
+      .then((me) => this.applyUser(me as unknown as SessionUser & { role: string }))
+      .catch(() => {});
   },
 
-  /** 功能列表跳转 */
+  applyUser(me: { nickname?: string; avatar?: string; role?: string }) {
+    const identityType = me.role || UserIdentityType.GUEST;
+    this.setData({
+      loggedIn: true,
+      user: {
+        nickname: me.nickname || '未设置昵称',
+        avatar: me.avatar || '',
+        identity_type: identityType,
+      },
+      isMerchant: identityType === UserIdentityType.MERCHANT,
+    });
+  },
+
+  /** 未登录态：去登录页 */
+  onGotoLogin() {
+    wx.navigateTo({ url: '/pages/login/login' });
+  },
+
+  /** 功能列表跳转（未登录先登录） */
   onNav(e: WechatMiniprogram.BaseEvent) {
     const { url } = e.currentTarget.dataset as { url: string };
+    if (!isLoggedIn()) {
+      wx.navigateTo({ url: '/pages/login/login' });
+      return;
+    }
+    if (TAB_PAGES.includes(url)) {
+      wx.switchTab({ url });
+      return;
+    }
     wx.navigateTo({ url });
   },
 
@@ -54,23 +84,10 @@ Page({
     this.setData({ modalVisible: false });
   },
 
-  /** 弹窗 confirm（已输入「注销」）：Mock 两分支 / 接口 #50 */
+  /** 弹窗 confirm（已输入「注销」）：接口 #50 */
   onModalConfirm() {
     if (this.data.confirming) return;
     this.setData({ confirming: true });
-
-    if (USE_MOCK) {
-      setTimeout(() => {
-        this.setData({ confirming: false, modalVisible: false });
-        if (this.data.mockBlocked) {
-          // 在途交易拦截分支（契约 4002 ORDER_STATUS_CONFLICT）
-          wx.showToast({ title: '存在未完成交易，请先完结后再注销', icon: 'none' });
-          return;
-        }
-        this.setData({ cancelled: true, effectiveAt: '冷静期结束后生效' });
-      }, 300);
-      return;
-    }
 
     cancelAccount({ confirm: true })
       .then((res) => {
@@ -85,10 +102,5 @@ Page({
         this.setData({ confirming: false, modalVisible: false });
         wx.showToast({ title: err.message || '存在未完成交易，请先完结后再注销', icon: 'none' });
       });
-  },
-
-  /** 已注销态：回登录页 */
-  onGotoLogin() {
-    wx.reLaunch({ url: '/pages/login/login' });
   },
 });

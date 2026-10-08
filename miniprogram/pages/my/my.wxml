@@ -8,6 +8,14 @@
   </view>
 
   <block wx:else>
+    <!-- 未登录态：登录入口 -->
+    <view wx:if="{{!loggedIn}}" class="guest">
+      <view class="guest__icon">👤</view>
+      <view class="guest__desc">登录后可发布闲置、发起会话与交易</view>
+      <button class="guest__btn" bindtap="onGotoLogin">微信登录 / 注册</button>
+    </view>
+
+    <block wx:else>
     <!-- 用户信息卡 -->
     <view class="user-card">
       <view class="user-card__avatar">
@@ -54,6 +62,7 @@
         <text class="cell__arrow">›</text>
       </view>
     </view>
+    </block>
   </block>
 
   <!-- 注销二次确认弹窗（F26-AC1） -->

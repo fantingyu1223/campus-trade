@@ -17,7 +17,7 @@
 
     <!-- 48h 确认收货倒计时（F35-AC1，仅待确认态展示） -->
     <view wx:if="{{order.status === 'pending_confirm' && countdownText}}" class="countdown {{countdownExpired ? 'countdown--expired' : ''}}">
-      {{countdownExpired ? '确认收货已超时' : `确认收货倒计时 ${countdownText}`}}
+      {{countdownExpired ? '确认收货已超时' : '确认收货倒计时 ' + countdownText}}
     </view>
 
     <!-- 订单信息卡 -->

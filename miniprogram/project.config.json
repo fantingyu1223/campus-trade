@@ -1,6 +1,6 @@
 {
   "description": "校园二手平台小程序",
-  "appid": "touristappid",
+  "appid": "wx7bd52be0a5d06f09",
   "compileType": "miniprogram",
   "libVersion": "latest",
   "setting": {
@@ -9,8 +9,31 @@
     "minified": true,
     "postcss": true,
     "urlCheck": false,
-    "useCompilerPlugins": ["typescript"]
+    "useCompilerPlugins": [
+      "typescript"
+    ],
+    "compileWorklet": false,
+    "uglifyFileName": false,
+    "uploadWithSourceMap": true,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "condition": false,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    }
   },
   "projectname": "campus-secondhand-miniprogram",
-  "miniprogramRoot": "./"
+  "miniprogramRoot": "./",
+  "simulatorPluginLibVersion": {},
+  "packOptions": {
+    "ignore": [],
+    "include": []
+  },
+  "editorSetting": {}
 }

@@ -74,7 +74,14 @@ export class ProductQueryService {
         q.roleFilter === 'merchant' ? { in: merchantIds } : { notIn: merchantIds };
     }
 
-    const where = this.buildWhere(q, sellerIdFilter);
+    // category_id：父品类自动展开为 父+子 集合（叶子品类直接精确匹配）
+    let categoryFilter: bigint | Prisma.BigIntFilter | null = q.categoryId;
+    if (q.categoryId !== null) {
+      const childIds = await this.repo.findChildCategoryIds(q.categoryId);
+      if (childIds.length > 0) categoryFilter = { in: [q.categoryId, ...childIds] };
+    }
+
+    const where = this.buildWhere(q, sellerIdFilter, categoryFilter);
     const orderBy = this.buildOrderBy(q.sort);
 
     const { list, total } = await this.repo.searchProducts(where, orderBy, q.page, q.pageSize);
@@ -244,6 +251,7 @@ export class ProductQueryService {
   private buildWhere(
     q: ProductListQuery,
     sellerIdFilter: Prisma.BigIntFilter | null,
+    categoryFilter: bigint | Prisma.BigIntFilter | null,
   ): Prisma.ProductWhereInput {
     const where: Prisma.ProductWhereInput = {};
 
@@ -255,8 +263,8 @@ export class ProductQueryService {
     if (q.keyword) {
       where.OR = [{ title: { contains: q.keyword } }, { description: { contains: q.keyword } }];
     }
-    if (q.categoryId !== null) {
-      where.category_id = q.categoryId;
+    if (categoryFilter !== null) {
+      where.category_id = categoryFilter as Prisma.BigIntFilter | bigint;
     }
     if (q.minPrice !== null || q.maxPrice !== null) {
       where.price = {};

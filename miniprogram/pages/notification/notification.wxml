@@ -1,7 +1,7 @@
 <view class="page">
   <!-- 顶部：未读数 + 全部已读 -->
   <view class="topbar">
-    <view class="topbar__count">{{unreadCount > 0 ? `${unreadCount} 条未读` : '没有未读通知'}}</view>
+    <view class="topbar__count">{{unreadCount > 0 ? unreadCount + ' 条未读' : '没有未读通知'}}</view>
     <view class="topbar__read-all {{unreadCount === 0 ? 'topbar__read-all--disabled' : ''}}" bindtap="onReadAll">全部已读</view>
   </view>
 

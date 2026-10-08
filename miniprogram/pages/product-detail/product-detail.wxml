@@ -7,8 +7,8 @@
 
   <block wx:elif="{{detail}}">
     <!-- 图集 -->
-    <swiper wx:if="{{detail.product.images.length > 0}}" class="gallery" indicator-dots circular>
-      <swiper-item wx:for="{{detail.product.images}}" wx:key="*this">
+    <swiper wx:if="{{detail.images.length > 0}}" class="gallery" indicator-dots circular>
+      <swiper-item wx:for="{{detail.images}}" wx:key="*this">
         <image src="{{item}}" mode="aspectFill" class="gallery__img" />
       </swiper-item>
     </swiper>
@@ -17,29 +17,29 @@
     <!-- 商品信息 -->
     <view class="info">
       <view class="info__price-row">
-        <text class="info__price">¥{{detail.product.price}}</text>
-        <text wx:if="{{detail.product.original_price}}" class="info__original">¥{{detail.product.original_price}}</text>
-        <view wx:if="{{detail.product.is_urgent}}" class="info__urgent">急出</view>
+        <text class="info__price">¥{{detail.price}}</text>
+        <text wx:if="{{detail.original_price}}" class="info__original">¥{{detail.original_price}}</text>
+        <view wx:if="{{detail.is_urgent}}" class="info__urgent">急出</view>
       </view>
-      <view class="info__title">{{detail.product.title}}</view>
+      <view class="info__title">{{detail.title}}</view>
       <view class="info__meta">
         <text class="info__tag">{{conditionLabel}}</text>
         <text class="info__tag">{{tradeModeLabel}}</text>
       </view>
       <view class="info__row">
         <text class="info__label">自提地点</text>
-        <text class="info__value">{{detail.product.meet_location}}</text>
+        <text class="info__value">{{detail.meet_location}}</text>
       </view>
-      <view class="info__row" wx:if="{{detail.product.published_at}}">
+      <view class="info__row" wx:if="{{detail.published_at}}">
         <text class="info__label">发布时间</text>
-        <text class="info__value">{{detail.product.published_at}}</text>
+        <text class="info__value">{{detail.published_at}}</text>
       </view>
     </view>
 
     <!-- 商品描述 -->
     <view class="section">
       <view class="section__title">商品描述</view>
-      <view class="section__body">{{detail.product.description}}</view>
+      <view class="section__body">{{detail.desc}}</view>
     </view>
 
     <!-- 卖家信息条 -->
@@ -49,7 +49,7 @@
         <view class="seller__nickname">{{detail.seller.nickname}}</view>
         <identity-badge identity-type="{{detail.seller.identity_type}}" />
       </view>
-      <view class="seller__credit">信用 {{detail.seller.credit_score}}</view>
+      <view wx:if="{{detail.seller.credit_score !== null}}" class="seller__credit">信用 {{detail.seller.credit_score}}</view>
     </view>
 
     <!-- 内嵌安全提示（F13-AC3） -->
