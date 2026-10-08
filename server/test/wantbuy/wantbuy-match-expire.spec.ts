@@ -19,8 +19,10 @@
 import { NotificationType, WantBuyStatus } from '@contract/index';
 import { PrismaService } from '../../src/infra/prisma.service';
 import { NotifySenderService } from '../../src/infra/notify-sender/notify-sender.service';
+import { ProductPublishedBus } from '../../src/infra/product-events/product-published.bus';
 import { WantBuyMatchService } from '../../src/modules/wantbuy/wantbuy-match.service';
 import { WantBuyExpireCron } from '../../src/modules/wantbuy/wantbuy-expire.cron';
+import { WantBuyModule } from '../../src/modules/wantbuy/wantbuy.module';
 
 // ---------- 测试夹具 ----------
 
@@ -86,6 +88,22 @@ const setupCron = () => {
 };
 
 // ---------- PIM-EV-11：商品上架撮合（@ac F9-AC1，@rule CIM-R-33 仅消费 active 未过期） ----------
+
+describe('WantBuyModule 事件接线（@event PIM-EV-11 订阅侧：上架总线 → 撮合服务）', () => {
+  it('onModuleInit 订阅 ProductPublishedBus，上架事件触发 matchOnProductPublished', async () => {
+    const { prisma, notify, service } = setupMatch();
+    prisma.wantBuy.findMany.mockResolvedValue([makeWantBuyRow()]);
+    const module_ = new WantBuyModule(service);
+    module_.onModuleInit();
+    try {
+      await ProductPublishedBus.emit({ id: '900', category_id: '10', title: '九成新二手平板，配件齐全', price: '1200.00' });
+      expect(notify.send).toHaveBeenCalledTimes(1);
+      expect(notify.send.mock.calls[0][0].type).toBe(NotificationType.WANT_BUY_MATCH);
+    } finally {
+      module_.onModuleDestroy();
+    }
+  });
+});
 
 describe('WantBuyMatchService.matchOnProductPublished（@event PIM-EV-11，@ac F9-AC1）', () => {
   it('同品类 + 关键词命中 + 价格在上限内 → 发 want_buy_match 通知，payload 含 want_buy_id/product_id', async () => {

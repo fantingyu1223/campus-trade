@@ -15,6 +15,7 @@
  */
 import { Injectable } from '@nestjs/common';
 import { ERROR_CODES } from '@contract/index';
+import { ProductPublishedBus } from '@infra/product-events/product-published.bus';
 import { ProductRepository } from './product.repository';
 import { UrgentBadgeService } from './urgent-badge.service';
 import { WordSnapshot } from './infra-snapshot/word-snapshot';
@@ -87,6 +88,15 @@ export class ProductPublishService {
       },
       dto.images,
     );
+
+    // @event PIM-EV-11 触发源：上架事实经 infra 事件总线分发（wantbuy 撮合为下游订阅方；
+    // 边界纪律禁止 product 直 import wantbuy，故走 @infra/product-events 总线）
+    await ProductPublishedBus.emit({
+      id: p.id.toString(),
+      category_id: dto.categoryId.toString(),
+      title: dto.title,
+      price: dto.price,
+    });
 
     return { product_id: p.id.toString(), status: 'on_sale' };
   }

@@ -27,6 +27,7 @@ import {
   VIOLATION_WORDS,
 } from '../../src/modules/product/infra-snapshot/word-snapshot';
 import { validatePublishFields } from '../../src/modules/product/product.validator';
+import { ProductPublishedBus } from '../../src/infra/product-events/product-published.bus';
 import { PrismaService } from '../../src/infra/prisma.service';
 
 // ---------- 测试夹具 ----------
@@ -178,6 +179,41 @@ describe('ProductPublishService.publish（@api §5.2 #10，@ac F5-AC1）', () =>
     await service.publish(SELLER, body);
 
     expect(prisma.product.create.mock.calls[0][0].data.meet_location).toBeNull();
+  });
+
+  it('发布成功后 emit 商品上架事件（@event PIM-EV-11 触发源，wantbuy 撮合下游订阅）', async () => {
+    const { prisma, service } = setup();
+    mockHappyPath(prisma);
+    const onPublished = jest.fn();
+    const off = ProductPublishedBus.subscribe(onPublished);
+    try {
+      await service.publish(SELLER, makeBody());
+
+      expect(onPublished).toHaveBeenCalledTimes(1);
+      expect(onPublished).toHaveBeenCalledWith({
+        id: '100',
+        category_id: '10',
+        title: '高等数学（下册）',
+        price: '25.00',
+      });
+    } finally {
+      off();
+    }
+  });
+
+  it('前置校验失败（敏感词拦截）不 emit 上架事件', async () => {
+    const { prisma, service } = setup();
+    mockHappyPath(prisma);
+    const onPublished = jest.fn();
+    const off = ProductPublishedBus.subscribe(onPublished);
+    try {
+      await expect(
+        service.publish(SELLER, makeBody({ title: `出售${PROHIBITED_WORDS[0]}货源` })),
+      ).rejects.toMatchObject({ code: ERROR_CODES.PARAM_VALIDATION_FAILED });
+      expect(onPublished).not.toHaveBeenCalled();
+    } finally {
+      off();
+    }
   });
 });
 
