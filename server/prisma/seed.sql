@@ -15,6 +15,8 @@ INSERT INTO `category` VALUES (8,2,'笔记本电脑','',2,'active','2026-10-06 2
 INSERT INTO `category` VALUES (9,2,'耳机/音箱','',3,'active','2026-10-06 22:34:05','2026-10-06 22:34:05');
 INSERT INTO `category` VALUES (10,3,'宿舍用品','',1,'active','2026-10-06 22:34:05','2026-10-06 22:34:05');
 INSERT INTO `category` VALUES (11,3,'洗护清洁','',2,'active','2026-10-06 22:34:05','2026-10-06 22:34:05');
+INSERT INTO `category` VALUES (12,0,'其他闲置',NULL,5,'active','2026-10-06 22:34:05','2026-10-06 22:34:05');
+INSERT INTO `category` VALUES (13,12,'其他',NULL,1,'active','2026-10-06 22:34:05','2026-10-06 22:34:05');
 INSERT INTO `user` VALUES (1,'mock_seller_001',NULL,'张同学','','å¤§å››å­¦å§å‡ºé—²ç½®','student',1,'normal',NULL,NULL,'2026-10-06 15:00:28',NULL,NULL,NULL,NULL,NULL,NULL,'2026-10-06 22:34:05','2026-10-06 15:00:28');
 INSERT INTO `user` VALUES (2,'mock_buyer_001',NULL,'李同学','','å¤§äºŒå­¦å¼Ÿ','student',1,'normal',NULL,NULL,'2026-10-06 15:00:28',NULL,NULL,NULL,NULL,NULL,NULL,'2026-10-06 22:34:05','2026-10-06 15:00:28');
 -- 后台种子管理员：初始密码 Admin@2026（bcrypt 哈希，§5.3 #51 登录可用）；

@@ -26,7 +26,11 @@ const CATEGORY_OPTIONS = [
   { id: 9, name: '耳机/音箱' },
   { id: 10, name: '宿舍用品' },
   { id: 11, name: '洗护清洁' },
+  { id: 13, name: '其他' },
 ];
+
+/** 「其他」品类的数据库叶子 id（选中后需自定义输入品类名） */
+const OTHER_CATEGORY_ID = 13;
 
 /** 成色五档（§4.8 condition_level） */
 const CONDITION_OPTIONS: { value: ConditionLevel; label: string }[] = [
@@ -49,6 +53,7 @@ const FIELD_LABELS: Record<string, string> = {
   images: '实拍图',
   title: '商品标题',
   category: '商品分类',
+  customCategory: '自定义品类',
   condition: '成色',
   price: '价格',
   meetLocation: '自提地点',
@@ -65,6 +70,8 @@ Page({
     title: '',
     categoryOptions: CATEGORY_OPTIONS,
     categoryIndex: -1,
+    customCategory: '',
+    otherCategoryId: OTHER_CATEGORY_ID,
     conditionOptions: CONDITION_OPTIONS,
     conditionIndex: -1,
     price: '',
@@ -114,6 +121,9 @@ Page({
   },
   onCategoryChange(e: WechatMiniprogram.PickerChange) {
     this.setData({ categoryIndex: Number(e.detail.value) });
+  },
+  onCustomCategoryInput(e: WechatMiniprogram.Input) {
+    this.setData({ customCategory: e.detail.value });
   },
   onConditionChange(e: WechatMiniprogram.PickerChange) {
     this.setData({ conditionIndex: Number(e.detail.value) });
@@ -169,6 +179,9 @@ Page({
     if (d.categoryIndex < 0) {
       missing.push(FIELD_LABELS.category);
       errors.category = `请选择${FIELD_LABELS.category}`;
+    } else if (d.categoryOptions[d.categoryIndex].id === OTHER_CATEGORY_ID && !d.customCategory.trim()) {
+      missing.push(FIELD_LABELS.customCategory);
+      errors.customCategory = `请填写${FIELD_LABELS.customCategory}`;
     }
     if (d.conditionIndex < 0) {
       missing.push(FIELD_LABELS.condition);
@@ -195,11 +208,18 @@ Page({
     }
 
     const d = this.data;
+    const categoryId = d.categoryOptions[d.categoryIndex].id;
+    const customCategory = d.customCategory.trim();
+    // 「其他」品类：自定义品类名落为描述首行（服务端只接受正面清单叶子品类）
+    const desc =
+      categoryId === OTHER_CATEGORY_ID && customCategory
+        ? `品类：${customCategory}\n${d.desc.trim()}`
+        : d.desc.trim();
     const payload: PublishPayload = {
       title: d.title.trim(),
-      desc: d.desc.trim(),
+      desc,
       price: Number(d.price).toFixed(2),
-      category_id: String(d.categoryOptions[d.categoryIndex].id),
+      category_id: String(categoryId),
       // COS 未开通、无上传接口：本地图暂以占位图 URL 提交（见 config.ts）
       images: d.images.map(() => STATIC_PLACEHOLDER_IMAGE),
       stock: 1,

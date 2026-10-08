@@ -51,6 +51,17 @@
         </view>
       </picker>
       <view wx:if="{{errors.category}}" class="field-error">{{errors.category}}</view>
+      <!-- 选择「其他」时需自定义输入品类名 -->
+      <block wx:if="{{categoryIndex >= 0 && categoryOptions[categoryIndex].id === otherCategoryId}}">
+        <input
+          class="form-item__input"
+          placeholder="请输入品类名称，如：乐器、手办、宠物用品"
+          maxlength="20"
+          value="{{customCategory}}"
+          bindinput="onCustomCategoryInput"
+        />
+        <view wx:if="{{errors.customCategory}}" class="field-error">{{errors.customCategory}}</view>
+      </block>
     </view>
 
     <view class="form-item">
@@ -107,7 +118,7 @@
       <image wx:for="{{images}}" wx:key="index" src="{{item}}" mode="aspectFill" class="summary__img" />
     </view>
     <view class="summary__row"><text class="summary__label">标题</text><text class="summary__value">{{title}}</text></view>
-    <view class="summary__row"><text class="summary__label">分类</text><text class="summary__value">{{categoryOptions[categoryIndex].name}}</text></view>
+    <view class="summary__row"><text class="summary__label">分类</text><text class="summary__value">{{categoryOptions[categoryIndex].name}}{{categoryOptions[categoryIndex].id === otherCategoryId && customCategory ? '（' + customCategory + '）' : ''}}</text></view>
     <view class="summary__row"><text class="summary__label">成色</text><text class="summary__value">{{conditionOptions[conditionIndex].label}}</text></view>
     <view class="summary__row"><text class="summary__label">价格</text><text class="summary__value summary__value--price">¥{{price}}</text></view>
     <view class="summary__row"><text class="summary__label">自提地点</text><text class="summary__value">{{meetLocation}}</text></view>

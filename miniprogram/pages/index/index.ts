@@ -19,6 +19,7 @@ const CATEGORIES: CategoryItem[] = [
   { id: 2, name: '数码电子', icon: '💻' },
   { id: 3, name: '生活用品', icon: '🪑' },
   { id: 4, name: '服饰鞋包', icon: '👟' },
+  { id: 12, name: '其他闲置', icon: '📦' },
 ];
 
 Page({
