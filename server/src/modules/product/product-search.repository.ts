@@ -39,7 +39,8 @@ export class ProductSearchRepository {
   findSellersByIds(ids: bigint[]) {
     return this.prisma.user.findMany({
       where: { id: { in: ids } },
-      select: { id: true, identity_type: true, nickname: true },
+      // N6 匿名保护：is_anonymous 供读侧脱敏判定（昵称展示为「匿名用户」）
+      select: { id: true, identity_type: true, nickname: true, is_anonymous: true },
     });
   }
 

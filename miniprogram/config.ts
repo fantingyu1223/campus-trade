@@ -14,7 +14,13 @@
 export const API_BASE = 'http://10.20.240.63:3000/api/v1';
 
 /**
+ * 静态资源基址（/static/* → server/public/*，main.ts 已映射）。
+ * 预置头像等本地静态资源统一经它拼接（与 API_BASE 同主机，去路径前缀）。
+ */
+export const STATIC_BASE = 'http://10.20.240.63:3000';
+
+/**
  * 图片占位：COS 未开通、服务端无上传接口，发布页选择的本地图暂以服务端
  * 本地静态占位图 URL 提交（模拟器/真机均经局域网 IP 访问；生产需接入 COS 后替换）。
  */
-export const STATIC_PLACEHOLDER_IMAGE = 'http://10.20.240.63:3000/static/placeholder.png';
+export const STATIC_PLACEHOLDER_IMAGE = `${STATIC_BASE}/static/placeholder.png`;

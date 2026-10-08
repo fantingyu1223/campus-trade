@@ -23,6 +23,10 @@ export interface AuthMeResponse {
   id: string;
   nickname: string;
   avatar: string;
+  /** 个人简介（user.bio） */
+  bio: string;
+  /** 匿名展示开关（N6：开启后公开档案与商品卖家信息展示为「匿名用户」） */
+  is_anonymous: boolean;
   role: string;
   verified: boolean;
   school_id: string | null;

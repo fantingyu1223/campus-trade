@@ -330,6 +330,8 @@ model User {
   avatar_url           String       @default("") @db.VarChar(512)
   /// 个人简介
   bio                  String       @default("") @db.VarChar(500)
+  /// 匿名展示开关（开启后公开档案与商品卖家信息展示为「匿名用户」，N6 匿名保护，@table user → PIM-AG-02）
+  is_anonymous         Boolean      @default(false)
   /// 身份：升级路径 guest→student/staff→merchant，由认证/商家审核流程回写
   identity_type        IdentityType @default(guest)
   /// 所属学校，FK→school.id（不设物理外键）

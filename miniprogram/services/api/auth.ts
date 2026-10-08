@@ -13,7 +13,7 @@ export const BASE_URL = API_BASE;
 
 interface RequestOptions {
   url: string;
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   data?: Record<string, unknown>;
   /** 默认携带 token（§5.1：未认证接口不要求 token，但携带时返回个性化字段） */
   auth?: boolean;
@@ -36,7 +36,8 @@ export function request<T>(options: RequestOptions): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     wx.request({
       url: BASE_URL + url,
-      method,
+      // miniprogram-api-typings 的 method 联合未含 PATCH（运行时支持），此处收窄断言
+      method: method as WechatMiniprogram.RequestOption['method'],
       data: cleanData,
       header,
       success: (res) => {

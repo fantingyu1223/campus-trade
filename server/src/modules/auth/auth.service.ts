@@ -107,6 +107,8 @@ export class AuthService {
       id: user.id.toString(),
       nickname: user.nickname ?? '',
       avatar: user.avatar_url ?? '',
+      bio: user.bio ?? '',
+      is_anonymous: user.is_anonymous ?? false,
       role: user.identity_type,
       verified: user.identity_type !== 'guest',
       school_id: user.school_id ? user.school_id.toString() : null,

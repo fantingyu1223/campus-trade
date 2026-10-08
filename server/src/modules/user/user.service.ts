@@ -8,15 +8,19 @@
  *
  * 纪律（N6 / PIM-AG-02 不变量）：学号、资质材料、openid、real_name 等实名与凭证
  * 字段一律不出站；所有公开档案响应出站前必须经过 assertNoRealNameLeak 守卫。
+ * N6 匿名保护（仿 @rule CIM-R-28 身份标识化口径）：user.is_anonymous=true 时，
+ * 公开档案昵称展示为「匿名用户」、头像置空；本人视角接口（PATCH /users/me）不脱敏。
  */
 import { Injectable } from '@nestjs/common';
 import { ApiResponse, ERROR_CODES, ErrorCode, UserIdentityType, UserStatus } from '@contract/index';
 import {
   ProfileProductItem,
   ReviewSummaryPlaceholder,
+  UpdateProfileResponse,
   UserProfileResponse,
 } from './dto/profile.dto';
 import { ProductRow, UserRepository, UserRow } from './user.repository';
+import { validateUpdateProfileFields } from './user.validator';
 
 /**
  * 业务错误：携带契约错误码（§5.1），由全局过滤器翻译为统一响应包络。
@@ -63,6 +67,9 @@ export function assertNoRealNameLeak(payload: unknown): void {
 /** 主页商品列表条数上限（契约 §5.2 #46 默认值） */
 const PROFILE_LIST_TAKE = 20;
 
+/** N6 匿名保护：匿名用户的公开昵称占位 */
+const ANONYMOUS_NICKNAME = '匿名用户';
+
 @Injectable()
 export class UserService {
   constructor(private readonly repo: UserRepository) {}
@@ -70,6 +77,8 @@ export class UserService {
   /**
    * 个人/商家主页公开档案。
    * @api §5.2 #46，@ac F2-AC1（公开档案）/ F2-AC2（认证商家亮标）
+   * N6 匿名保护（仿 @rule CIM-R-28 口径）：is_anonymous=true 时
+   * nickname →「匿名用户」、avatar → ''（其余公开字段不受影响）。
    * @param id 用户 id（十进制字符串，已在 controller 层校验）
    * @throws BusinessError(1001) 用户不存在或已注销（F26-AC1：注销后主页不可访问）
    */
@@ -93,8 +102,9 @@ export class UserService {
     const profile: UserProfileResponse = {
       user: {
         id: user.id.toString(),
-        nickname: user.nickname,
-        avatar: user.avatar_url,
+        // N6 匿名保护：匿名开启时公开档案昵称/头像脱敏
+        nickname: user.is_anonymous ? ANONYMOUS_NICKNAME : user.nickname,
+        avatar: user.is_anonymous ? '' : user.avatar_url,
         bio: user.bio,
         role: user.identity_type as UserIdentityType,
         // @rule CIM-R-28：标识派生自身份，不可关闭
@@ -112,6 +122,31 @@ export class UserService {
     };
 
     // N6：实名不出站守卫（PIM-AG-02 不变量）
+    assertNoRealNameLeak(profile);
+    return profile;
+  }
+
+  /**
+   * 资料编辑（@api 补充接口 PATCH /users/me）：白名单四字段部分更新，
+   * 返回更新后的本人档案（本人视角不脱敏；实名字段本就不在白名单内）。
+   * @throws BusinessError(9001) 空 body / 字段非法（落点 user.validator.ts）
+   */
+  async updateMyProfile(userId: bigint, raw: unknown): Promise<UpdateProfileResponse> {
+    const fields = validateUpdateProfileFields(raw);
+    const user = await this.repo.updateProfileById(userId, fields);
+
+    const profile: UpdateProfileResponse = {
+      id: user.id.toString(),
+      nickname: user.nickname,
+      avatar: user.avatar_url,
+      bio: user.bio,
+      is_anonymous: user.is_anonymous,
+      role: user.identity_type as UserIdentityType,
+      school_id: user.school_id !== null ? user.school_id.toString() : null,
+      join_at: user.created_at.toISOString(),
+    };
+
+    // N6：实名不出站守卫（与公开档案同一不变量）
     assertNoRealNameLeak(profile);
     return profile;
   }

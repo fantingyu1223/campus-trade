@@ -51,6 +51,21 @@
 .user-card__merchant {
   margin-top: 12rpx;
 }
+.user-card__bio {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: var(--ct-ink-600);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.user-card__anon-tip {
+  margin-top: 10rpx;
+  font-size: 22rpx;
+  color: var(--ct-ink-400);
+}
 
 /* 分组与功能项 */
 .group {

@@ -16,6 +16,8 @@ export interface UserRow {
   identity_type: string;
   school_id: bigint | null;
   status: string;
+  /** 匿名展示开关（N6 匿名保护读侧脱敏依据） */
+  is_anonymous: boolean;
 }
 
 @Injectable()

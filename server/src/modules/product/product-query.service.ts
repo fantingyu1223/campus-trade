@@ -128,7 +128,8 @@ export class ProductQueryService {
     const sellerRow = sellers[0];
     const seller: ProductSellerBrief = {
       id: product.seller_id.toString(),
-      nickname: sellerRow?.nickname ?? '',
+      // N6 匿名保护（仿 @rule CIM-R-28 身份标识化口径）：is_anonymous=true 时昵称展示为「匿名用户」
+      nickname: sellerRow?.is_anonymous ? '匿名用户' : (sellerRow?.nickname ?? ''),
       identity_type: sellerRow?.identity_type ?? UserIdentityType.GUEST,
       is_merchant: sellerRow?.identity_type === UserIdentityType.MERCHANT,
     };

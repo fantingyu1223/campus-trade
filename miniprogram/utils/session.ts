@@ -12,6 +12,10 @@ export interface SessionUser {
   id: number;
   nickname?: string;
   avatar?: string;
+  /** 个人简介（/auth/me 返回） */
+  bio?: string;
+  /** 匿名展示开关（N6；/auth/me 返回） */
+  is_anonymous?: boolean;
   role: string;
   verified: boolean;
   school_id?: number;

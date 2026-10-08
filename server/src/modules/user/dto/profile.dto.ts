@@ -63,3 +63,31 @@ export interface UserProfileResponse {
   sold_list: ProfileProductItem[];
   review_summary: ReviewSummaryPlaceholder;
 }
+
+/**
+ * PATCH /users/me 请求体（资料编辑，全部可选但至少一项）。
+ * @api 补充接口 PATCH /users/me（我的页面设置区·资料编辑）
+ */
+export interface UpdateProfileRequest {
+  nickname?: string;
+  bio?: string;
+  avatar_url?: string;
+  /** 匿名展示开关（N6：开启后公开档案与商品卖家信息展示为「匿名用户」） */
+  is_anonymous?: boolean;
+}
+
+/**
+ * PATCH /users/me 响应 data：更新后的本人档案（本人视角，不脱敏、不含实名字段）。
+ * 与公开档案区分：本人可见真实 nickname/avatar 与 is_anonymous 开关状态。
+ */
+export interface UpdateProfileResponse {
+  id: string;
+  nickname: string;
+  avatar: string;
+  bio: string;
+  is_anonymous: boolean;
+  role: UserIdentityType;
+  school_id: string | null;
+  /** 注册时间（ISO 8601） */
+  join_at: string;
+}

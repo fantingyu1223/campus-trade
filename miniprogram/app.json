@@ -20,6 +20,7 @@
     "pages/favorites/favorites",
     "pages/report-submit/report-submit",
     "pages/appeal-submit/appeal-submit",
+    "pages/profile-edit/profile-edit",
     "pages/my/my"
   ],
   "window": {

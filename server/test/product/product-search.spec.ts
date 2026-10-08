@@ -346,6 +346,21 @@ describe('ProductQueryService.detail（@api §5.2 #14，@ac F33-AC1）', () => {
     expect(prisma.product.findUnique).not.toHaveBeenCalled();
   });
 
+  it('匿名卖家（is_anonymous=true）：seller.nickname 展示为「匿名用户」（N6 匿名保护）', async () => {
+    const { prisma, service } = setup();
+    prisma.product.findUnique.mockResolvedValue(makeDetailRow());
+    prisma.productImage.findMany.mockResolvedValue([]);
+    prisma.user.findMany.mockResolvedValue([
+      { id: BigInt(1), identity_type: 'student', nickname: '张三', is_anonymous: true },
+    ]);
+
+    const result = await service.detail('100');
+
+    expect(result.seller.nickname).toBe('匿名用户');
+    expect(result.seller.is_merchant).toBe(false);
+    expect(JSON.stringify(result)).not.toContain('张三');
+  });
+
   it('商品不存在 → 2001', async () => {
     const { prisma, service } = setup();
     prisma.product.findUnique.mockResolvedValue(null);

@@ -36,6 +36,7 @@ const makeUser = (over: Record<string, unknown> = {}) => ({
   nickname: '',
   avatar_url: '',
   bio: '',
+  is_anonymous: false,
   identity_type: UserIdentityType.GUEST,
   school_id: null,
   status: UserStatus.NORMAL,
@@ -196,11 +197,27 @@ describe('AuthService.me（@api §5.2 #2）', () => {
       id: '1',
       nickname: '小明',
       avatar: 'https://x/a.png',
+      bio: '',
+      is_anonymous: false,
       role: 'student',
       verified: true,
       school_id: '7',
       credit_score: null,
     });
+  });
+
+  it('me 响应回显 bio 与 is_anonymous（资料编辑读侧）', async () => {
+    const repo = new AuthRepository(makePrismaMock());
+    const service = new AuthService(repo, makeWxClientMock());
+    const prisma = (repo as unknown as { prisma: ReturnType<typeof makePrismaMock> }).prisma;
+    prisma.user.findUnique.mockResolvedValue(
+      makeUser({ bio: '佛系出闲置', is_anonymous: true }),
+    );
+
+    const me = await service.me('1');
+
+    expect(me.bio).toBe('佛系出闲置');
+    expect(me.is_anonymous).toBe(true);
   });
 
   it('用户不存在 → 1001', async () => {

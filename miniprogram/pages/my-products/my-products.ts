@@ -4,7 +4,7 @@
  * @module PIM-BC-02 商品与交易
  * 接口：§5.2 #16 GET /products/mine（status=on_sale/sold/off_sale）、
  *      #12 POST /products/{id}/offline、#13 POST /products/{id}/sold。
- * 接口未就绪：USE_MOCK=true 时走本地 Mock（按契约结构），就绪后置 false 切换。
+ * 接口：§5.2 #16 GET /products/mine（真实接口；USE_MOCK 保留为联调回退开关）。
  */
 import {
   myProducts,
@@ -16,7 +16,7 @@ import {
   BuyerCandidate,
 } from '../../services/api/product';
 
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 type TabStatus = 'on_sale' | 'sold' | 'off_sale';
 

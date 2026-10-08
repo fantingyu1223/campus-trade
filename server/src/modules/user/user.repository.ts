@@ -17,6 +17,8 @@ export interface UserRow {
   nickname: string;
   avatar_url: string;
   bio: string;
+  /** 匿名展示开关（N6 匿名保护读侧脱敏依据） */
+  is_anonymous: boolean;
   identity_type: string;
   school_id: bigint | null;
   status: string;
@@ -62,5 +64,25 @@ export class UserRepository {
   /** 按卖家+状态计数 */
   async countProductsBySeller(sellerId: bigint, status: ProductStatus): Promise<number> {
     return this.prisma.product.count({ where: { seller_id: sellerId, status } });
+  }
+
+  /**
+   * 资料编辑落库（@api PATCH /users/me）：仅更新白名单四字段中实际提供的项，
+   * 返回更新后的 user 行（本人档案响应数据源）。
+   */
+  async updateProfileById(
+    id: bigint,
+    fields: { nickname?: string; bio?: string; avatarUrl?: string; isAnonymous?: boolean },
+  ): Promise<UserRow> {
+    const row = await this.prisma.user.update({
+      where: { id },
+      data: {
+        ...(fields.nickname !== undefined ? { nickname: fields.nickname } : {}),
+        ...(fields.bio !== undefined ? { bio: fields.bio } : {}),
+        ...(fields.avatarUrl !== undefined ? { avatar_url: fields.avatarUrl } : {}),
+        ...(fields.isAnonymous !== undefined ? { is_anonymous: fields.isAnonymous } : {}),
+      },
+    });
+    return row as unknown as UserRow;
   }
 }

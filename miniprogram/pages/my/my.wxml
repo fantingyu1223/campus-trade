@@ -27,6 +27,8 @@
           <text class="user-card__nickname">{{user.nickname}}</text>
           <identity-badge identity-type="{{user.identity_type}}" />
         </view>
+        <view wx:if="{{user.bio}}" class="user-card__bio">{{user.bio}}</view>
+        <view wx:if="{{user.is_anonymous}}" class="user-card__anon-tip">已开启匿名展示</view>
         <!-- 认证商家强化标识（F33-AC1） -->
         <view wx:if="{{isMerchant}}" class="user-card__merchant">
           <merchant-badge size="large" />
@@ -50,6 +52,19 @@
       </view>
       <view class="cell" hover-class="ct-press" data-url="/pages/order-list/order-list" bindtap="onNav">
         <text class="cell__label">📋 我的订单</text>
+        <text class="cell__arrow">›</text>
+      </view>
+    </view>
+
+    <!-- 设置 -->
+    <view class="group">
+      <view class="group__title">设置</view>
+      <view class="cell" hover-class="ct-press" bindtap="onGotoProfileEdit">
+        <text class="cell__label">✏️ 资料编辑</text>
+        <text class="cell__arrow">›</text>
+      </view>
+      <view class="cell" hover-class="ct-press" bindtap="onLogout">
+        <text class="cell__label">🚪 退出登录</text>
         <text class="cell__arrow">›</text>
       </view>
     </view>

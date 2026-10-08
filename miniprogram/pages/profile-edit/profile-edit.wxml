@@ -1,0 +1,62 @@
+<view class="page">
+  <!-- 当前头像预览 + 预置头像单选 -->
+  <view class="section">
+    <view class="section__title">头像</view>
+    <view class="avatar-current">
+      <image wx:if="{{avatarDisplay && !isAnonymous}}" class="avatar-current__img" src="{{avatarDisplay}}" mode="aspectFill" />
+      <view wx:else class="avatar-current__placeholder">👤</view>
+      <view class="avatar-current__tip" wx:if="{{isAnonymous}}">匿名展示中</view>
+    </view>
+    <view class="avatar-grid">
+      <view
+        wx:for="{{avatars}}"
+        wx:key="path"
+        class="avatar-grid__item {{avatarUrl === item.path ? 'avatar-grid__item--active' : ''}}"
+        data-path="{{item.path}}"
+        bindtap="onAvatarTap"
+        hover-class="ct-press"
+      >
+        <image class="avatar-grid__img" src="{{item.display}}" mode="aspectFill" />
+      </view>
+    </view>
+  </view>
+
+  <!-- 昵称 -->
+  <view class="section">
+    <view class="section__title">昵称</view>
+    <input
+      class="field-input"
+      value="{{nickname}}"
+      maxlength="64"
+      placeholder="请输入昵称（≤64 字）"
+      bindinput="onNicknameInput"
+    />
+  </view>
+
+  <!-- 个人简介 -->
+  <view class="section">
+    <view class="section__title">个人简介</view>
+    <textarea
+      class="field-textarea"
+      value="{{bio}}"
+      maxlength="500"
+      placeholder="介绍一下自己吧（≤500 字）"
+      bindinput="onBioInput"
+    />
+  </view>
+
+  <!-- 匿名开关（N6） -->
+  <view class="section">
+    <view class="anon-row">
+      <view class="anon-row__text">
+        <view class="anon-row__label">匿名展示</view>
+        <view class="anon-row__desc">开启后，其他用户将看到「匿名用户」与默认头像</view>
+      </view>
+      <switch checked="{{isAnonymous}}" color="#FF5A2D" bindchange="onAnonymousChange" />
+    </view>
+  </view>
+
+  <button class="ct-btn ct-btn--primary save-btn {{saving ? 'ct-btn--disabled' : ''}}" bindtap="onSave">
+    {{saving ? '保存中…' : '保存'}}
+  </button>
+</view>

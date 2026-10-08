@@ -15,7 +15,7 @@ import { ERROR_CODES, UserIdentityType, UserStatus } from '@contract/index';
 import { UserController } from '../../src/modules/user/user.controller';
 import { UserService, BusinessError, assertNoRealNameLeak } from '../../src/modules/user/user.service';
 import { UserRepository } from '../../src/modules/user/user.repository';
-import { validateUserIdParam } from '../../src/modules/user/user.validator';
+import { validateUserIdParam, validateUpdateProfileFields } from '../../src/modules/user/user.validator';
 import { PrismaService } from '../../src/infra/prisma.service';
 
 // ---------- 测试夹具 ----------
@@ -28,6 +28,7 @@ const makeUser = (over: Record<string, unknown> = {}) => ({
   nickname: '小明',
   avatar_url: 'https://cdn/x/a.png',
   bio: '出闲置教材',
+  is_anonymous: false,
   identity_type: UserIdentityType.STUDENT,
   school_id: BigInt(7),
   status: UserStatus.NORMAL,
@@ -74,11 +75,11 @@ const makeProduct = (over: Record<string, unknown> = {}) => ({
 
 const makePrismaMock = () =>
   ({
-    user: { findUnique: jest.fn() },
+    user: { findUnique: jest.fn(), update: jest.fn() },
     school: { findUnique: jest.fn() },
     product: { findMany: jest.fn(), count: jest.fn() },
   }) as unknown as PrismaService & {
-    user: { findUnique: jest.Mock };
+    user: { findUnique: jest.Mock; update: jest.Mock };
     school: { findUnique: jest.Mock };
     product: { findMany: jest.Mock; count: jest.Mock };
   };
@@ -355,4 +356,189 @@ describe('validateUserIdParam（参数校验 → 9001）', () => {
       }
     },
   );
+});
+
+// ---------- N6 匿名保护：公开档案脱敏（仿 @rule CIM-R-28 口径） ----------
+
+describe('N6 匿名保护（is_anonymous=true 时公开档案脱敏）', () => {
+  it('匿名用户：nickname →「匿名用户」、avatar → 空串，其余公开字段不受影响', async () => {
+    const { prisma, service } = setup();
+    mockHappyPath(prisma, { is_anonymous: true });
+
+    const profile = await service.getPublicProfile('1');
+
+    expect(profile.user.nickname).toBe('匿名用户');
+    expect(profile.user.avatar).toBe('');
+    expect(profile.user.bio).toBe('出闲置教材');
+    expect(profile.user.role).toBe('student');
+    expect(profile.user.school_name).toBe('示例大学');
+    expect(JSON.stringify(profile)).not.toContain('小明');
+  });
+
+  it('非匿名用户：昵称/头像原样返回', async () => {
+    const { prisma, service } = setup();
+    mockHappyPath(prisma, { is_anonymous: false });
+
+    const profile = await service.getPublicProfile('1');
+
+    expect(profile.user.nickname).toBe('小明');
+    expect(profile.user.avatar).toBe('https://cdn/x/a.png');
+  });
+});
+
+// ---------- PATCH /users/me：资料编辑 ----------
+
+describe('UserService.updateMyProfile（@api 补充接口 PATCH /users/me）', () => {
+  it('部分字段更新：仅透传提供项，响应更新后的本人档案（本人视角不脱敏）', async () => {
+    const { prisma, service } = setup();
+    prisma.user.update.mockImplementation(({ data }: { data: Record<string, unknown> }) =>
+      Promise.resolve(makeUser(data)),
+    );
+
+    const profile = await service.updateMyProfile(BigInt(1), {
+      nickname: '阿黄',
+      is_anonymous: true,
+    });
+
+    expect(prisma.user.update).toHaveBeenCalledWith({
+      where: { id: BigInt(1) },
+      data: { nickname: '阿黄', is_anonymous: true },
+    });
+    expect(profile).toEqual({
+      id: '1',
+      nickname: '阿黄',
+      avatar: 'https://cdn/x/a.png',
+      bio: '出闲置教材',
+      is_anonymous: true,
+      role: 'student',
+      school_id: '7',
+      join_at: '2026-01-01T00:00:00.000Z',
+    });
+  });
+
+  it('匿名开关生效：响应回显 is_anonymous=true 且本人视角昵称不脱敏', async () => {
+    const { prisma, service } = setup();
+    prisma.user.update.mockResolvedValue(makeUser({ is_anonymous: true }));
+
+    const profile = await service.updateMyProfile(BigInt(1), { is_anonymous: true });
+
+    expect(profile.is_anonymous).toBe(true);
+    expect(profile.nickname).toBe('小明');
+  });
+
+  it('空 body → 9001，不透传 repository', async () => {
+    const { prisma, service } = setup();
+
+    await expect(service.updateMyProfile(BigInt(1), {})).rejects.toMatchObject({
+      code: ERROR_CODES.PARAM_VALIDATION_FAILED,
+    });
+    expect(prisma.user.update).not.toHaveBeenCalled();
+  });
+
+  it('非法字段（超长 nickname）→ 9001，不落库', async () => {
+    const { prisma, service } = setup();
+
+    await expect(
+      service.updateMyProfile(BigInt(1), { nickname: 'x'.repeat(65) }),
+    ).rejects.toMatchObject({ code: ERROR_CODES.PARAM_VALIDATION_FAILED });
+    expect(prisma.user.update).not.toHaveBeenCalled();
+  });
+});
+
+// ---------- validateUpdateProfileFields（参数校验 → 9001） ----------
+
+describe('validateUpdateProfileFields（PATCH /users/me 入参校验）', () => {
+  it('全字段合法 → 逐项规范化返回', () => {
+    expect(
+      validateUpdateProfileFields({
+        nickname: '阿黄',
+        bio: '佛系出闲置',
+        avatar_url: '/static/avatar-3.png',
+        is_anonymous: true,
+      }),
+    ).toEqual({ nickname: '阿黄', bio: '佛系出闲置', avatarUrl: '/static/avatar-3.png', isAnonymous: true });
+  });
+
+  it.each([{}, null, undefined, [], 'x'])('空 body/非对象 %j → 9001', (input) => {
+    try {
+      validateUpdateProfileFields(input);
+      fail('应当抛出 9001');
+    } catch (e) {
+      expect(e).toBeInstanceOf(BusinessError);
+      expect((e as BusinessError).code).toBe(ERROR_CODES.PARAM_VALIDATION_FAILED);
+    }
+  });
+
+  it.each([
+    ['nickname 超长', { nickname: 'x'.repeat(65) }],
+    ['nickname 非字符串', { nickname: 123 }],
+    ['bio 超长', { bio: 'x'.repeat(501) }],
+    ['avatar_url 超长', { avatar_url: '/static/' + 'x'.repeat(510) }],
+    ['avatar_url 前缀非法', { avatar_url: 'ftp://x/a.png' }],
+    ['avatar_url 相对路径非 /static/', { avatar_url: 'avatar-1.png' }],
+    ['is_anonymous 非布尔', { is_anonymous: 'true' }],
+  ])('%s → 9001', (_label, body) => {
+    try {
+      validateUpdateProfileFields(body);
+      fail('应当抛出 9001');
+    } catch (e) {
+      expect(e).toBeInstanceOf(BusinessError);
+      expect((e as BusinessError).code).toBe(ERROR_CODES.PARAM_VALIDATION_FAILED);
+    }
+  });
+
+  it.each(['/static/avatar-1.png', 'http://cdn/x/a.png', 'https://cdn/x/a.png'])(
+    'avatar_url 合法前缀 %j 透传',
+    (url) => {
+      expect(validateUpdateProfileFields({ avatar_url: url })).toEqual({ avatarUrl: url });
+    },
+  );
+
+  it('nickname/bio 边界长度（64/500）放行', () => {
+    expect(
+      validateUpdateProfileFields({ nickname: 'x'.repeat(64), bio: 'y'.repeat(500) }),
+    ).toEqual({ nickname: 'x'.repeat(64), bio: 'y'.repeat(500) });
+  });
+});
+
+// ---------- UserRepository.updateProfileById（写侧白名单组装） ----------
+
+describe('UserRepository.updateProfileById（@table user → PIM-AG-02）', () => {
+  it('仅组装提供的字段（avatarUrl→avatar_url / isAnonymous→is_anonymous 列名映射）', async () => {
+    const prisma = makePrismaMock();
+    const repo = new UserRepository(prisma);
+    prisma.user.update.mockResolvedValue(makeUser({ avatar_url: '/static/avatar-2.png' }));
+
+    await repo.updateProfileById(BigInt(1), { avatarUrl: '/static/avatar-2.png' });
+
+    expect(prisma.user.update).toHaveBeenCalledWith({
+      where: { id: BigInt(1) },
+      data: { avatar_url: '/static/avatar-2.png' },
+    });
+  });
+});
+
+// ---------- UserController.updateMe（统一响应包络 + 登录守卫） ----------
+
+describe('UserController.updateMe（PATCH /users/me，统一响应包络 §5.1）', () => {
+  it('成功返回 { code:0, message:"ok", data }，uid 转 BigInt 透传 service', async () => {
+    const service = { updateMyProfile: jest.fn().mockResolvedValue({ id: '1', is_anonymous: false }) };
+    const controller = new UserController(service as unknown as UserService);
+
+    const res = await controller.updateMe({ nickname: '阿黄' }, { user: { id: '1' } });
+
+    expect(res.code).toBe(0);
+    expect(res.message).toBe('ok');
+    expect(service.updateMyProfile).toHaveBeenCalledWith(BigInt(1), { nickname: '阿黄' });
+  });
+
+  it('未登录（req.user 缺失）→ 1001，不透传 service', async () => {
+    const service = { updateMyProfile: jest.fn() };
+    const controller = new UserController(service as unknown as UserService);
+
+    await expect(controller.updateMe({ nickname: '阿黄' }, {})).rejects.toMatchObject({
+      code: ERROR_CODES.AUTH_TOKEN_INVALID,
+    });
+    expect(service.updateMyProfile).not.toHaveBeenCalled();
+  });
 });
