@@ -42,6 +42,11 @@
   justify-content: center;
   margin-right: 20rpx;
   flex-shrink: 0;
+  overflow: hidden;
+}
+.conv-item__avatar-img {
+  width: 88rpx;
+  height: 88rpx;
 }
 .conv-item__main {
   flex: 1;

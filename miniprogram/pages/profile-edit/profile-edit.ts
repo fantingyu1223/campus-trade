@@ -8,7 +8,7 @@
  */
 import { getMe } from '../../services/api/auth';
 import { updateProfile } from '../../services/api/user';
-import { getUser, saveUser } from '../../utils/session';
+import { getToken, getUser, saveUser } from '../../utils/session';
 import { STATIC_BASE } from '../../config';
 
 /** 预置头像（相对路径为存值；display 为展示 URL） */
@@ -40,6 +40,8 @@ Page({
     isAnonymous: false,
     avatars: PRESET_AVATARS,
     saving: false,
+    /** 相册上传中（loading 态） */
+    uploading: false,
   },
 
   onLoad() {
@@ -73,6 +75,56 @@ Page({
   onAvatarTap(e: WechatMiniprogram.BaseEvent) {
     const { path } = e.currentTarget.dataset as { path: string };
     this.setData({ avatarUrl: path, avatarDisplay: toDisplayAvatar(path) });
+  },
+
+  /** 从相册选择自定义头像：chooseMedia → uploadFile（POST /uploads，multipart 字段 file） */
+  onChooseFromAlbum() {
+    if (this.data.uploading) return;
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      success: (res) => {
+        const file = res.tempFiles[0];
+        if (!file) return;
+        this.uploadAvatar(file.tempFilePath);
+      },
+    });
+  },
+
+  /** 上传到服务端（wx.uploadFile 直传，request 封装不支持 multipart） */
+  uploadAvatar(filePath: string) {
+    this.setData({ uploading: true });
+    wx.uploadFile({
+      url: `${STATIC_BASE}/api/v1/uploads`,
+      filePath,
+      name: 'file',
+      header: { Authorization: `Bearer ${getToken()}` },
+      success: (res) => {
+        this.setData({ uploading: false });
+        try {
+          const body = JSON.parse(res.data) as {
+            code: number;
+            message: string;
+            data: { url: string } | null;
+          };
+          if (body.code === 0 && body.data?.url) {
+            this.setData({
+              avatarUrl: body.data.url,
+              avatarDisplay: toDisplayAvatar(body.data.url),
+            });
+            wx.showToast({ title: '头像已上传', icon: 'success' });
+            return;
+          }
+          wx.showToast({ title: body.message || '上传失败', icon: 'none' });
+        } catch {
+          wx.showToast({ title: '上传响应异常', icon: 'none' });
+        }
+      },
+      fail: () => {
+        this.setData({ uploading: false });
+        wx.showToast({ title: '网络异常，上传失败', icon: 'none' });
+      },
+    });
   },
 
   onAnonymousChange(e: WechatMiniprogram.SwitchChange) {

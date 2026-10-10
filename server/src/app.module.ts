@@ -11,9 +11,14 @@ import { NotifyModule } from './modules/notify/notify.module';
 import { GovernanceModule } from './modules/admin/governance/governance.module';
 import { AdminSupportModule } from './modules/admin/support/admin-support.module';
 import { HealthController } from './health.controller';
+import { UploadsController } from './infra/uploads/uploads.controller';
+import { JwtAuthGuard } from '@infra/auth/jwt.guard';
+import { PrismaService } from '@infra/prisma.service';
 
 // 业务模块按 docs/design §3.1 划分：auth/user/product/wantbuy/chat/order/
 // review/report/notify + admin（governance/support）。
+// UploadsController 为 infra 层纯技术设施（图片上传，PIM-C-3），直属根模块注册；
+// JwtAuthGuard/PrismaService 为其守卫与依赖，在根模块补 provider。
 @Module({
   imports: [
     AuthModule,
@@ -28,6 +33,7 @@ import { HealthController } from './health.controller';
     GovernanceModule,
     AdminSupportModule,
   ],
-  controllers: [HealthController],
+  controllers: [HealthController, UploadsController],
+  providers: [PrismaService, JwtAuthGuard],
 })
 export class AppModule {}

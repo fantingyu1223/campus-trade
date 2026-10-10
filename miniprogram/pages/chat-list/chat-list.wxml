@@ -20,15 +20,18 @@
       data-identity-type="{{item.peer.identity_type}}"
       bindtap="onTapConversation"
     >
-      <view class="conv-item__avatar">{{item.peer.nickname[0] || '友'}}</view>
+      <view class="conv-item__avatar">
+        <image wx:if="{{item.peerAvatar}}" class="conv-item__avatar-img" src="{{item.peerAvatar}}" mode="aspectFill" />
+        <block wx:else>{{item.peer.nickname[0] || '友'}}</block>
+      </view>
       <view class="conv-item__main">
         <view class="conv-item__top">
-          <text class="conv-item__nickname">{{item.peer.nickname}}</text>
+          <text class="conv-item__nickname">{{item.peer.nickname || '未设置昵称'}}</text>
           <identity-badge identity-type="{{item.peer.identity_type || 'guest'}}" />
           <text class="conv-item__time">{{item.timeLabel}}</text>
         </view>
         <view class="conv-item__bottom">
-          <text class="conv-item__last {{item.unread > 0 ? 'conv-item__last--unread' : ''}}">{{item.last_msg}}</text>
+          <text class="conv-item__last {{item.unread > 0 ? 'conv-item__last--unread' : ''}}">{{item.lastMsgText}}</text>
           <view wx:if="{{item.unread > 0}}" class="conv-item__badge">{{item.unread > 99 ? '99+' : item.unread}}</view>
         </view>
       </view>

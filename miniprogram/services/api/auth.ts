@@ -55,8 +55,10 @@ export function request<T>(options: RequestOptions): Promise<T> {
           clearSession();
           wx.navigateTo({ url: '/pages/login/login' });
         }
-        const err = new Error(body.message || `请求失败(${body.code})`) as Error & { code?: number };
+        const err = new Error(body.message || `请求失败(${body.code})`) as Error & { code?: number; data?: unknown };
         err.code = body.code;
+        // 业务错误的 data 透传（§5.2 #27：3002 时 data.hits 为命中风险词列表，供弹层展示）
+        err.data = body.data;
         reject(err);
       },
       fail: (err) => reject(new Error(err.errMsg || '网络异常，请稍后重试')),

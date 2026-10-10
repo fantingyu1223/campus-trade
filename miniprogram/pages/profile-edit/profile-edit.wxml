@@ -8,6 +8,10 @@
       <view class="avatar-current__tip" wx:if="{{isAnonymous}}">匿名展示中</view>
     </view>
     <view class="avatar-grid">
+      <!-- 自定义：从相册选择（上传 POST /uploads） -->
+      <view class="avatar-grid__item avatar-grid__item--custom {{uploading ? 'avatar-grid__item--uploading' : ''}}" bindtap="onChooseFromAlbum" hover-class="ct-press">
+        <text class="avatar-grid__plus">{{uploading ? '…' : '＋'}}</text>
+      </view>
       <view
         wx:for="{{avatars}}"
         wx:key="path"
@@ -19,6 +23,8 @@
         <image class="avatar-grid__img" src="{{item.display}}" mode="aspectFill" />
       </view>
     </view>
+    <!-- 自定义头像（非预置）选中态提示 -->
+    <view wx:if="{{avatarUrl && avatarUrl.indexOf('/static/avatar-') !== 0}}" class="avatar-custom-tip">已选择自定义头像 ✓</view>
   </view>
 
   <!-- 昵称 -->

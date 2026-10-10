@@ -36,8 +36,8 @@
         <intent-card payload="{{item.intent_payload}}" is-self="{{item.sender_id === myId}}" bind:respond="onIntentRespond" />
       </view>
 
-      <!-- 图片消息占位 -->
-      <image wx:elif="{{item.type === 'image'}}" src="{{item.content}}" mode="widthFix" class="msg-image" />
+      <!-- 图片消息（image_url 已拼展示 URL） -->
+      <image wx:elif="{{item.type === 'image'}}" src="{{item.imageDisplay}}" mode="widthFix" class="msg-image" />
     </view>
   </scroll-view>
 

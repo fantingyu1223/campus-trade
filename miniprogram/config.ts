@@ -11,13 +11,13 @@
  * 图片占位：COS 未开通前，图片 URL 可用后端本地静态目录
  *   http://<host>:3000/static/placeholder.png
  */
-export const API_BASE = 'http://10.20.240.63:3000/api/v1';
+export const API_BASE = 'http://10.20.174.102:3000/api/v1';
 
 /**
  * 静态资源基址（/static/* → server/public/*，main.ts 已映射）。
  * 预置头像等本地静态资源统一经它拼接（与 API_BASE 同主机，去路径前缀）。
  */
-export const STATIC_BASE = 'http://10.20.240.63:3000';
+export const STATIC_BASE = 'http://10.20.174.102:3000';
 
 /**
  * 图片占位：COS 未开通、服务端无上传接口，发布页选择的本地图暂以服务端
