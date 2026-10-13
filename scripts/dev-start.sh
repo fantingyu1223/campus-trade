@@ -8,8 +8,8 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 MYSQL_DIR="$ROOT/.local-mysql/mysql-8.0.40-winx64"
 CONFIG="$ROOT/miniprogram/config.ts"
 
-# 1. 探测默认路由网卡的 IPv4（DHCP 环境下每次开机可能变化）
-LAN_IP=$(powershell -NoProfile -Command "Get-NetRoute -DestinationPrefix '0.0.0.0/0' | Sort-Object RouteMetric | Select-Object -First 1 | ForEach-Object { (Get-NetIPAddress -InterfaceIndex \$_.InterfaceIndex -AddressFamily IPv4 -ErrorAction SilentlyContinue).IPAddress }" | tr -d '\r')
+# 1. 探测默认路由网卡的 IPv4（DHCP 环境下每次开机可能变化；排除 169.254.* APIPA 链路本地地址）
+LAN_IP=$(powershell -NoProfile -Command "Get-NetRoute -DestinationPrefix '0.0.0.0/0' | Sort-Object RouteMetric | ForEach-Object { (Get-NetIPAddress -InterfaceIndex \$_.InterfaceIndex -AddressFamily IPv4 -ErrorAction SilentlyContinue).IPAddress } | Where-Object { \$_ -and \$_ -notlike '169.254.*' } | Select-Object -First 1" | tr -d '\r')
 if [ -z "$LAN_IP" ]; then echo "[warn] 未探测到局域网 IP，跳过 config.ts 同步"; fi
 
 # 2. 同步小程序 API_BASE / STATIC_BASE
